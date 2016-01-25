@@ -128,9 +128,6 @@ TreeAnalysisTop::TreeAnalysisTop() : PAFChainItemSelector() {
 	fHDummy = 0;
 	hWeight = 0;
 	fHTopPtWeight = 0;
-	fHnominal_1btag = 0;
-	fHnominal_2jets = 0;
-	fHnominal_dilep = 0;
 	fHnGenEle = 0;
 	fHnGenMuo = 0;
 	fHGenElePt = 0;
@@ -252,12 +249,6 @@ void TreeAnalysisTop::Initialise() {
 	}
 	//PAF_INFO("TreeAnalysisTop", "+ Initialise other histograms...");
 	fHTopPtWeight  = CreateH1F("H_TopPtWeight" ,"TopPt Weight",100, 0, 2);
-	//fHpdfWeightSum = CreateH1F("H_pdfWeightSum", "PDF sum Weights", 52, -0.5, 51.5);
-	//fHpdfWeight    = CreateH1F("H_pdfWeight"   , "PDF Weights", 52, -0.5, 51.5);
-
-	fHnominal_1btag   = CreateH1F("H_nominal_1btag"  , "Counts 1btag", 1, 0.5, 1.5);
-	fHnominal_2jets   = CreateH1F("H_nominal_2jets"  , "Counts 2jets", 1, 0.5, 1.5);
-	fHnominal_dilep   = CreateH1F("H_nominal_dilep"  , "Counts dilep", 1, 0.5, 1.5);
 
 	fHnGenEle  = CreateH1F("fHnGenEle" , "nGenPromptElecs"  , 11, -1.5, 9.5);
 	fHnGenMuo  = CreateH1F("fHnGenMuo" , "nGenPromptMuons"  , 11, -1.5, 9.5);
