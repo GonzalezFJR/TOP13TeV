@@ -392,14 +392,6 @@ class TreeAnalysisTop : public PAFChainItemSelector
   TH1F* fHWeightyield[gNCHANNELS][gNWEIGHT];
   TH1F* fHSSyields   [gNCHANNELS][gNSYST];
   TH1F* fHTopPtWeight;
-  //TH1F* fHpdfWeightSum;
-  //TH1F* fHpdfWeight;
-  //TH1F* fHpdfWeight_1btag;
-  //TH1F* fHpdfWeight_2jets;
-  //TH1F* fHpdfWeight_dilep;
-  TH1F* fHnominal_1btag;
-  TH1F* fHnominal_2jets;
-  TH1F* fHnominal_dilep;
   TH1F* fHLepSys[gNCHANNELS][iNCUTS];
   TH1F* fHTrigSys[gNCHANNELS][iNCUTS];
   TH1F* fHnGenEle;
