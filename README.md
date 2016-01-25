@@ -4,3 +4,5 @@ It uses the last version of DatasetManager, you should have the code in "Dataset
 
 The analyzer and the other libraries should be in the folder "packages".
 Root 6 and the last version of PAF are used. Both are authomaticaly loaded in "runAll_TopMC.sh.
+
+git clone https://github.com/GonzalezFJR/TOP13TeV
