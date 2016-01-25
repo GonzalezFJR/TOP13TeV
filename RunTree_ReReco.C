@@ -8,7 +8,7 @@ R__LOAD_LIBRARY(DatasetManager/DatasetManager.C+)
 void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 			Int_t    nSlots         =  1,
 			Bool_t   DoSystStudies  =  false,
-			Long64_t nEvents        = 1000,
+			Long64_t nEvents        = 0,
 			Float_t  stopMass       = 0.0,
 			Float_t  lspMass        = 0.0) {
   
@@ -105,6 +105,9 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 		else {       
 			G_Event_Weight = dm->GetCrossSection() / dm->GetEventsInTheSample();
 		}
+    
+    if(nEvents == 0) nEvents = dm->GetEventsInTheSample();
+
     cout << endl;
     cout << " #===============================================" << endl;
     cout << " #     sampleName = " << sampleName                 << endl;
