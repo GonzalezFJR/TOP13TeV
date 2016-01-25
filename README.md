@@ -8,6 +8,7 @@
 
 # Download all the files:
 git clone https://github.com/GonzalezFJR/TOP13TeV
+cd TOP13TeV
 # Remember to copy the Dataset Manager header file
 
 # Analyze all the samples
