@@ -19,7 +19,7 @@ Set the enviroment
 
 Load Root 6, start PAF and PoD.
 
-If you run in Oviedo, to load Root 6 execute:
+If you run in Oviedo, load Root 6:
 
     source /cms/slc6_amd64_gcc493/external/gcc/4.9.3/etc/profile.d/init.sh
     source /cms/slc6_amd64_gcc493/external/python/2.7.6/etc/profile.d/init.sh
