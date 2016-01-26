@@ -55,3 +55,15 @@ Run all the samples
     source runAll_TopMC.sh
 
 Root 6, PAF and PoD are loaded authomatically.
+
+Run on a local file
+====
+
+To run the analysis on a local tree you can directly write the RunTree_ReReco.C file and change the local path and name of the sample repectively:
+
+    TString localpath = "/your/local/path/";
+    TString sample    = "yousample.root";
+
+Then execute the program using for the name of the sample "TestHeppy":
+
+        root -l -b -q 'RunTree_ReReco.C("TestHeppy", 1, true)'
