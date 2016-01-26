@@ -48,8 +48,10 @@ void TreeAnalysisTop::GetParameters(){
 void TreeAnalysisTop::GetTreeVariables(){
   nLepGood             = Get<Int_t>("nLepGood");
   nJet                 = Get<Int_t>("nJet");
-  ngenLep              = Get<Int_t>("ngenLep");
-  genWeight            = Get<Float_t>("genWeight");
+  if(!gIsData){
+    ngenLep              = Get<Int_t>("ngenLep");
+    genWeight            = Get<Float_t>("genWeight");
+  }
   for(int k = 0; k<nLepGood; k++){
     LepGood_px[k]      = Get<Float_t>("LepGood_px", k);
     LepGood_py[k]      = Get<Float_t>("LepGood_py", k);
@@ -65,13 +67,15 @@ void TreeAnalysisTop::GetTreeVariables(){
     LepGood_pdgId[k]   = Get<Int_t>("LepGood_pdgId", k);
     LepGood_charge[k]  = Get<Int_t>("LepGood_charge", k);
   }
-  for(int k = 0; k<nJet; k++){
-    Jet_px[k]          = Get<Float_t>("Jet_px", k);
-    Jet_py[k]          = Get<Float_t>("Jet_py", k);
-    Jet_pz[k]          = Get<Float_t>("Jet_pz", k);
-    Jet_energy[k]      = Get<Float_t>("Jet_energy", k);
-    Jet_eta[k]         = Get<Float_t>("Jet_eta", k);
-    Jet_btagCSV[k]     = Get<Float_t>("Jet_btagCSV", k);
+  if(!gIsData){
+    for(int k = 0; k<nJet; k++){
+      Jet_px[k]          = Get<Float_t>("Jet_px", k);
+      Jet_py[k]          = Get<Float_t>("Jet_py", k);
+      Jet_pz[k]          = Get<Float_t>("Jet_pz", k);
+      Jet_energy[k]      = Get<Float_t>("Jet_energy", k);
+      Jet_eta[k]         = Get<Float_t>("Jet_eta", k);
+      Jet_btagCSV[k]     = Get<Float_t>("Jet_btagCSV", k);
+    }
   }
   for(int k = 0; k<ngenLep; k++){
     genLep_pdgId[k]    = Get<Int_t>("genLep_pdgId", k);
@@ -1451,8 +1455,6 @@ void TreeAnalysisTop::FillYieldsHistograms(gChannel chan, iCut cut, gSystFlag sy
 void TreeAnalysisTop::FillYields(gSystFlag sys){
 	ResetHypLeptons();  
 
-	Float_t genWeight = genWeight;
-
 #ifdef DEBUG
 	cout << "gDoDF= " << gDoDF << endl;
 	cout << "PassTriggerEMu= " << PassTriggerEMu() << endl;
@@ -1928,7 +1930,6 @@ int TreeAnalysisTop::getSelectedJets(){
     if(!IsGoodJet(i,gJetEtCut)) continue;
 
     Float_t jetbtagi      = Jet_btagCSV[i];
-    Int_t   jetmcflavouri = Get<Int_t>  ("Jet_mcFlavour", i);
     Float_t jetetai       = Jet_eta[i];
     Float_t jetenergyi    = Jet_energy[i];
     
@@ -1938,6 +1939,7 @@ int TreeAnalysisTop::getSelectedJets(){
       isbtag = fBTagSFnom->IsTagged(Jet_btagCSV[i], -999999, JetPt.at(i), jetetai);
     }
     else {
+      Int_t   jetmcflavouri = Get<Int_t>  ("Jet_mcFlavour", i);
       // official b-tag recommendation: use JetHadronFlavour instead of JetPartonFlavor
       /*
 	if(TMath::Abs(Jet_mcFlavour[i]) == 5 || TMath::Abs(Jet_mcFlavour[i]) == 4){ 
