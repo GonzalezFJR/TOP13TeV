@@ -99,6 +99,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 			TString sample = "treeTtbar_jan19.root"
 			myProject->AddDataFile(localpath + sample);
 			G_Event_Weight = 1;
+			nEvents = 100000000;
 		}
 		else {       
 			G_Event_Weight = dm->GetCrossSection() / dm->GetEventsInTheSample();
