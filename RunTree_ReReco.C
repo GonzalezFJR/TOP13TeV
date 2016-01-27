@@ -95,7 +95,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
       cout << " weightSum(MC@NLO) = " << dm->GetSumWeights()     << endl;
     }
     else if(sampleName == "TestHeppy"){
-			TString localppath="/pool/ciencias/users/user/palencia/";
+			TString localpath="/pool/ciencias/users/user/palencia/";
 			TString sample = "treeTtbar_jan19.root";
 			myProject->AddDataFile(localpath + sample);
 			G_Event_Weight = 1;
