@@ -1960,7 +1960,7 @@ int TreeAnalysisTop::getSelectedJets(){
       else if (gSysSource == MisTagDown)  isbtag = fBTagSFlDo->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
       else                                isbtag = fBTagSFnom->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
       // Use this line only to get raw numbers for syncronization
-      //if(Get<Float_t>("Jet_btagCSV",[i] > 0.89) isbtag=true;  // WP for 74
+      //if(Get<Float_t>("Jet_btagCSV", i) > 0.89) isbtag=true;  // WP for 74
     }
     jet tmpjet(jt, isbtag, i);
     Jet.push_back(tmpjet);
