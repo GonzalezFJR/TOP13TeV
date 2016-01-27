@@ -67,22 +67,22 @@ void TreeAnalysisTop::GetTreeVariables(){
     LepGood_pdgId[k]   = Get<Int_t>("LepGood_pdgId", k);
     LepGood_charge[k]  = Get<Int_t>("LepGood_charge", k);
   }
-  if(!gIsData){
-    for(int k = 0; k<nJet; k++){
-      Jet_px[k]          = Get<Float_t>("Jet_px", k);
-      Jet_py[k]          = Get<Float_t>("Jet_py", k);
-      Jet_pz[k]          = Get<Float_t>("Jet_pz", k);
-      Jet_energy[k]      = Get<Float_t>("Jet_energy", k);
-      Jet_eta[k]         = Get<Float_t>("Jet_eta", k);
-      Jet_btagCSV[k]     = Get<Float_t>("Jet_btagCSV", k);
-    }
+  for(int k = 0; k<nJet; k++){
+    Jet_px[k]          = Get<Float_t>("Jet_px", k);
+    Jet_py[k]          = Get<Float_t>("Jet_py", k);
+    Jet_pz[k]          = Get<Float_t>("Jet_pz", k);
+    Jet_energy[k]      = Get<Float_t>("Jet_energy", k);
+    Jet_eta[k]         = Get<Float_t>("Jet_eta", k);
+    Jet_btagCSV[k]     = Get<Float_t>("Jet_btagCSV", k);
   }
-  for(int k = 0; k<ngenLep; k++){
-    genLep_pdgId[k]    = Get<Int_t>("genLep_pdgId", k);
-    genLep_pt[k]       = Get<Float_t>("genLep_pt", k);
-    genLep_eta[k]      = Get<Float_t>("genLep_eta", k);
-    genLep_phi[k]      = Get<Float_t>("genLep_phi", k);
-    genLep_mass[k]     = Get<Float_t>("genLep_mass", k);
+  if(!gIsData){
+    for(int k = 0; k<ngenLep; k++){
+      genLep_pdgId[k]    = Get<Int_t>("genLep_pdgId", k);
+      genLep_pt[k]       = Get<Float_t>("genLep_pt", k);
+      genLep_eta[k]      = Get<Float_t>("genLep_eta", k);
+      genLep_phi[k]      = Get<Float_t>("genLep_phi", k);
+      genLep_mass[k]     = Get<Float_t>("genLep_mass", k);
+    }
   }
 }
 
