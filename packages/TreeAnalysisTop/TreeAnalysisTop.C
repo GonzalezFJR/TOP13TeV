@@ -1141,7 +1141,6 @@ float TreeAnalysisTop::getTopPtSF(){
 //------------------------------------------------------------------------
 void TreeAnalysisTop::FillDYHistograms(){
 	float Mll = 0.;
-	Float_t genWeight = genWeight;
 	if (PassTriggerEMu()  && IsElMuEvent()){
 		// Define Hypothesis Leptons...
 		EventWeight = gWeight * getSF(ElMu);
