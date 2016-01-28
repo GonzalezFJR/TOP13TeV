@@ -4,12 +4,9 @@ Download the analyzer
 Download all the code from github.
 
     git clone https://github.com/GonzalezFJR/TOP13TeV
-
-Download Dataset Manager from gitlab.
-
-    git clone https://gitlab.cern.ch/IFCA-UO-CMS/Utils.git
-    mv Utils/DatasetManager/ TOP13TeV
     cd TOP13TeV
+
+
 
 Now you can set the enviroment and process one sample or directly run all the samples.
 
@@ -67,3 +64,12 @@ To run the analysis on a local tree you can directly write the RunTree_ReReco.C 
 Then execute the program using for the name of the sample "TestHeppy":
 
         root -l -b -q 'RunTree_ReReco.C("TestHeppy", 1, true)'
+
+
+Upload dataset Manager
+====
+    
+If there was a new release of Dataset Manager you could download it from gitlab.
+
+    git clone https://gitlab.cern.ch/IFCA-UO-CMS/Utils.git
+    mv Utils/DatasetManager/ TOP13TeV
