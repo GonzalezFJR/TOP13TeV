@@ -42,7 +42,7 @@ void DrawPlots();
 const TString plotfolder = "/nfs/fanae/user/juanr/StopTOP/plots/";
 bool doSys     = false;
 bool doSetLogy = true;
-bool dodata    = true;
+bool dodata    = false;
 bool do8TeV    = false;
 
 //#######################################//
@@ -476,7 +476,7 @@ void T2ttStackPlots(TString var, TString chan, TString level, int mStop, int mLs
   if (dodata) hdata->Draw("pesame");
   plot->RedrawAxis("same");
   TString signal = Form("T2tt_mStop%i_mLsp%i", mStop, mLsp);
-  //TH1F* h_stop_1 = loadHistogram(signal, var, chan, level); h_stop_1->SetFillColor(0); h_stop_1->SetLineColor(kMagenta-4);    h_stop_1->SetLineWidth(2); h_stop_1->SetLineStyle(1); 
+  TH1F* h_stop_1 = loadHistogram(signal, var, chan, level); h_stop_1->SetFillColor(0); h_stop_1->SetLineColor(kMagenta-4);    h_stop_1->SetLineWidth(2); h_stop_1->SetLineStyle(1); 
 
   SetLegend();
   leg->AddEntry(H_ttbar(var,chan,level, "0"), Form("ttbar: %5.2f", yield("ttbar", chan, level)), "f");
@@ -488,11 +488,11 @@ void T2ttStackPlots(TString var, TString chan, TString level, int mStop, int mLs
   TH1F* hh = H_ttbar(var,chan,level, "0"); hh->SetFillStyle(1001); hh->SetFillColor(kBlack);
   leg->AddEntry(hh, Form("All bkg: %5.2f", yield("bkg", chan, level)), "");
   if (dodata) leg->AddEntry(hdata, Form("Data: %5.2f", yield("data", chan, level)), "pl");
-  //leg->AddEntry(h_stop_1, Form("S.%i-%i (x20) : %5.2f", mStop, mLsp, h_stop_1->Integral()), "l");
+  leg->AddEntry(h_stop_1, Form("S.%i-%i (x20) : %5.2f", mStop, mLsp, h_stop_1->Integral()), "l");
 
   leg->Draw("same"); texlumi->Draw("same"); texcms->Draw("same");
   SetTexChan(chan, level); texchan->Draw("same");
-  //h_stop_1->Scale(20);  h_stop_1->Draw("same,hist");
+  h_stop_1->Scale(20);  h_stop_1->Draw("same,hist");
 
 
   TH1F* mh = (TH1F*)hs->GetStack()->Last()->Clone();
