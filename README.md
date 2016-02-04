@@ -63,7 +63,7 @@ To run the analysis on a local tree you can directly write the RunTree_ReReco.C 
 
 Then execute the program using for the name of the sample "TestHeppy":
 
-        root -l -b -q 'RunTree_ReReco.C("TestHeppy", 1, true)'
+    root -l -b -q 'RunTree_ReReco.C("TestHeppy", 1, true)'
 
 
 Upload dataset Manager
@@ -73,3 +73,30 @@ If there was a new release of Dataset Manager you could download it from gitlab.
 
     git clone https://gitlab.cern.ch/IFCA-UO-CMS/Utils.git
     mv Utils/DatasetManager/ TOP13TeV
+    
+    
+Running the Stop Analysis
+====
+
+In the RunTree_ReReco.C file change the package of the analyzer:
+
+    myProject->AddSelectorPackage("StopAnalyzer");
+
+To analyze one stop sample you must specify the masses of stop and neutralino and the weight for normalization. Example:
+
+    root -l -b -q 'RunTree_ReReco.C("T2tt_150to175LSP1to100", 1, true, 0, true, 150, 50, 0.0134)'
+    
+To analyze all masses in one file or just evey point use the RunT2ttSamples.py script as follows:
+
+    python RunT2ttSamples.py T2tt_150to175LSP1to100
+    python RunT2ttSamples.py
+    
+Stop Plotter
+====
+
+Change the path in SetPlotter.C and the "plotfolder" path defined in DrawPlots.C. To create plots for a given stop signal execute the T2ttStackPlots function with the required values of: variable to plot ("MET", "MT2", "InvMass", "NJets"...), channel ("ElMu", "Muon", "All"), level ("1btag", "MET", "2jets", "DYVetop"...), StopMass and NeutralinoMass. 
+
+    root -l
+    .L DrawPlots.C
+    T2ttStackPlots(var, chan, level, StopMass, NeutralinoMass)
+
