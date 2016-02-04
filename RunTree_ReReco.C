@@ -9,8 +9,10 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 			Int_t    nSlots         =  1,
 			Bool_t   DoSystStudies  =  false,
 			Long64_t nEvents        = 0,
-			Float_t  stopMass       = 0.0,
-			Float_t  lspMass        = 0.0) {
+			Bool_t G_CreateTree   = false,
+			Int_t stopMass       = 0,
+			Int_t lspMass        = 0
+      Float_t  SusyWeight     = 0.0) {
   
   // VARIABLES TO BE USED AS PARAMETERS...
   Float_t G_Total_Lumi    = 19664.225;   
@@ -94,12 +96,18 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
       cout << endl;
       cout << " weightSum(MC@NLO) = " << dm->GetSumWeights()     << endl;
     }
+    else if(sampleName.BeginsWith("T2tt")){
+      TString lp = "/pool/ciencias/TreesDR74X/heppyTrees/v2/";
+      cout << "Analyzing Stop sample" << endl;
+      G_Event_Weight = SusyWeight;
+      myProject->AddDataFile(lp + "Tree_" + sampleName + "_0.root");
+      sampleName = Form("T2tt_mStop%i_mLsp%i",stopMass, lspMass);
+    }
     else if(sampleName == "TestHeppy"){
 			TString localpath="/pool/ciencias/users/user/palencia/";
 			TString sample = "treeTtbar_jan19.root";
 			myProject->AddDataFile(localpath + sample);
 			G_Event_Weight = 1;
-			nEvents = 100000000;
 		}
 		else {       
 			G_Event_Weight = dm->GetCrossSection() / dm->GetEventsInTheSample();
@@ -122,7 +130,8 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 	// Output file name
   //----------------------------------------------------------------------------
 	Bool_t G_Use_CSVM = true;
-	TString outputDir = "./prueba";
+	TString outputDir = "./temp";
+  if(sampleName.BeginsWith("T2tt")) outputDir += "/Susy";
 
 	gSystem->mkdir(outputDir, kTRUE);
 
@@ -130,12 +139,10 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 	oss << G_Total_Lumi;
 
 	TString LumiString = oss.str();
-  TString outputFile = outputDir
-    + "/"
-    + "Tree_"
-    + sampleName
-    + ".root";
-  
+  TString outputFile = outputDir;
+  if(sampleName == "TTbar_Powheg") outputFile += "/Tree_TTJets.root";
+  else                             outputFile += "/Tree_" + sampleName + ".root";
+
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
 
@@ -159,18 +166,15 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   myProject->SetInputParam("stopMass"     , stopMass         );
   myProject->SetInputParam("lspMass"      , lspMass          );
   myProject->SetInputParam("IsMCatNLO"    , G_IsMCatNLO      );  
+  myProject->SetInputParam("CreateTree"   , G_CreateTree     );
+
  
-
-
-  // Number of events (Long64_t)
-  //----------------------------------------------------------------------------
-  if (nSlots==1) myProject->SetNEvents(nEvents);
-  //else           myProject->SetNEvents(nEvents);
-
+  if(nEvents != 0) myProject->SetNEvents(nEvents);
 
   // Name of analysis class
   //----------------------------------------------------------------------------
   myProject->AddSelectorPackage("TreeAnalysisTop");
+  //myProject->AddSelectorPackage("StopAnalyzer");
   //myProject->AddSelectorPackage("WZ13TeV");
 
   // Additional packages
