@@ -4,10 +4,9 @@
 // The plots are saved in plotfolder
 //
 // Usage:
-// PlotStackStop(TString var, TString chan, TString level);
-// PlotStackStop("MET", "ElMu", "1btag");
-// DrawPlots();
-// T2ttStackPlots("MT2", "All", "DYVeto", 400, 200);
+// root -l -q -b 'DrawPlots(500, 200, 850, 100)'
+// DrawPlots(500, 100, 850, 100);
+// T2ttStackPlots("MET", "ElMu", "1btag", 850, 100, 500, 100);
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -35,14 +34,15 @@ float* BinVar2(TString var, TString chan, TString level);
 TH1F* loadHSyst(TString sample, TString var, TString chan, TString level, TString syst);
 
 void PlotStackStop(TString var, TString chan, TString level);
-void DrawPlots();
+void T2ttStackPlots(TString var, TString chan = "All", TString level = "DYVeto", int mStop1 = 0, int mLsp1 = 0, int mStop2 = 0, int mLsp2 = 0);
+void DrawPlots(int mStop1, int mLsp1, int mStop2 = 0, int mLsp2 = 0);
 
 
 // Constants:
 const TString plotfolder = "/nfs/fanae/user/juanr/StopTOP/plots/";
 bool doSys     = false;
 bool doSetLogy = true;
-bool dodata    = false;
+bool dodata    = true;
 bool do8TeV    = false;
 
 //#######################################//
@@ -440,20 +440,21 @@ void PlotStackStop(TString var, TString chan, TString level){
   delete c;
 }
 
-void DrawPlots(){
- //TString levels[3] = {"dilepton", "2jets", "1btag"};
+void DrawPlots(int mStop1, int mLsp1, int mStop2 = 0, int mLsp2 = 0){
  TString levels[4] = {"dilepton", "2jets", "1btag","DYVeto"};
  for(int k = 0; k<4; k++){
   for(int i = 0; i<nVars; i++){
     for(int j = 0; j<nChannels; j++){
-      PlotStackStop(var[i], chan[j], levels[k]);
+      T2ttStackPlots(var[i], chan[j], levels[k], mStop1, mLsp1, mStop2, mLsp2);
     }
   }
  }
 }
 
 
-void T2ttStackPlots(TString var, TString chan, TString level, int mStop, int mLsp){
+void T2ttStackPlots(TString var, TString chan = "All", TString level = "DYVeto", int mStop1 = 0, int mLsp1 = 0, int mStop2 = 0, int mLsp2 = 0){
+  TH1F* h_stop_1;
+  TH1F* h_stop_2;
   TCanvas* c = SetCanvas();
   plot->cd();
   THStack* hs = TH_bkg(var, chan, level);
@@ -475,8 +476,22 @@ void T2ttStackPlots(TString var, TString chan, TString level, int mStop, int mLs
   hs->GetXaxis()->SetLabelSize(0.0);
   if (dodata) hdata->Draw("pesame");
   plot->RedrawAxis("same");
-  TString signal = Form("T2tt_mStop%i_mLsp%i", mStop, mLsp);
-  TH1F* h_stop_1 = loadHistogram(signal, var, chan, level); h_stop_1->SetFillColor(0); h_stop_1->SetLineColor(kMagenta-4);    h_stop_1->SetLineWidth(2); h_stop_1->SetLineStyle(1); 
+  TString signal1 = Form("T2tt_mStop%i_mLsp%i", mStop1, mLsp1);
+  TString signal2 = Form("T2tt_mStop%i_mLsp%i", mStop2, mLsp2);
+  if(mStop1 != 0){
+    h_stop_1 = loadHistogram(signal1, var, chan, level);
+    h_stop_1->SetFillColor(0);
+    h_stop_1->SetLineColor(kMagenta-4);
+    h_stop_1->SetLineWidth(2);
+    h_stop_1->SetLineStyle(1);
+  }
+  if(mStop2 != 0){
+    h_stop_2 = loadHistogram(signal2, var, chan, level);
+    h_stop_2->SetFillColor(0);
+    h_stop_2->SetLineColor(kBlue+3);
+    h_stop_2->SetLineWidth(2);
+    h_stop_2->SetLineStyle(1);
+  }
 
   SetLegend();
   leg->AddEntry(H_ttbar(var,chan,level, "0"), Form("ttbar: %5.2f", yield("ttbar", chan, level)), "f");
@@ -488,12 +503,13 @@ void T2ttStackPlots(TString var, TString chan, TString level, int mStop, int mLs
   TH1F* hh = H_ttbar(var,chan,level, "0"); hh->SetFillStyle(1001); hh->SetFillColor(kBlack);
   leg->AddEntry(hh, Form("All bkg: %5.2f", yield("bkg", chan, level)), "");
   if (dodata) leg->AddEntry(hdata, Form("Data: %5.2f", yield("data", chan, level)), "pl");
-  leg->AddEntry(h_stop_1, Form("S.%i-%i (x20) : %5.2f", mStop, mLsp, h_stop_1->Integral()), "l");
+  if(mStop1 != 0) leg->AddEntry(h_stop_1, Form("S.%i-%i (x20) : %5.2f", mStop1, mLsp1, h_stop_1->Integral()), "l");
+  if(mStop2 != 0) leg->AddEntry(h_stop_2, Form("S.%i-%i (x20) : %5.2f", mStop2, mLsp2, h_stop_2->Integral()), "l");
 
   leg->Draw("same"); texlumi->Draw("same"); texcms->Draw("same");
   SetTexChan(chan, level); texchan->Draw("same");
-  h_stop_1->Scale(20);  h_stop_1->Draw("same,hist");
-
+  if(mStop1 != 0) h_stop_1->Scale(20);  h_stop_1->Draw("same,hist");
+  if(mStop2 != 0) h_stop_2->Scale(20);  h_stop_2->Draw("same,hist");
 
   TH1F* mh = (TH1F*)hs->GetStack()->Last()->Clone();
   
@@ -532,8 +548,8 @@ void T2ttStackPlots(TString var, TString chan, TString level, int mStop, int mLs
     hratio->Draw("same");
   }
 
-  c->Print( plotfolder + chan + Form("/mStop%i_mLsp%i_", mStop, mLsp) + var + "_" + chan + "_" + level + ".pdf", "pdf");
-  c->Print( plotfolder + chan + Form("/mStop%i_mLsp%i_", mStop, mLsp) + var + "_" + chan + "_" + level + ".png", "png");
+  c->Print( plotfolder + chan + "/" + var + "_" + chan + "_" + level + ".pdf", "pdf");
+  c->Print( plotfolder + chan + "/" + var + "_" + chan + "_" + level + ".png", "png");
   delete c;
 }
 
