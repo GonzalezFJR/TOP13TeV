@@ -61,7 +61,7 @@ void TopPlotter::LoadSamples(TString pathtofiles){
   cout << "Loading Samples.... " << endl;
   Float_t Weight = fLumiNorm; 
   for (size_t sample=0; sample<gNSAMPLES; sample++){
-    TString samplename = pathtofiles + "/Tree_13TeV_EA_"+SampleName[sample]+".root";
+    TString samplename = pathtofiles + "/Tree_"+SampleName[sample]+".root";
     cout << "Loading " + samplename +" ..." << endl;
     _file = new TFile(samplename);
     //Bool_t IsData = (sample == DoubleEG || sample == DoubleMuon || sample == MuEG || sample ==SingleMuon || sample ==SingleElectron );

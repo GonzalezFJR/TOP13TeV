@@ -11,7 +11,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 			Long64_t nEvents        = 0,
 			Bool_t G_CreateTree   = false,
 			Int_t stopMass       = 0,
-			Int_t lspMass        = 0
+			Int_t lspMass        = 0,
       Float_t  SusyWeight     = 0.0) {
   
   // VARIABLES TO BE USED AS PARAMETERS...
@@ -62,13 +62,14 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
     cout << "   + Data..." << endl;
     
     TString datasuffix[] = {
-      "Run2015D_v4",
+      "Run2015D_v4Full",
       "Run2015D_05Oct",
+      "Run2015C_05Oct"
       //"Run2015C_05Oct",
       //"C_7016",
       //"D_7360"
     };
-    const unsigned int nDataSamples = 2;
+    const unsigned int nDataSamples = 3;
     for(unsigned int i = 0; i < nDataSamples; i++) {
       TString asample = Form("Tree_%s_%s",sampleName.Data(), datasuffix[i].Data());
       cout << "   + Looking for " << asample << " trees..." << endl;
@@ -140,8 +141,9 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 
 	TString LumiString = oss.str();
   TString outputFile = outputDir;
-  if(sampleName == "TTbar_Powheg") outputFile += "/Tree_TTJets.root";
-  else                             outputFile += "/Tree_" + sampleName + ".root";
+  //if(sampleName == "TTbar_Powheg") outputFile += "/Tree_TTJets.root";
+  //else 
+                            outputFile += "/Tree_" + sampleName + ".root";
 
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
