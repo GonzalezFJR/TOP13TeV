@@ -2,8 +2,9 @@
 
 //void RunTopPlots(TString pathtofile="/nfs/fanae/user/palencia/april14Run2/TOP/TopTrees/temp/", Int_t verbose=0){
 //void RunTopPlots(TString pathtofile="/nfs/fanae/user/palencia/april14Run2/TOP/TopTrees/may15/", Int_t verbose=2){
-void RunTopPlots(TString pathtofile="../temp/", Int_t verbose=2){
-  TString outputdir = pathtofile + "/TopPlots/";
+void RunTopPlots(TString pathtofile="/nfs/fanae/user/palencia/testHeppy/TOP/TopTrees/mar1/", Int_t verbose=2){
+//void RunTopPlots(TString pathtofile="/nfs/fanae/user/juanr/TOP13TeV/fiducial76X/", Int_t verbose=2){
+  TString outputdir = "./TopPlots/";
   
   cout << "--------------" << endl;
   cout << "OutputDir is:      " << outputdir << endl;

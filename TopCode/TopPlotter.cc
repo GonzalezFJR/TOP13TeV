@@ -9,7 +9,7 @@
 using namespace std;
 
 bool gUseTTMadSpin = true;
-const float fLumiNorm = 2110;
+const float fLumiNorm = 2173*1.023; //2222.979
 
 TopPlotter::TopPlotter(){}
 
@@ -61,7 +61,7 @@ void TopPlotter::LoadSamples(TString pathtofiles){
   cout << "Loading Samples.... " << endl;
   Float_t Weight = fLumiNorm; 
   for (size_t sample=0; sample<gNSAMPLES; sample++){
-    TString samplename = pathtofiles + "/Tree_"+SampleName[sample]+".root";
+    TString samplename = pathtofiles + "/Tree_13TeV_EA_"+SampleName[sample]+".root";
     cout << "Loading " + samplename +" ..." << endl;
     _file = new TFile(samplename);
     //Bool_t IsData = (sample == DoubleEG || sample == DoubleMuon || sample == MuEG || sample ==SingleMuon || sample ==SingleElectron );
@@ -118,16 +118,16 @@ void TopPlotter::LoadSamples(TString pathtofiles){
 	}
 	
 	
-	S[sample].SystError[0][SFIDISO] = 0.0218; // mu-mu   //((TH1F*)_file->Get("H_LepSys_"+ gChanLabel[ch]+"_dilepton"))->GetMean();
-	S[sample].SystError[1][SFIDISO] = 0.0478; // e-e	 //((TH1F*)_file->Get("H_LepSys_"+ gChanLabel[ch]+"_dilepton"))->GetMean();
-	S[sample].SystError[2][SFIDISO] = 0.0082; // e-mu	 //((TH1F*)_file->Get("H_LepSys_"+ gChanLabel[ch]+"_dilepton"))->GetMean();
+	S[sample].SystError[0][SFIDISO] = 0.0318;                      // mu-mu   //((TH1F*)_file->Get("H_LepSys_"+ gChanLabel[ch]+"_dilepton"))->GetMean();
+	S[sample].SystError[1][SFIDISO] = 0.0462;                      // e-e	      //((TH1F*)_file->Get("H_LepSys_"+ gChanLabel[ch]+"_dilepton"))->GetMean();
+	S[sample].SystError[2][SFIDISO] = sqrt(0.0227*0.0227 + 0.0155*0.0155); // e-mu        //((TH1F*)_file->Get("H_LepSys_"+ gChanLabel[ch]+"_dilepton"))->GetMean();
 	
 	
 	
-	S[sample].SystError[ch][SFTrig]  = 0.044;  //((TH1F*)_file->Get("H_TrigSys_"+ gChanLabel[ch]+"_dilepton"))->GetMean();
-	S[sample].SystError[0][SFTrig] = 0.0046; // mu-mu	
-	S[sample].SystError[1][SFTrig] = 0.0145; // e-e	
-	S[sample].SystError[2][SFTrig] = 0.0073; // e-mu	
+	S[sample].SystError[ch][SFTrig] = 0.044;  //((TH1F*)_file->Get("H_TrigSys_"+ gChanLabel[ch]+"_dilepton"))->GetMean();
+	S[sample].SystError[0][SFTrig]  = 0.0108; // mu-mu      
+	S[sample].SystError[1][SFTrig]  = 0.0125; // e-e	     
+	S[sample].SystError[2][SFTrig]  = 0.0123; // e-mu       
   
       }
     }
@@ -135,10 +135,10 @@ void TopPlotter::LoadSamples(TString pathtofiles){
     // Load kinematic histograms of the samples. 
     for (size_t chan=0; chan<gNCHANNELS; chan++){
       for (size_t cut=0; cut<iNCUTS; cut++){
-	if (SampleName[sample] == "DoubleMuon"         ||       
-	    SampleName[sample] == "DoubleEG"           || 
-	    SampleName[sample] == "MuonEG"             ||       
-	    SampleName[sample] == "DYJetsToLL_M10to50_aMCatNLO" ||
+	if (SampleName[sample] == "DoubleMuonSum"         ||       
+	    SampleName[sample] == "DoubleEGsum"           || 
+	    SampleName[sample] == "MuonEGsum"             ||       
+	    SampleName[sample] == "DYJetsToLL_M10to50_aMCatNLO_ext" ||
 	    SampleName[sample] == "DYJetsToLL_M50_aMCatNLO")  {
 	    //SampleName[sample] == "ZJets_Madgraph")  {
 	  
@@ -405,13 +405,13 @@ void TopPlotter::LoadCategories(){
 	//}
       
 	//SUSYstop.Yields_syst[chan][cut][sys]  = S[T2tt_150to250LSP1to100_LeptonFilter].Yields_syst[chan][cut][sys];
+      //cout << chan << " " << cut << " "<< TTbar.Yields[chan][cut] << endl;
 	
 	STop .Yields_syst[chan][cut][sys]  = S[TbarWDilep].Yields_syst[chan][cut][sys];
 	STop .Yields_syst[chan][cut][sys] += S[TWDilep]   .Yields_syst[chan][cut][sys];
 	
 	DY   .Yields_syst[chan][cut][sys]  = S[ZJets_Madgraph] .Yields_syst[chan][cut][sys];
 	DY   .Yields_syst[chan][cut][sys] += S[DYJets_Madgraph].Yields_syst[chan][cut][sys];
-	
 	VV   .Yields_syst[chan][cut][sys]  = S[WZ]                .Yields_syst[chan][cut][sys];
 	VV   .Yields_syst[chan][cut][sys] += S[ZZ]                .Yields_syst[chan][cut][sys];
 	VV   .Yields_syst[chan][cut][sys] += S[WWTo2L2Nu_Madgraph].Yields_syst[chan][cut][sys];
@@ -456,7 +456,7 @@ void TopPlotter::LoadCategories(){
       Fake .Yields_stat[chan][cut]   = S[TTJetsSemiLeptMGtauola].Yields_stat[chan][cut] * S[TTJetsSemiLeptMGtauola].Yields_stat[chan][cut];
       Fake .Yields_stat[chan][cut]  += S[Wbb_Madgraph]          .Yields_stat[chan][cut] * S[Wbb_Madgraph]          .Yields_stat[chan][cut];
       //Fake .Yields_stat[chan][cut] += S[WgammaToLNuG]          .Yields_stat[chan][cut] * S[WgammaToLNuG]          .Yields_stat[chan][cut];
-      
+       
       SUSYstop  .Yields_stat[chan][cut] = TMath::Sqrt(SUSYstop  .Yields_stat[chan][cut]);
       TTbar.Yields_stat[chan][cut] = TMath::Sqrt(TTbar.Yields_stat[chan][cut]);
       STop .Yields_stat[chan][cut] = TMath::Sqrt(STop .Yields_stat[chan][cut]);
@@ -473,7 +473,7 @@ void TopPlotter::LoadCategories(){
       //Total.Yields_stat[chan][cut] += TTbar.Yields_stat[chan][cut] * TTbar.Yields_stat[chan][cut];
       Total.Yields_stat[chan][cut]  = TMath::Sqrt(Total.Yields_stat[chan][cut]);
 
-      if(cut==3 && chan==2){
+      if(cut==4 && chan==2){
          cout << "Fake = " << Fake .Yields_stat[chan][cut]<< ", " 
               << "Rare = " << Rare .Yields_stat[chan][cut]<< ", "
               << "VV   = " << VV   .Yields_stat[chan][cut]<< ", "
@@ -571,7 +571,7 @@ void TopPlotter::LoadCategories(){
   
     for (size_t chan=0; chan<gNCHANNELS; chan++){
       DY.MllHistos[chan][cut] = (TH1F*)S[ZJets_Madgraph].MllHistos[chan][cut]->Clone();
-      DY.MllHistos[chan][cut] ->Add(   S[DYJets_Madgraph] .MllHistos[chan][cut]);
+      DY.MllHistos[chan][cut] ->Add(   S[DYJets_Madgraph] .MllHistos[chan][cut]);	
     }
   }
   cout << " ---> Kinematic Histograms..." << endl;
@@ -2253,18 +2253,30 @@ void TopPlotter::CalculateSystematicErrors(Categories &C, Int_t cut){
 	 C.SystError[ch][pdf]   = 0.0;  
          C.SystError[ch][had]   = 0.0;     
       }else if(cut==4){                    // 1 b tag
-         //C.SystError[ch][cr]    = 0.0;  // Scale ME
-         C.SystError[0][cr]    = 0.0054;  //
-         C.SystError[1][cr]    = 0.0065;  //
-         C.SystError[2][cr]    = 0.0031;  //
+         //Scale ME
+         C.SystError[0][cr]    = 0.0040;  //
+         C.SystError[1][cr]    = 0.0042;  //
+         C.SystError[2][cr]    = 0.0010;  //
 
-	 C.SystError[ch][toppt] = 0.0;  // NLO generator
+         // NLO generator
+         C.SystError[0][toppt]    = 0.0193;  //
+         C.SystError[1][toppt]    = 0.0316;  //
+         C.SystError[2][toppt]    = 0.0212;  //
 
-	 C.SystError[0][pdf]   = 0.0055;  // mu-mu
+         // PDF
+	 C.SystError[0][pdf]   = 0.0053;  // mu-mu
 	 C.SystError[1][pdf]   = 0.0055;  // e-e
-	 C.SystError[2][pdf]   = 0.0061;  // e-mu
+	 C.SystError[2][pdf]   = 0.0060;  // e-mu
 
-         C.SystError[ch][had]   = 0.0;    
+         // JES
+	 C.SystError[0][jes]   = 0.0328;  // mu-mu
+	 C.SystError[1][jes]   = 0.0315;  // e-e
+	 C.SystError[2][jes]   = 0.0215;  // e-mu
+
+         // hadronization
+         C.SystError[0][had]   = 0.015;    
+         C.SystError[1][had]   = 0.028;    
+         C.SystError[2][had]   = 0.0128;    
       }
     
     
@@ -2272,9 +2284,15 @@ void TopPlotter::CalculateSystematicErrors(Categories &C, Int_t cut){
     C.SystError[ch][les]      = TMath::Max(TMath::Abs(C.Yields_syst[ch][cut][LESUp] - C.Yields[ch][cut]), 
 					   TMath::Abs(C.Yields_syst[ch][cut][LESDown] - C.Yields[ch][cut])
 					   ) / C.Yields[ch][cut]; 
-    C.SystError[ch][jes]      = 0.0;//TMath::Max(TMath::Abs(C.Yields_syst[ch][cut][JESUp] - C.Yields[ch][cut]), 
-					//   TMath::Abs(C.Yields_syst[ch][cut][JESDown] - C.Yields[ch][cut])
-					//   ) / C.Yields[ch][cut];
+    C.SystError[ch][jes]      = TMath::Max(TMath::Abs(C.Yields_syst[ch][cut][JESUp] - C.Yields[ch][cut]), 
+					   TMath::Abs(C.Yields_syst[ch][cut][JESDown] - C.Yields[ch][cut])
+					   ) / C.Yields[ch][cut];
+    if(cut==4){                          
+          // JES
+	 C.SystError[0][jes] = 0.0258;  // mu-mu
+	 C.SystError[1][jes] = 0.0254;  // e-e
+	 C.SystError[2][jes] = 0.0159;  // e-mu
+    }
 					   
     C.SystError[ch][jer]      = (TMath::Abs(C.Yields_syst[ch][cut][JER] - C.Yields[ch][cut])) / C.Yields[ch][cut];
     
@@ -2741,7 +2759,7 @@ void TopPlotter::CalculateCrossSection(Bool_t DD){
       Total.Yields[ch][cut] += Fake.Yields[ch][cut];
     }
     
-    ttbar.xsec     [ch] = ttbar_TLWG * (Data.Yields[ch][cut] - Total.Yields[ch][cut]) / TTbar.Yields[ch][cut]; 
+    ttbar.xsec     [ch] = ttbar_TLWG * (Data.Yields[ch][cut] - Total.Yields[ch][cut]) / TTbar.Yields[ch][cut];// *604354./34542493.0; 
     
     // statistical error
     ttbar.xsec_stat[ch] = ttbar.xsec[ch] * TMath::Sqrt(Data.Yields[ch][cut]) / (Data.Yields[ch][cut] - Total.Yields[ch][cut]);
@@ -2779,7 +2797,7 @@ void TopPlotter::CalculateCrossSection(Bool_t DD){
   
   // Get ttbar XSection
   for (Int_t ch = 0; ch<gNCHANNELS; ch++){
-    ttbar.xsec     [ch] = ttbar_TLWG * (Data.Yields[ch][cut] - Total.Yields[ch][cut]) / TTbar.Yields[ch][cut]; 
+    ttbar.xsec     [ch] = ttbar_TLWG * (Data.Yields[ch][cut] - Total.Yields[ch][cut]) / TTbar.Yields[ch][cut];// *604354./34542493.0; 
     
     // statistical error
     ttbar.xsec_stat[ch] = ttbar.xsec[ch] * 
@@ -2791,7 +2809,7 @@ void TopPlotter::CalculateCrossSection(Bool_t DD){
 		  (Total.Yields_syst[ch][cut][0] / (Data.Yields[ch][cut] - Total.Yields[ch][cut])) + 
 		  (TTbar.Yields_syst[ch][cut][0] / TTbar.Yields[ch][cut]) * 
 		  (TTbar.Yields_syst[ch][cut][0] / TTbar.Yields[ch][cut]));
-    ttbar.xsec_lumi[ch] = ttbar.xsec[ch]  * 0.046; //0.12; // Lumi uncertainty 
+    ttbar.xsec_lumi[ch] = ttbar.xsec[ch]  * 0.027; //0.12; // Lumi uncertainty 
     
     // Acceptances...
     ttbar.acc      [ch] = TTbar.Yields     [ch][cut]    / (fLumiNorm * ttbar_TLWG);

@@ -178,16 +178,16 @@ enum Samples{
   gNSAMPLES
 };
 TString SampleName[gNSAMPLES] = { 
-  "DoubleEG"  ,
-  "DoubleMuon",
-  "MuonEG"    ,
-  "TTJets"    , 
-  "TTJetsSemi", 
+  "DoubleEGsum"  ,
+  "DoubleMuonSum",
+  "MuonEGsum"    ,
+  "TTbar_Powheg", //"TTbar_Powheg"    , 
+  "TTbarSemi_Powheg", 
   // TTbar systematics
   ////"TTJets_matchingup"     ,
   ////"TTJets_matchingdown"   ,
-  "TTbar_Powheg_ScaleUp"      ,    
-  "TTbar_Powheg_ScaleDown"    ,   
+  "TTbar_Powheg_scaleUp"      ,    
+  "TTbar_Powheg_scaleDown_ext"    ,   
   ////"TTJets_MadSpinPDF"     ,
   ////"TTbar_Powheg"          ,
   ////"TTbar_Powheg_Herwig"   ,
@@ -195,7 +195,7 @@ TString SampleName[gNSAMPLES] = {
   ////"TTJetsFullLeptMGTuneP11noCR",
   "TbarW"                      , 
   "TW"                         , 
-  "DYJetsToLL_M10to50_aMCatNLO", 
+  "DYJetsToLL_M10to50_aMCatNLO_ext", 
   "DYJetsToLL_M50_aMCatNLO"    , 
   "WJetsToLNu_aMCatNLO"        , 
   "WW"                         ,
