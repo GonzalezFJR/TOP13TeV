@@ -6,6 +6,8 @@
 #include "BTagEfficienciesTTbarSummer15.C" // Change this to your sample efficiency
 #include "FastSimCorrectionFactorsSummer12.C" // Change this to your sample efficiency
 
+using namespace std;
+
 BTagSFUtil::BTagSFUtil(string MeasurementType, string BTagAlgorithm, TString OperatingPoint, int SystematicIndex, TString FastSimDataset, int Seed) {
 
   rand_ = new TRandom3(Seed);
@@ -32,14 +34,17 @@ BTagSFUtil::BTagSFUtil(string MeasurementType, string BTagAlgorithm, TString Ope
     if (TaggerName=="CSVv2") TaggerCut = 0.605;
     reader_bc = new BTagCalibrationReader(&calib, BTagEntry::OP_LOOSE, MeasurementType, SystematicFlagBC);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_LOOSE, MeasurementType, SystematicFlagL);
-    reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_LOOSE, "comb", SystematicFlagL);
+    //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_LOOSE, "comb", SystematicFlagL);
+    reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_LOOSE, "incl", SystematicFlagL);  // comb-->incl
   } else if (OperatingPoint=="Medium")  {
     TaggerOP += "M";
     if (TaggerName=="CSV") TaggerCut = 0.679;
-    if (TaggerName=="CSVv2") TaggerCut = 0.890;
+    //if (TaggerName=="CSVv2") TaggerCut = 0.890; // for 74X
+    if (TaggerName=="CSVv2") TaggerCut = 0.800; // for 76X
     reader_bc = new BTagCalibrationReader(&calib, BTagEntry::OP_MEDIUM, MeasurementType, SystematicFlagBC);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_MEDIUM, MeasurementType, SystematicFlagL);
-    reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_MEDIUM,  "comb", SystematicFlagL);
+    //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_MEDIUM,  "comb", SystematicFlagL);
+    reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_MEDIUM,  "incl", SystematicFlagL);  // comb-->incl
   } else if (OperatingPoint=="Tight")  {
     TaggerOP += "T";
     if (TaggerName=="CSV") TaggerCut = 0.898;
@@ -47,7 +52,8 @@ BTagSFUtil::BTagSFUtil(string MeasurementType, string BTagAlgorithm, TString Ope
     if (TaggerName=="CSVv2") TaggerCut = 0.970;
     reader_bc = new BTagCalibrationReader(&calib, BTagEntry::OP_TIGHT, MeasurementType, SystematicFlagBC);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_TIGHT, MeasurementType, SystematicFlagL);
-    reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_TIGHT, "comb", SystematicFlagL);
+    //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_TIGHT, "comb", SystematicFlagL);
+    reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_TIGHT, "incl", SystematicFlagL);  // comb-->incl
   } 
 
   if (TaggerCut<0) 

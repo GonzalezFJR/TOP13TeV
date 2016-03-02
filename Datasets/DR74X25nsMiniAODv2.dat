@@ -1,0 +1,45 @@
+#Dataset	N_Events	Cross Section	Main Folder	Base File	SumWeight
+DYJetsToLL_M10to50_aMCatNLO	30021559	18610	TreesDR74X/heppyTrees/v1/	Tree_DYJetsToLL_M10to50_aMCatNLO.root	9.05E+11
+DYJetsToLL_M50_aMCatNLO	28747969	6025.2	TreesDR74X/heppyTrees/v1/	Tree_DYJetsToLL_M50_aMCatNLO.root	4.51E+11
+DYJetsToLL_M50_MLM	9042031	6025.2	TreesDR74X/heppyTrees/v1/	Tree_DYJetsToLL_M50_MLM.root	
+DYJetsToLL_M5to50_MLM	9404398	22635.1	TreesDR74X/heppyTrees/v1/	Tree_DYJetsToLL_M5to50_MLM.root	
+ZGTo2LG	4451319	131.3	TreesDR74X/heppyTrees/v1/	Tree_ZGTo2LG.root	
+WGToLNuG	6099599	585.8	TreesDR74X/heppyTrees/v1/	Tree_WGToLNuG.root	
+WJetsToLNu_MLM	72207128	61526.7	TreesDR74X/heppyTrees/v1/	Tree_WJetsToLNu_MLM.root	
+WJetsToLNu_aMCatNLO	24084766	61526.7	TreesDR74X/heppyTrees/v1/	Tree_WJetsToLNu_aMCatNLO.root	3.74E+12
+TTbar_Powheg	96834559	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTbar_Powheg.root	
+TTbar_Powheg_ScaleDown	9860774	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTbar_Powheg_ScaleDown.root	
+TTbar_Powheg_ScaleUp	9921174	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTbar_Powheg_ScaleUp.root	
+TTbar_Powheg_mtop1695	9969800	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTbar_Powheg_mtop1695.root	
+TTbar_Powheg_mtop1755	9904200	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTbar_Powheg_mtop1755.root	
+TTbar_Powheg_Herwig	17520956	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTbar_Powheg_Herwig.root	
+TTbar_Powheg_Pythia6	18666925	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTbar_Powheg_Pythia6.root	
+TTJets	89704515	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTJets.root	
+TTLep_pow	4997000	87.3	TreesDR74X/heppyTrees/v1/	Tree_TTLep_pow.root	Sum of Weights
+TTJets_aMCatNLO	42784971	831.8	TreesDR74X/heppyTrees/v1/	Tree_TTJets_aMCatNLO.root	9.06E+10
+tZq_ll	2984613	0.0758	TreesDR74X/heppyTrees/v1/	Tree_tZq_ll.root	
+TTTT	248616	0.0091	TreesDR74X/heppyTrees/v1/	Tree_TTTT.root	
+TW	995600	35.6	TreesDR74X/heppyTrees/v1/	Tree_TW.root	
+TbarW	988500	35.6	TreesDR74X/heppyTrees/v1/	Tree_TbarW.root	
+TToLeptons_tch	3299800	44.07196	TreesDR74X/heppyTrees/v1/	Tree_TToLeptons_tch.root	
+TbarToLeptons_tch	1680200	26.2278	TreesDR74X/heppyTrees/v1/		
+WW	993640	115.0	TreesDR74X/heppyTrees/v1/	Tree_WW.root	
+WWto2L2Nu	1965200	12.178	TreesDR74X/heppyTrees/v1/	Tree_WWto2L2Nu.root	
+WZ	978512	47.1	TreesDR74X/heppyTrees/v1/	Tree_WZ.root	
+WZTo3LNu	1980800	4.42965	TreesDR74X/heppyTrees/v1/	Tree_WZTo3LNu.root	
+ZZ	996944	16.5	TreesDR74X/heppyTrees/v1/	Tree_ZZ.root	
+VHToNonbb	993464	0.95200	TreesDR74X/heppyTrees/v1/	Tree_VHToNonbb.root	
+TTHnobb	1562609	0.21510	TreesDR74X/heppyTrees/v1/	Tree_TTHnobb.root	
+WZZ	250000	0.05565	TreesDR74X/heppyTrees/v1/	Tree_WZZ.root	
+ZZZ	250000	0.01398	TreesDR74X/heppyTrees/v1/	Tree_ZZZ.root	
+WWZ	250000	0.1651	TreesDR74X/heppyTrees/v1/	Tree_WWZ.root	
+WWDouble	843514	1.64	TreesDR74X/heppyTrees/v1/	Tree_WWDouble.root	
+WpWpJJ	149600	0.0371	TreesDR74X/heppyTrees/v1/	Tree_WpWpJJ.root	
+TTWToLNu	252908	0.2043	TreesDR74X/heppyTrees/v1/	Tree_TTWToLNu.root	8.540706E+04
+TTWToQQ	833964	0.406	TreesDR74X/heppyTrees/v1/	Tree_TTWToQQ.root	5.694506E+05
+TTZToLLNuNu	398000	0.2529	TreesDR74X/heppyTrees/v1/	Tree_TTZToLLNuNu.root	1.001123E+05
+TTZToQQ	749800	0.5297	TreesDR74X/heppyTrees/v1/	Tree_TTZToQQ.root	3.966050E+05
+TTGJets	4832230	3.697	TreesDR74X/heppyTrees/v1/	Tree_TTGJets.root	
+TG_aMCatNLO	400000	2.967	TreesDR74X/heppyTrees/v1/	Tree_TG_aMCatNLO.root	
+T2tt_500_325	388207	0.51848	TreesDR74X/heppyTrees/v1/	Tree_T2tt_500_325.root	
+T2tt_850_100	240685	0.01896	TreesDR74X/heppyTrees/v1/	Tree_T2tt_850_100.root	

@@ -52,19 +52,20 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   //----------------------------------------------------------------------------
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
   DatasetManager* dm = DatasetManager::GetInstance();
-  dm->SetTab("DR74X25nsMiniAODv2");
+  dm->SetTab("DR76X25nsMiniAODv2");
   //dm->RedownloadFiles();
 
   // Deal with data samples
   if ((sampleName == "DoubleEG"   ||
        sampleName == "DoubleMuon" ||
-       sampleName == "MuonEG")) {
+       sampleName == "MuonEG"     ||
+       sampleName == "SingleEle"  ||
+       sampleName == "SingleMu")) {
     cout << "   + Data..." << endl;
     
     TString datasuffix[] = {
-      "Run2015D_v4Full",
-      "Run2015D_05Oct",
-      "Run2015C_05Oct"
+      "Run2015C_16Dec",
+      "Run2015D_16Dec"
       //"Run2015C_05Oct",
       //"C_7016",
       //"D_7360"
@@ -91,10 +92,12 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 	    sampleName == "TTZToQQ" || 
 	    sampleName == "WWZ" || 
 	    sampleName == "WZZ" || 
-	    sampleName == "ZZZ") {
-      G_Event_Weight = dm->GetCrossSection() / dm->GetSumWeights();
-      
-      cout << endl;
+			sampleName == "ZZZ" ||
+			sampleName.Contains("aMCatNLO") ||
+			sampleName.Contains("amcatnlo") ){
+			G_Event_Weight = dm->GetCrossSection() / dm->GetSumWeights();
+
+			cout << endl;
       cout << " weightSum(MC@NLO) = " << dm->GetSumWeights()     << endl;
     }
     else if(sampleName.BeginsWith("T2tt")){

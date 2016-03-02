@@ -129,6 +129,7 @@ TCanvas* LeptonSF::Draw() {
   //gStyle->SetOptStat(0);
   //gStyle->SetPalette(1);
   //gStyle->SetPaintTextFormat("4.3f");
+  // root -l -b -q makePlots.C
 
   TCanvas* c = new TCanvas();
   c->Print("sfAll.ps[");
@@ -156,7 +157,7 @@ TCanvas* LeptonSF::Draw() {
   fTightMuonSF->GetYaxis()->SetTitleOffset(.7);
   fTightMuonSF->SetXTitle("|#eta|");
   fTightMuonSF->SetYTitle("p_{T} (GeV)");
-  fTightMuonSF->GetXaxis()->SetRange(5,8); // show only positive side
+  //fTightMuonSF->GetXaxis()->SetRange(5,8); // show only positive side
   fTightMuonSF->Draw("COLZ, TEXTE");
   c->SaveAs("sfMuo.png");
   c->SaveAs("sfMuo.pdf");

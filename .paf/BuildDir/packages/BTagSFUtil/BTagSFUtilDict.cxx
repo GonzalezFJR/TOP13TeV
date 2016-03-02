@@ -55,7 +55,7 @@ namespace ROOT {
       ::BTagSFUtil *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::BTagSFUtil));
       static ::ROOT::TGenericClassInfo 
-         instance("BTagSFUtil", "BTagSFUtil.h", 13,
+         instance("BTagSFUtil", "BTagSFUtil.h", 10,
                   typeid(::BTagSFUtil), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &BTagSFUtil_Dictionary, isa_proxy, 0,
                   sizeof(::BTagSFUtil) );

@@ -55,7 +55,7 @@ namespace ROOT {
       ::PUWeight *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::PUWeight));
       static ::ROOT::TGenericClassInfo 
-         instance("PUWeight", "PUWeight.h", 53,
+         instance("PUWeight", "PUWeight.h", 55,
                   typeid(::PUWeight), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &PUWeight_Dictionary, isa_proxy, 0,
                   sizeof(::PUWeight) );

@@ -50,6 +50,7 @@ void TreeAnalysisTop::GetTreeVariables(){
   nJet                 = Get<Int_t>("nJet");
   if(!gIsData){
     ngenLep              = Get<Int_t>("ngenLep");
+    ngenLepFromTau       = Get<Int_t>("ngenLepFromTau");
     genWeight            = Get<Float_t>("genWeight");
   }
   for(int k = 0; k<nLepGood; k++){
@@ -77,11 +78,14 @@ void TreeAnalysisTop::GetTreeVariables(){
   }
   if(!gIsData){
     for(int k = 0; k<ngenLep; k++){
-      genLep_pdgId[k]    = Get<Int_t>("genLep_pdgId", k);
+      genLep_pdgId[k]    = TMath::Abs(Get<Int_t>("genLep_pdgId", k));
       genLep_pt[k]       = Get<Float_t>("genLep_pt", k);
       genLep_eta[k]      = Get<Float_t>("genLep_eta", k);
       genLep_phi[k]      = Get<Float_t>("genLep_phi", k);
       genLep_mass[k]     = Get<Float_t>("genLep_mass", k);
+    }
+    for(int k = 0; k<ngenLepFromTau; k++){
+      genLepFromTau_pdgId[k]    = TMath::Abs(Get<Int_t>("genLepFromTau_pdgId", k));
     }
   }
 }
@@ -200,6 +204,7 @@ TreeAnalysisTop::TreeAnalysisTop() : PAFChainItemSelector() {
 			fHChi0StopMass[ichan][icut] = 0;
 			fHvertices[ichan][icut] = 0;
 			fHgoodvertices[ichan][icut] = 0;
+			fnGenLep[ichan][icut] = 0;
 
 			for (unsigned int isyst = 0; isyst < gNSYST; isyst++) {
 				fHInvMass[ichan][icut][isyst] = 0;   
@@ -263,15 +268,16 @@ void TreeAnalysisTop::Initialise() {
 	if (gSampleName == "DoubleMuon"      ||     
 			gSampleName == "DoubleEG"        || 
 			gSampleName == "SingleMu"        || 
-			gSampleName == "SingleElectron"  || 
+			gSampleName == "SingleEle"  || 
 			gSampleName == "MuonEG"	       ||	    
 			gSampleName == "TTJets    "      ||  
 			gSampleName == "DYJetsToLL_M50_aMCatNLO"     ||
 			gSampleName == "DYJetsToLL_M10to50_aMCatNLO" ||
+			gSampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" ||
 			gSampleName == "ZJets_MLM"       ||
 			gSampleName == "DYJets_MLM"      ||
 			gSampleName == "TTbar_Powheg"    ||  
-			gSampleName == "TTbar_aMCatNLO"  ||  
+			gSampleName == "TTJets_aMCatNLO"  ||  
 			gSampleName == "TTbar_Powheg_Pythia6")  {  
 		//	PAF_INFO("TreeAnalysisTop", "+ Initialise Drell-Yan histograms...");
 		InitialiseDYHistos();
@@ -282,10 +288,10 @@ void TreeAnalysisTop::Initialise() {
 	//	PU Reweight
 	//--------------------------------------
 	//PAF_INFO("TreeAnalysisTop", "+ Initialise Pile-Up reweighting tool...");
-	fPUWeight     = new PUWeight(gLumiForPU,Summer2015_25ns_poisson,"2015_25ns");
+	fPUWeight     = new PUWeight(gLumiForPU, Fall2015_25ns_matchData_poisson,"2015_25ns_76"); 
 	if (!gIsData) {
-		fPUWeightUp   = new PUWeight(18494.9,   Summer2015_25ns_poisson,"2015_25ns"); //  18494.9  (5% down)
-		fPUWeightDown = new PUWeight(20441.7,   Summer2015_25ns_poisson,"2015_25ns"); //  20441.7  (5% up  )
+		fPUWeightUp   = new PUWeight(18494.9,    Fall2015_25ns_matchData_poisson,"2015_25ns_76"); //  18494.9 
+		fPUWeightDown = new PUWeight(20441.7,    Fall2015_25ns_matchData_poisson,"2015_25ns_76"); //  20441.7 
 	}
 
 	//if (gUseCSVM) fBTagSF   = new BTagSFUtil("CSVM","ABCD");//ReReco
@@ -321,6 +327,7 @@ void TreeAnalysisTop::Initialise() {
 void TreeAnalysisTop::InitialiseGenHistos(){
 	fHDeltaRLepJet[Muon] = CreateH1F("H_DeltaRLepJet_"+gChanLabel[Muon],"",1000,0.,5.);
 	fHDeltaRLepJet[Elec] = CreateH1F("H_DeltaRLepJet_"+gChanLabel[Elec],"",1000,0.,5.);  
+	fHnGenLep0 = CreateH1F("H_nGenLep_ElMu_raw","",8, -0.5, 7.5);  
 }
 
 void TreeAnalysisTop::InitialiseDYHistos(){
@@ -457,6 +464,7 @@ void TreeAnalysisTop::InitialiseKinematicHistos(){
 			// STOP HISTOGRAMS:
 			fHvertices[ch][cut]     = CreateH1F("H_Vtx_"+gChanLabel[ch]+"_"+sCut[cut],"", 51, -0.5, 50.5); 
 			fHgoodvertices[ch][cut] = CreateH1F("H_goodVtx_"+gChanLabel[ch]+"_"+sCut[cut],"", 51, -0.5, 50.5); 
+      fnGenLep[ch][cut] = CreateH1F("H_nGenLep_" +gChanLabel[ch]+"_"+sCut[cut],"NGenLeps", 8, -0.5, 7.5);
 		}
 	}
 }
@@ -643,7 +651,11 @@ void TreeAnalysisTop::InsideLoop() {
 	// Calculate PU Weight
 	PUSF = 1.;
 	if (!gIsData)
-		PUSF = fPUWeight->GetWeight(Get<Int_t>("nTrueInt")); //True       //nTruePU
+		PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); //True       //nTruePU
+  if (gIsData) {  
+    if (METFilter() == false) return; 
+  }
+
 
 	// Init data members ........................................................
 	GetTreeVariables();
@@ -680,8 +692,8 @@ void TreeAnalysisTop::InsideLoop() {
 			if (gSampleName == "TTbar_Powheg"              ) return;
 			if (gSampleName == "TTJets"                    ) return;
 			if (gSampleName == "TTJets_MLM"                ) return;
-			if (gSampleName == "TTbar_Powheg_ScaleUp"      ) return;
-			if (gSampleName == "TTbar_Powheg_ScaleDown"    ) return;
+			if (gSampleName == "TTbar_Powheg_scaleUp"      ) return;
+			if (gSampleName == "TTbar_Powheg_scaleDown"    ) return;
 			if (gSampleName == "TTbar_Powheg_mtop1695"     ) return;
 			if (gSampleName == "TTbar_Powheg_mtop1755"     ) return;
 			if (gSampleName == "TTbar_Powheg_2L"	         ) return;
@@ -742,12 +754,12 @@ void TreeAnalysisTop::InsideLoop() {
 	if (gSampleName == "DoubleMuon"      ||     
 			gSampleName == "DoubleEG"        || 
 			gSampleName == "SingleMu"        || 
-			gSampleName == "SingleElectron"  || 
+			gSampleName == "SingleEle"  || 
 			gSampleName == "MuonEG"	       ||	  
 			gSampleName == "ZJets_MLM"       ||
 			gSampleName == "DYJets_MLM"      ||
 			gSampleName == "DYJetsToLL_M50_aMCatNLO"     ||
-			gSampleName == "DYJetsToLL_M10to50_aMCatNLO" 
+			gSampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" 
 		 )  {
 		FillDYHistograms();
 	}
@@ -839,14 +851,14 @@ void TreeAnalysisTop::InsideLoop() {
   // Pile Up sytematics ....................................................................
   ResetOriginalObjects();
   if (!gIsData)
-    PUSF = fPUWeightUp->GetWeight(Get<Int_t>("nTrueInt")); //nTruePU
+    PUSF = fPUWeightUp->GetWeight(Get<Float_t>("nTrueInt")); //nTruePU
   gSysSource = PUUp;
   SetEventObjects();
   FillYields(PUUp);
   
   ResetOriginalObjects();
   if (!gIsData)
-    PUSF = fPUWeightDown->GetWeight(Get<Int_t>("nTrueInt")); //nTruePU
+    PUSF = fPUWeightDown->GetWeight(Get<Float_t>("nTrueInt")); //nTruePU
   gSysSource = PUDown;
   SetEventObjects();
   FillYields(PUDown); 
@@ -868,18 +880,60 @@ void TreeAnalysisTop::Summary(){}
 //------------------------------------------------------------------------------
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopTrigger#Run2015C_D_25_ns_data_with_RunII
 bool TreeAnalysisTop::PassTriggerMuMu() {
-	Bool_t pass = Get<Float_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+  Bool_t pass = false;
+  if (!gIsData){
+    pass = Get<Int_t>("HLT_BIT_HLT_IsoTkMu20_v")                       ||
+      Get<Int_t>("HLT_BIT_HLT_IsoMu20_v")                         ||
+      Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
+      Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+  }else{
+    if (gSampleName == "DoubleMuon")
+      pass = Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
+        Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    else if (gSampleName == "SingleMu")
+      pass = (Get<Int_t>("HLT_BIT_HLT_IsoTkMu20_v") || Get<Int_t>("HLT_BIT_HLT_IsoMu20_v")) &&
+        !(Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
+            Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v"));
+  }
 	return pass;
 }
 
 bool TreeAnalysisTop::PassTriggerEE(){ 
-	Bool_t pass = Get<Float_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+  Bool_t pass = false;
+  if (!gIsData){
+    pass = Get<Int_t>("HLT_BIT_HLT_Ele23_WPLoose_Gsf_v") ||
+			Get<Int_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+	}else{
+		if (gSampleName == "DoubleEG")
+			pass = Get<Int_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+		else if (gSampleName == "SingleEle")
+			pass = Get<Int_t>("HLT_BIT_HLT_Ele23_WPLoose_Gsf_v") &&
+				!Get<Int_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+	}
 	return pass;
 }
 
 bool TreeAnalysisTop::PassTriggerEMu(){ 
-	Bool_t pass = (Get<Float_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || 
-			Get<Float_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v")); 
+  Bool_t pass = false;
+	if (!gIsData){
+		pass = Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v")   ||
+			Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v")  ||
+			(Get<Int_t>("HLT_BIT_HLT_IsoTkMu20_v") || Get<Int_t>("HLT_BIT_HLT_IsoMu20_v"))         ||
+			Get<Int_t>("HLT_BIT_HLT_Ele23_WPLoose_Gsf_v");
+	}else{
+		if (gSampleName == "MuonEG")
+			pass = Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
+				Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+		else if (gSampleName == "SingleMu")
+			pass = (Get<Int_t>("HLT_BIT_HLT_IsoTkMu20_v") || Get<Int_t>("HLT_BIT_HLT_IsoMu20_v")) &&
+				!(Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
+						Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"));
+		else if (gSampleName == "SingleEle")
+			pass = Get<Int_t>("HLT_BIT_HLT_Ele23_WPLoose_Gsf_v") &&
+				!(Get<Int_t>("HLT_BIT_HLT_IsoTkMu20_v") || Get<Int_t>("HLT_BIT_HLT_IsoMu20_v") ||
+						Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
+						Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"));
+	}
 	return pass;
 }
 
@@ -887,28 +941,28 @@ bool TreeAnalysisTop::PassTriggerEMu(){
 // Get METHODS
 //------------------------------------------------------------------------------
 float TreeAnalysisTop::getHT(){
-  float ht(0);
-  for (unsigned int i=0; i<Jet.size(); i++) ht+=Jet[i].p.Pt();
-  return ht;
+	float ht(0);
+	for (unsigned int i=0; i<Jet.size(); i++) ht+=Jet[i].p.Pt();
+	return ht;
 }
 float TreeAnalysisTop::getJetPtIndex(unsigned int ind){
-  if (Jet.size() <= ind) return -999.;
-  return Jet[ind].p.Pt();
+	if (Jet.size() <= ind) return -999.;
+	return Jet[ind].p.Pt();
 }
 float TreeAnalysisTop::getJetEtaIndex(unsigned int ind){
-  if (Jet.size() <= ind) return -999.;
-  return TMath::Abs(Jet[ind].p.Eta());
+	if (Jet.size() <= ind) return -999.;
+	return TMath::Abs(Jet[ind].p.Eta());
 }
 float TreeAnalysisTop::getBtagJetPtIndex(unsigned int ind){
-  if (Jet.size() <= ind) return -999.;
-  Int_t btagInd = 0;
-  if (ind==0) btagInd = getLeadingJetbTag();
-  else  return -999.;
-  return Jet[btagInd].p.Pt();
+	if (Jet.size() <= ind) return -999.;
+	Int_t btagInd = 0;
+	if (ind==0) btagInd = getLeadingJetbTag();
+	else  return -999.;
+	return Jet[btagInd].p.Pt();
 }
 
 float TreeAnalysisTop::getMT(gChannel chan){
-  float ptl1 = fHypLepton1.p.Pt();
+	float ptl1 = fHypLepton1.p.Pt();
 	float ptl2 = fHypLepton2.p.Pt();
 	float dphi = getDelPhill();
 	return TMath::Sqrt(2*ptl1*ptl2*(1-TMath::Cos(dphi)));
@@ -1105,18 +1159,18 @@ float TreeAnalysisTop::getSF(gChannel chan) {
 		id1  = fLeptonSF->GetTightMuonSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
 		id2  = fLeptonSF->GetTightMuonSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
 		trig = fLeptonSF->GetDoubleMuSF (fHypLepton1.p.Eta(),fHypLepton2.p.Eta());
-  } 
-  else if (chan == Elec){
-    id1  = fLeptonSF->GetTightElectronSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
-    id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta()); 
-    trig = fLeptonSF->GetDoubleElSF     (fHypLepton1.p.Eta(),fHypLepton2.p.Eta()); 
-  }
-  else if (chan == ElMu){
-    id1  = fLeptonSF->GetTightMuonSF    (fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
-    id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
-    trig = fLeptonSF->GetMuEGSF         (fHypLepton2.p.Eta(),fHypLepton1.p.Eta());
-  }
-  return (PUSF*id1*id2*trig);
+	} 
+	else if (chan == Elec){
+		id1  = fLeptonSF->GetTightElectronSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
+		id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta()); 
+		trig = fLeptonSF->GetDoubleElSF     (fHypLepton1.p.Eta(),fHypLepton2.p.Eta()); 
+	}
+	else if (chan == ElMu){
+		id1  = fLeptonSF->GetTightMuonSF    (fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
+		id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
+		trig = fLeptonSF->GetMuEGSF         (fHypLepton2.p.Eta(),fHypLepton1.p.Eta());
+	}
+	return (PUSF*id1*id2*trig);
 }
 
 float TreeAnalysisTop::getTopPtSF(){
@@ -1250,138 +1304,138 @@ void TreeAnalysisTop::FillDYHistograms(){
 						fHDY_InvMass        [Muon][i1btag]->Fill(             Mll, EventWeight);
 					}
 				}
-      }
-    }
-  }
-  ResetHypLeptons(); 
-	if (PassTriggerEE()   && IsElElEvent()){
-		EventWeight = gWeight * getSF(Elec);
-		if(gIsMCatNLO)    EventWeight = EventWeight * genWeight; 
-		Mll = (fHypLepton1.p+fHypLepton2.p).M();
+			}
+		}
+		}
+		ResetHypLeptons(); 
+		if (PassTriggerEE()   && IsElElEvent()){
+			EventWeight = gWeight * getSF(Elec);
+			if(gIsMCatNLO)    EventWeight = EventWeight * genWeight; 
+			Mll = (fHypLepton1.p+fHypLepton2.p).M();
 
-		if (PassesMllVeto()){
-			fHDY_InvMassVsNPV   [Elec][iDilepton]->Fill(nGoodVertex, Mll, EventWeight);
-			fHDY_InvMassVsMET   [Elec][iDilepton]->Fill(getMET()   , Mll, EventWeight);
-			fHDY_InvMassVsNjets [Elec][iDilepton]->Fill(getNJets() , Mll, EventWeight);
-			fHDY_InvMassVsNbtags[Elec][iDilepton]->Fill(getNBTags(), Mll, EventWeight);
-			fHDY_InvMass        [Elec][iDilepton]->Fill(             Mll, EventWeight);
+			if (PassesMllVeto()){
+				fHDY_InvMassVsNPV   [Elec][iDilepton]->Fill(nGoodVertex, Mll, EventWeight);
+				fHDY_InvMassVsMET   [Elec][iDilepton]->Fill(getMET()   , Mll, EventWeight);
+				fHDY_InvMassVsNjets [Elec][iDilepton]->Fill(getNJets() , Mll, EventWeight);
+				fHDY_InvMassVsNbtags[Elec][iDilepton]->Fill(getNBTags(), Mll, EventWeight);
+				fHDY_InvMass        [Elec][iDilepton]->Fill(             Mll, EventWeight);
 
-			//if (PassesMETCut())   {
-			if (1)   {  // No vut in MET for e-mu channel
-				fHDY_InvMassVsNPV   [Elec][iMET]->Fill(nGoodVertex, Mll, EventWeight);
-				fHDY_InvMassVsMET   [Elec][iMET]->Fill(getMET()   , Mll, EventWeight);
-				fHDY_InvMassVsNjets [Elec][iMET]->Fill(getNJets() , Mll, EventWeight);
-				fHDY_InvMassVsNbtags[Elec][iMET]->Fill(getNBTags(), Mll, EventWeight);
-				fHDY_InvMass	    [Elec][iMET]->Fill( 	    Mll, EventWeight);
+				//if (PassesMETCut())   {
+				if (1)   {  // No vut in MET for e-mu channel
+					fHDY_InvMassVsNPV   [Elec][iMET]->Fill(nGoodVertex, Mll, EventWeight);
+					fHDY_InvMassVsMET   [Elec][iMET]->Fill(getMET()   , Mll, EventWeight);
+					fHDY_InvMassVsNjets [Elec][iMET]->Fill(getNJets() , Mll, EventWeight);
+					fHDY_InvMassVsNbtags[Elec][iMET]->Fill(getNBTags(), Mll, EventWeight);
+					fHDY_InvMass	    [Elec][iMET]->Fill( 	    Mll, EventWeight);
 
-				if (getNBTags() == 1){
-					fHDY_InvMassVsNPV   [Elec][iExact1btag]->Fill(nGoodVertex, Mll, EventWeight);
-					fHDY_InvMassVsMET   [Elec][iExact1btag]->Fill(getMET()   , Mll, EventWeight);
-					fHDY_InvMassVsNjets [Elec][iExact1btag]->Fill(getNJets() , Mll, EventWeight);
-					fHDY_InvMassVsNbtags[Elec][iExact1btag]->Fill(getNBTags(), Mll, EventWeight);
-					fHDY_InvMass        [Elec][iExact1btag]->Fill(             Mll, EventWeight);
-				}
-				if (getNBTags() == 2){
-					fHDY_InvMassVsNPV   [Elec][iExact2btag]->Fill(nGoodVertex, Mll, EventWeight);
-					fHDY_InvMassVsMET   [Elec][iExact2btag]->Fill(getMET()   , Mll, EventWeight);
-					fHDY_InvMassVsNjets [Elec][iExact2btag]->Fill(getNJets() , Mll, EventWeight);
-					fHDY_InvMassVsNbtags[Elec][iExact2btag]->Fill(getNBTags(), Mll, EventWeight);
-					fHDY_InvMass        [Elec][iExact2btag]->Fill(             Mll, EventWeight);
-				}
-				if (PassesNJetsCut()) {
-					fHDY_InvMassVsNPV   [Elec][i2jets]->Fill(nGoodVertex, Mll, EventWeight);
-					fHDY_InvMassVsMET   [Elec][i2jets]->Fill(getMET()   , Mll, EventWeight);
-					fHDY_InvMassVsNjets [Elec][i2jets]->Fill(getNJets() , Mll, EventWeight);
-					fHDY_InvMassVsNbtags[Elec][i2jets]->Fill(getNBTags(), Mll, EventWeight);
-					fHDY_InvMass        [Elec][i2jets]->Fill(             Mll, EventWeight);
+					if (getNBTags() == 1){
+						fHDY_InvMassVsNPV   [Elec][iExact1btag]->Fill(nGoodVertex, Mll, EventWeight);
+						fHDY_InvMassVsMET   [Elec][iExact1btag]->Fill(getMET()   , Mll, EventWeight);
+						fHDY_InvMassVsNjets [Elec][iExact1btag]->Fill(getNJets() , Mll, EventWeight);
+						fHDY_InvMassVsNbtags[Elec][iExact1btag]->Fill(getNBTags(), Mll, EventWeight);
+						fHDY_InvMass        [Elec][iExact1btag]->Fill(             Mll, EventWeight);
+					}
+					if (getNBTags() == 2){
+						fHDY_InvMassVsNPV   [Elec][iExact2btag]->Fill(nGoodVertex, Mll, EventWeight);
+						fHDY_InvMassVsMET   [Elec][iExact2btag]->Fill(getMET()   , Mll, EventWeight);
+						fHDY_InvMassVsNjets [Elec][iExact2btag]->Fill(getNJets() , Mll, EventWeight);
+						fHDY_InvMassVsNbtags[Elec][iExact2btag]->Fill(getNBTags(), Mll, EventWeight);
+						fHDY_InvMass        [Elec][iExact2btag]->Fill(             Mll, EventWeight);
+					}
+					if (PassesNJetsCut()) {
+						fHDY_InvMassVsNPV   [Elec][i2jets]->Fill(nGoodVertex, Mll, EventWeight);
+						fHDY_InvMassVsMET   [Elec][i2jets]->Fill(getMET()   , Mll, EventWeight);
+						fHDY_InvMassVsNjets [Elec][i2jets]->Fill(getNJets() , Mll, EventWeight);
+						fHDY_InvMassVsNbtags[Elec][i2jets]->Fill(getNBTags(), Mll, EventWeight);
+						fHDY_InvMass        [Elec][i2jets]->Fill(             Mll, EventWeight);
 
-					if (PassesNBtagCut()) {
-						fHDY_InvMassVsNPV   [Elec][i1btag]->Fill(nGoodVertex, Mll, EventWeight);
-						fHDY_InvMassVsMET   [Elec][i1btag]->Fill(getMET()   , Mll, EventWeight);
-						fHDY_InvMassVsNjets [Elec][i1btag]->Fill(getNJets() , Mll, EventWeight);
-						fHDY_InvMassVsNbtags[Elec][i1btag]->Fill(getNBTags(), Mll, EventWeight);
-						fHDY_InvMass        [Elec][i1btag]->Fill(             Mll, EventWeight);
+						if (PassesNBtagCut()) {
+							fHDY_InvMassVsNPV   [Elec][i1btag]->Fill(nGoodVertex, Mll, EventWeight);
+							fHDY_InvMassVsMET   [Elec][i1btag]->Fill(getMET()   , Mll, EventWeight);
+							fHDY_InvMassVsNjets [Elec][i1btag]->Fill(getNJets() , Mll, EventWeight);
+							fHDY_InvMassVsNbtags[Elec][i1btag]->Fill(getNBTags(), Mll, EventWeight);
+							fHDY_InvMass        [Elec][i1btag]->Fill(             Mll, EventWeight);
+						}
 					}
 				}
 			}
+			}
+			ResetHypLeptons();
 		}
-	}
-	ResetHypLeptons();
-}
-void TreeAnalysisTop::FillKinematicHistos(gChannel chan, iCut cut){
+		void TreeAnalysisTop::FillKinematicHistos(gChannel chan, iCut cut){
 #ifdef DEBUG
-  cout << "Filling KinematicHistos("<<chan<<","<<cut<<")... ";
-  cout << fHypLepton1.index << " , " << fHypLepton2.index << endl;
+			cout << "Filling KinematicHistos("<<chan<<","<<cut<<")... ";
+			cout << fHypLepton1.index << " , " << fHypLepton2.index << endl;
 #endif
 
-	if (gSysSource != Norm)      return;  //only fill histograms for nominal distributions...
-	if (fChargeSwitch == true  ) return;
+			if (gSysSource != Norm)      return;  //only fill histograms for nominal distributions...
+			if (fChargeSwitch == true  ) return;
 
-	if (!gIsData) {
-		for(int i = 0; i<Get<Int_t>("nLHEweight"); i++){
-			fHLHEweights[chan][cut]->Fill(i, EventWeight*Get<Float_t>("LHEweight_wgt", i));
-		}
-	}
+			if (!gIsData) {
+				for(int i = 0; i<Get<Int_t>("nLHEweight"); i++){
+					fHLHEweights[chan][cut]->Fill(i, EventWeight*Get<Float_t>("LHEweight_wgt", i));
+				}
+			}
 
-	//++ met info
-  fHMET[chan][cut]           ->Fill(getMET(),             EventWeight);
-  fHMT[chan][cut]            ->Fill(getMT(chan),          EventWeight);
-  fHMT2[chan][cut]           ->Fill(getMT2(chan),         EventWeight);
-  fHMeff[chan][cut]          ->Fill(getMeff(),            EventWeight);
-  fHPtllb[chan][cut]         ->Fill(getPtllb().Pt(),      EventWeight);
-  fHDelPhiLepJet[chan][cut]  ->Fill(TMath::Abs(getDPhiLepJet())/pi, EventWeight);
-  fHDelPhiJetMet[chan][cut]  ->Fill(TMath::Abs(getDPhiJetMet())/pi, EventWeight); 
-  fHDelPhiLepMet[chan][cut]  ->Fill(TMath::Abs(getDPhiLepMet())/pi, EventWeight); 
-  fHDelPhiPllbMet[chan][cut] ->Fill(TMath::Abs(getDPhibMet()  )/pi, EventWeight); 
-  
-  //++ lepton info
- // fHDiLepPt[chan][cut]    ->Fill((fHypLepton1.p+fHypLepton2.p).Pt(),      EventWeight);
- // fHLep0Pt[chan][cut]     ->Fill(fHypLepton1.p.Pt(),                      EventWeight);
- // fHLep1Pt[chan][cut]     ->Fill(fHypLepton2.p.Pt(),                      EventWeight);
-  fHLep0Eta[chan][cut]    ->Fill(TMath::Abs(fHypLepton1.p.Eta()),         EventWeight);
-  fHLep1Eta[chan][cut]    ->Fill(TMath::Abs(fHypLepton2.p.Eta()),         EventWeight);
-  fHDelLepPhi[chan][cut]  ->Fill(fHypLepton1.p.DeltaPhi((fHypLepton2.p)), EventWeight);
-  //++ jet info		  
-  int njets = getNJets(); 
-  //fHNJets[chan][cut]      ->Fill(njets,                                   EventWeight);
-  if(getHT()>0){
-     fHHT[chan][cut]      ->Fill(getHT(),                                 EventWeight);
-     fHHT2[chan][cut]     ->Fill(getHT(),                                 EventWeight);
-     fHHT3[chan][cut]     ->Fill(getHT(),                                 EventWeight);
-     fHHT4[chan][cut]     ->Fill(getHT(),                                 EventWeight);
-     fHHT5[chan][cut]     ->Fill(getHT(),                                 EventWeight);
-  }
- // fHNBtagJets[chan][cut]  ->Fill(getNBTags(),                             EventWeight);
- // fHJet0Pt[chan][cut]     ->Fill(getJetPtIndex(0),                        EventWeight);
- // fHJet1Pt[chan][cut]     ->Fill(getJetPtIndex(1),                        EventWeight);
-  fHJet0Eta[chan][cut]    ->Fill(getJetEtaIndex(0),			  EventWeight);
-  fHJet1Eta[chan][cut]    ->Fill(getJetEtaIndex(1),			  EventWeight);
-	fHBtagJet0Pt[chan][cut] ->Fill(getBtagJetPtIndex(0),                    EventWeight);
+			//++ met info
+			fHMET[chan][cut]           ->Fill(getMET(),             EventWeight);
+			fHMT[chan][cut]            ->Fill(getMT(chan),          EventWeight);
+			fHMT2[chan][cut]           ->Fill(getMT2(chan),         EventWeight);
+			fHMeff[chan][cut]          ->Fill(getMeff(),            EventWeight);
+			fHPtllb[chan][cut]         ->Fill(getPtllb().Pt(),      EventWeight);
+			fHDelPhiLepJet[chan][cut]  ->Fill(TMath::Abs(getDPhiLepJet())/pi, EventWeight);
+			fHDelPhiJetMet[chan][cut]  ->Fill(TMath::Abs(getDPhiJetMet())/pi, EventWeight); 
+			fHDelPhiLepMet[chan][cut]  ->Fill(TMath::Abs(getDPhiLepMet())/pi, EventWeight); 
+			fHDelPhiPllbMet[chan][cut] ->Fill(TMath::Abs(getDPhibMet()  )/pi, EventWeight); 
 
-	int ib = getLeadingJetbTag();
-	if (ib>=0)  fHCSVTag[chan][cut] ->Fill(Jet_btagCSV[ib], EventWeight);
+			//++ lepton info
+			// fHDiLepPt[chan][cut]    ->Fill((fHypLepton1.p+fHypLepton2.p).Pt(),      EventWeight);
+			// fHLep0Pt[chan][cut]     ->Fill(fHypLepton1.p.Pt(),                      EventWeight);
+			// fHLep1Pt[chan][cut]     ->Fill(fHypLepton2.p.Pt(),                      EventWeight);
+			fHLep0Eta[chan][cut]    ->Fill(TMath::Abs(fHypLepton1.p.Eta()),         EventWeight);
+			fHLep1Eta[chan][cut]    ->Fill(TMath::Abs(fHypLepton2.p.Eta()),         EventWeight);
+			fHDelLepPhi[chan][cut]  ->Fill(fHypLepton1.p.DeltaPhi((fHypLepton2.p)), EventWeight);
+			//++ jet info		  
+			int njets = getNJets(); 
+			//fHNJets[chan][cut]      ->Fill(njets,                                   EventWeight);
+			if(getHT()>0){
+				fHHT[chan][cut]      ->Fill(getHT(),                                 EventWeight);
+				fHHT2[chan][cut]     ->Fill(getHT(),                                 EventWeight);
+				fHHT3[chan][cut]     ->Fill(getHT(),                                 EventWeight);
+				fHHT4[chan][cut]     ->Fill(getHT(),                                 EventWeight);
+				fHHT5[chan][cut]     ->Fill(getHT(),                                 EventWeight);
+			}
+			// fHNBtagJets[chan][cut]  ->Fill(getNBTags(),                             EventWeight);
+			// fHJet0Pt[chan][cut]     ->Fill(getJetPtIndex(0),                        EventWeight);
+			// fHJet1Pt[chan][cut]     ->Fill(getJetPtIndex(1),                        EventWeight);
+			fHJet0Eta[chan][cut]    ->Fill(getJetEtaIndex(0),			  EventWeight);
+			fHJet1Eta[chan][cut]    ->Fill(getJetEtaIndex(1),			  EventWeight);
+			fHBtagJet0Pt[chan][cut] ->Fill(getBtagJetPtIndex(0),                    EventWeight);
 
-	fHTopD[chan][cut] ->Fill(getTopD(), EventWeight);
-	fHDelPhillJet[chan][cut]->Fill(getDeltaPhillJet(), EventWeight);
+			int ib = getLeadingJetbTag();
+			if (ib>=0)  fHCSVTag[chan][cut] ->Fill(Jet_btagCSV[ib], EventWeight);
 
-	//// Top/Z diff topology.
-	fHDRLep[chan][cut]        ->Fill(fHypLepton1.p.DeltaR(fHypLepton2.p),     EventWeight);
-	if (chan == Muon){
-		fHLep0Iso[chan][cut]      ->Fill(getMuonIso(fHypLepton1.index) ,EventWeight);
-		fHLep1Iso[chan][cut]      ->Fill(getMuonIso(fHypLepton2.index), EventWeight);
-	}
-	else if (chan==Elec){
-		fHLep0Iso[chan][cut]      ->Fill(getElecIso(fHypLepton1.index) ,EventWeight);
-		fHLep1Iso[chan][cut]      ->Fill(getElecIso(fHypLepton2.index), EventWeight);
-	}
-	else if (chan == ElMu){
-		fHLep0Iso[chan][cut]      ->Fill(getMuonIso(fHypLepton1.index) ,EventWeight);
-		fHLep1Iso[chan][cut]      ->Fill(getElecIso(fHypLepton2.index), EventWeight);
-	}
+			fHTopD[chan][cut] ->Fill(getTopD(), EventWeight);
+			fHDelPhillJet[chan][cut]->Fill(getDeltaPhillJet(), EventWeight);
 
-	if (njets > 0) {
-		fHDRLep0Jet[chan][cut]    ->Fill(getDRClosestJet(fHypLepton1.p),   EventWeight);
-		fHDRLep1Jet[chan][cut]    ->Fill(getDRClosestJet(fHypLepton2.p),   EventWeight);
+			//// Top/Z diff topology.
+			fHDRLep[chan][cut]        ->Fill(fHypLepton1.p.DeltaR(fHypLepton2.p),     EventWeight);
+			if (chan == Muon){
+				fHLep0Iso[chan][cut]      ->Fill(getMuonIso(fHypLepton1.index) ,EventWeight);
+				fHLep1Iso[chan][cut]      ->Fill(getMuonIso(fHypLepton2.index), EventWeight);
+			}
+			else if (chan==Elec){
+				fHLep0Iso[chan][cut]      ->Fill(getElecIso(fHypLepton1.index) ,EventWeight);
+				fHLep1Iso[chan][cut]      ->Fill(getElecIso(fHypLepton2.index), EventWeight);
+			}
+			else if (chan == ElMu){
+				fHLep0Iso[chan][cut]      ->Fill(getMuonIso(fHypLepton1.index) ,EventWeight);
+				fHLep1Iso[chan][cut]      ->Fill(getElecIso(fHypLepton2.index), EventWeight);
+			}
+
+			if (njets > 0) {
+				fHDRLep0Jet[chan][cut]    ->Fill(getDRClosestJet(fHypLepton1.p),   EventWeight);
+				fHDRLep1Jet[chan][cut]    ->Fill(getDRClosestJet(fHypLepton2.p),   EventWeight);
 		fHDPhiLep0Jet[chan][cut]  ->Fill(getDPhiClosestJet(fHypLepton1.p), EventWeight);
 		fHDPhiLep1Jet[chan][cut]  ->Fill(getDPhiClosestJet(fHypLepton2.p), EventWeight);
 	}
@@ -1790,8 +1844,7 @@ int TreeAnalysisTop::getSelectedLeptons(){
 }
 
 bool TreeAnalysisTop::METFilter(){
-  if (Get<Float_t>("Flag_HBHENoiseFilter") && 
-      Get<Float_t>("Flag_HBHENoiseIsoFilter") && 
+  if (Get<Float_t>("Flag_HBHENoiseIsoFilter") && 
       Get<Float_t>("Flag_CSCTightHaloFilter") && 
       Get<Float_t>("Flag_goodVertices") && 
       Get<Float_t>("Flag_eeBadScFilter")) 
@@ -2007,35 +2060,44 @@ bool TreeAnalysisTop::IsGoodJet(unsigned int ijet, float ptcut){
 // SelectedGenLepton
 //------------------------------------------------------------------------------
 void TreeAnalysisTop::SelectedGenLepton() {
-	if (!gIsData) {
+  if (!gIsData) {
+    nGenElec = 0; nGenMuon = 0;
+    int charge1 = 1;
+    for(int n = 0; n<ngenLep; n++){
+  // FIDUCIAL ___________________
+//    if( (Get<Float_t>("genLep_pt", n) > 20) && (Get<Float_t>("genLep_eta",n) < 2.4) ){ // FIDUCIAL
+      Int_t id = TMath::Abs(genLep_pdgId[n]);
+      //if(Get<Int_t>("genLep_status", n) != 23) continue; 
+        if (id == 11)  nGenElec++;
+        if (id == 13)  nGenMuon++;
+//      }
+    }
 
-		for(int n = 0; n<ngenLep; n++){
-			Int_t id = TMath::Abs(genLep_pdgId[n]);
-			if (id == 11)  nGenElec++;
-			if (id == 13)  nGenMuon++;
-		}
-		// add generated leptons (e/mu) from decays of taus from W/Z/h decays
-		for(int n = 0; n<Get<Int_t>("ngenLepFromTau"); n++){
-			Int_t id = TMath::Abs(Get<Int_t>("genLepFromTau_pdgId", n));
-			if (id == 11)  nGenElec++;
-			if (id == 13)  nGenMuon++;
-		}
-		fHnGenEle->Fill(nGenElec);
-		fHnGenMuo->Fill(nGenMuon);
-		//nGenTau  = ngenTau;
-		nGenLepton = nGenElec + nGenMuon + nGenTau;
-		for (Int_t i=0; i<ngenLep; i++) { 
-			if (TMath::Abs(genLep_pdgId[i]) == 11){
-				fHGenElePt->Fill(genLep_pt[i]); 
-			}
-		}
-		for (Int_t i=0; i<ngenLep; i++) { 
-			if (TMath::Abs(genLep_pdgId[i]) == 13){
-				fHGenMuoPt->Fill(genLep_pt[i]); 
-			}
-		}
-	}
+    // add generated leptons (e/mu) from decays of taus from W/Z/h decays
+    for(int n = 0; n<Get<Int_t>("ngenLepFromTau"); n++){
+//      if( (Get<Float_t>("genLepFromTau_pt", n) > 20) && (Get<Float_t>("genLepFromTau_eta",n) < 2.4) ){ // FIDUCIAL
+        Int_t id = TMath::Abs(Get<Int_t>("genLepFromTau_pdgId", n));
+        if (id == 11)  nGenElec++;
+        if (id == 13)  nGenMuon++;
+//      }
+    }
+    fHnGenEle->Fill(nGenElec);
+    fHnGenMuo->Fill(nGenMuon);
+    //nGenTau  = ngenTau;
+    nGenLepton = nGenElec + nGenMuon + nGenTau;
+    for (Int_t i=0; i<ngenLep; i++) {
+      if (TMath::Abs(genLep_pdgId[i]) == 11){
+        fHGenElePt->Fill(genLep_pt[i]);
+      }
+    }
+    for (Int_t i=0; i<ngenLep; i++) {
+      if (TMath::Abs(genLep_pdgId[i]) == 13){
+        fHGenMuoPt->Fill(genLep_pt[i]);
+      }
+    }
+  }
 }
+
 
 void TreeAnalysisTop::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
 	TLorentzVector met;
@@ -2053,42 +2115,31 @@ std::vector<int> TreeAnalysisTop::CleanedJetIndices(float pt){
 }
 
 void TreeAnalysisTop::SmearJetPts(int flag){
-	// Modify the jet pt for systematics studies. Either shifted or smeared propagate to the MET!!
-	if(gIsData)   return; // don't smear data
-	if(flag == 0) return; // 0 makes no sense
-	// select the jets you want to have... 
-	if (!gIsData) {
-		std::vector<int> cleanJets = CleanedJetIndices(15.);
-		TLorentzVector ojets, jets, tmp, genJet;                            // 4-vec of old jets, newjets and a tmp-vector
+  // Modify the jet pt for systematics studies. Either shifted or smeared propagate to the MET!!
+  if(gIsData)   return; // don't smear data
+  if(flag == 0) return; // 0 makes no sense
+  // select the jets you want to have... 
+  if (!gIsData) {
+    std::vector<int> cleanJets = CleanedJetIndices(15.);
+    TLorentzVector ojets, jets, tmp, genJet;                            // 4-vec of old jets, newjets and a tmp-vector
+    std::vector<int>::const_iterator it = cleanJets.begin();
 
-		std::vector<int>::const_iterator it = cleanJets.begin();
-
-		for( it = cleanJets.begin(); it != cleanJets.end(); ++it) {
-			tmp.SetPtEtaPhiE(JetPt.at(*it), Jet_eta[*it], JetPhi.at(*it), Jet_energy[*it]);         // set temp to the jet
-			// Gen info for jets... 
-			genJet.SetPxPyPzE(Get<Float_t>("Jet_mcPx",*it), 
-					Get<Float_t>("Jet_mcPy",*it), 
-					Get<Float_t>("Jet_mcPz",*it),  
-					Get<Float_t>("Jet_mcEnergy",*it));        
-			ojets += tmp; 
-			if(flag == 1) JetPt.at(*it) *= Get<Float_t>("Jet_corr_JECUp",*it);   // vary up   for flag 1 
-			if(flag == 2) JetPt.at(*it) *= Get<Float_t>("Jet_corr_JECDown",*it); // vary down for flag 2;
-			if(flag == 3){
-				float jerScaleUp   = getJERScaleUp(*it);	  
-				float jerScale     = getJERScale(*it);	  
-				float factor1 = 0.;
-				if (genJet.DeltaR(tmp) < 0.5) factor1 = max(0.0, genJet.Pt() + jerScale*(tmp.Pt() - genJet.Pt()) );
-				else                          factor1 = tmp.Pt();
-				float sigmaMC  = getErrPt(JetPt.at(*it), Jet_eta[*it]) / JetPt.at(*it);
-				float factor   = fRand3->Gaus(1., sqrt(jerScale*jerScale -1.) * sigmaMC );
-				JetPt.at(*it) = JetPt.at(*it) * factor;		// smear for flag 3
-			}
-			// set tmp to the scaled/smeared jet
-			tmp.SetPtEtaPhiE(JetPt.at(*it), Jet_eta[*it], JetPhi.at(*it), Jet_energy[*it]);
-			jets += tmp;  // add scaled/smeared jet to the new jets
-		}
-		propagateMET(jets, ojets);  // propagate this change to the MET
-	}
+    for( it = cleanJets.begin(); it != cleanJets.end(); ++it) {
+      tmp.SetPtEtaPhiE(JetPt.at(*it), Jet_eta[*it], JetPhi.at(*it), Jet_energy[*it]);         // set temp to the jet
+      // Gen info for jets... 
+      genJet.SetPxPyPzE(Get<Float_t>("Jet_mcPx",*it), Get<Float_t>("Jet_mcPy",*it), Get<Float_t>("Jet_mcPz",*it), Get<Float_t>("Jet_mcEnergy",*it));        
+      ojets += tmp;
+      //if(flag == 1) JetPt.at(*it) = Get<Float_t>("Jet_jecUp_pt", *it)  * Get<Float_t>("Jet_corr_JER",*it); // vary up   for flag 1
+      //if(flag == 2) JetPt.at(*it) = Get<Float_t>("Jet_jecDown_pt", *it)  * Get<Float_t>("Jet_corr_JER",*it); // vary up   for flag 1
+    if(flag == 1) JetPt.at(*it) = Get<Float_t>("Jet_rawPt",*it)*Get<Float_t>("Jet_corr_JECUp",*it)*Get<Float_t>("Jet_corr_JER",*it); // vary up   for flag 1 
+    if(flag == 2) JetPt.at(*it) = Get<Float_t>("Jet_rawPt",*it)*Get<Float_t>("Jet_corr_JECDown",*it)*Get<Float_t>("Jet_corr_JER",*it); // vary down for flag 2;
+    if(flag == 3) JetPt.at(*it) *= Get<Float_t>("Jet_corr_JERUp", *it);    // smear for flag 3 
+      // set tmp to the scaled/smeared jet
+      tmp.SetPtEtaPhiE(JetPt.at(*it), Jet_eta[*it], JetPhi.at(*it), Jet_energy[*it]);
+      jets += tmp;  // add scaled/smeared jet to the new jets
+    }
+    propagateMET(jets, ojets);  // propagate this change to the MET
+  }
 }
 
 void TreeAnalysisTop::ScaleLeptons(int flag){

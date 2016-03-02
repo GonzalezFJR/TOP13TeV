@@ -199,6 +199,7 @@ class TreeAnalysisTop : public PAFChainItemSelector
   // Frequantly used variables in the trees
   Int_t   nLepGood;
   Int_t   ngenLep;
+  Int_t   ngenLepFromTau;
   Int_t   nJet;
   Float_t genWeight;
   Float_t LepGood_px[30];
@@ -225,6 +226,7 @@ class TreeAnalysisTop : public PAFChainItemSelector
   Float_t genLep_phi[50];
   Float_t genLep_mass[50];
   Int_t   genLep_pdgId[50];
+  Int_t   genLepFromTau_pdgId[50];
 
   // You would tipically add here your protected methods
   // and data members
@@ -396,6 +398,7 @@ class TreeAnalysisTop : public PAFChainItemSelector
   TH1F* fHTrigSys[gNCHANNELS][iNCUTS];
   TH1F* fHnGenEle;
   TH1F* fHnGenMuo;
+  TH1F* fHnGenLep0;
   TH1F* fHGenElePt;
   TH1F* fHGenMuoPt;
 
@@ -471,6 +474,7 @@ class TreeAnalysisTop : public PAFChainItemSelector
   TH2F* fHChi0StopMass[gNCHANNELS][iNCUTS];
   TH1F* fHvertices[gNCHANNELS][iNCUTS];
   TH1F* fHgoodvertices[gNCHANNELS][iNCUTS];
+	TH1F* fnGenLep[gNCHANNELS][iNCUTS];
   
   //++ Gen Info
   TH1F* fHDeltaRLepJet[gNCHANNELS-1];

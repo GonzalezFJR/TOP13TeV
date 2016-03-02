@@ -47,7 +47,9 @@ enum EMCDistribution {
 
   Summer2015_50ns_poisson,     /* Summer15*/
 
-  Summer2015_25ns_poisson     /* Summer15*/
+  Summer2015_25ns_poisson,     /* Summer15*/
+  
+  Fall2015_25ns_matchData_poisson
 };
 
 class PUWeight {

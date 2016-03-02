@@ -1,12 +1,9 @@
-#pragma once 
-
+#include <string>
 #include "BTagCalibrationStandalone.h"
 #include <Riostream.h>
 #include "TRandom3.h"
 #include "TMath.h"
 #include "TF1.h"
-
-#include "string"
 
 using namespace std;
 
