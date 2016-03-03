@@ -84,7 +84,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
     dm->LoadDataset(sampleName);
     if(sampleName != "TestHeppy")   myProject->AddDataFiles(dm->GetFiles());
     if(sampleName == "WJetsToLNu_aMCatNLO" || 
-	    sampleName == "DYJetsToLL_M10to50_aMCatNLO" || 
+	    sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || 
 	    sampleName == "DYJetsToLL_M50_aMCatNLO" || 
 	    sampleName == "TTJets_amcatnlo" ||
 	    sampleName == "TTWToLNu"  || 
@@ -151,7 +151,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
 
-  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M10to50_aMCatNLO" || sampleName == "DYJetsToLL_M50_aMCatNLO" || sampleName == "TTJets_amcatnlo"){ //||
+  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || sampleName == "DYJetsToLL_M50_aMCatNLO" || sampleName == "TTJets_amcatnlo"){ //||
         //     sampleName == "TTWToLNu"  || sampleName == "TTWToQQ" || sampleName == "TTZToQQ" || sampleName == "WWZ" || sampleName == "WZZ" || sampleName == "ZZZ"){
     PAF_INFO("RunTree_ReReco", "This is a MC@NLO sample!");
     G_IsMCatNLO = true;
