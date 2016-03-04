@@ -63,8 +63,8 @@ class LeptonSF {
   float GetDoubleMuSF(float eta1, float eta2) const { // binned in eta1, eta2
     eta1 = TMath::Abs(eta1);
     eta2 = TMath::Abs(eta2);
-    //return fDoubleMuSF->GetBinContent(fDoubleMuSF->FindBin(eta1, eta2));
-    return fDoubleMuSF->GetBinContent(fDoubleMuSF->FindBin(eta1, eta2)) - fDoubleMuSF->GetBinError(fDoubleMuSF->FindBin(eta1, eta2));
+    return fDoubleMuSF->GetBinContent(fDoubleMuSF->FindBin(eta1, eta2));
+    //return fDoubleMuSF->GetBinContent(fDoubleMuSF->FindBin(eta1, eta2)) - fDoubleMuSF->GetBinError(fDoubleMuSF->FindBin(eta1, eta2));
   }
   float GetDoubleElSF(float eta1, float eta2) const { // binned in eta1, eta2
     eta1 = TMath::Abs(eta1);
