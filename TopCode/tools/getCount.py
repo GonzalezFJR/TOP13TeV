@@ -10,6 +10,7 @@ def get(sample):
   for tree in os.listdir(patheppy):
     if ("Herwig" in tree and "Herwig" not in sample): continue
     if ("aMCatNLO" in tree and "aMCatNLO" not in sample): continue
+    if ("ext" in tree and "ext" not in sample): continue
     if sample in tree:
       #print "Opening ", patheppy + tree, "..."
       f = TFile.Open(patheppy + tree)
