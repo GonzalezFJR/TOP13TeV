@@ -450,6 +450,7 @@ class TreeAnalysisTop : public PAFChainItemSelector
   TH1F* fHNBtagsNJets[gNCHANNELS][iNCUTS][gNSYST]; 
   TH1F* fHSSNBtagsNJets[gNCHANNELS][iNCUTS][gNSYST]; 
   TH1F* fHCSVTag[gNCHANNELS][iNCUTS]; 
+  TH1F* fHJetCSV[gNCHANNELS][iNCUTS];
   TH1F* fHTopD[gNCHANNELS][iNCUTS];
   TH1F* fHDelPhillJet[gNCHANNELS][iNCUTS];
 
