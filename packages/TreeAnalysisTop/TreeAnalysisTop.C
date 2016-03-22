@@ -186,7 +186,8 @@ TreeAnalysisTop::TreeAnalysisTop() : PAFChainItemSelector() {
 			fHDelPhiJetMet[ichan][icut] = 0; 
 			fHDelPhiPllbMet[ichan][icut] = 0; 
 			fHDelPhiLepJet[ichan][icut] = 0; 
-
+			
+			fHJetCSV[ichan][icut]  = 0;
 			fHCSVTag[ichan][icut] = 0; 
 			fHTopD[ichan][icut] = 0;
 			fHDelPhillJet[ichan][icut] = 0;
@@ -446,7 +447,8 @@ void TreeAnalysisTop::InitialiseKinematicHistos(){
 			fHDiLepPt[ch][cut][0]     = CreateH1F("H_DiLepPt_"    +gChanLabel[ch]+"_"+sCut[cut],"DiLepPt"   , 1600,20,180); 
 			fHLep0Pt[ch][cut][0]      = CreateH1F("H_Lep0Pt_"     +gChanLabel[ch]+"_"+sCut[cut],"Lep0Pt"    , 1800,20,200);
 			fHLep1Pt[ch][cut][0]      = CreateH1F("H_Lep1Pt_"     +gChanLabel[ch]+"_"+sCut[cut],"Lep1Pt"    , 1800,20,200);
-
+			
+			fHJetCSV[ch][cut]  = CreateH1F("H_JetCSV_" +gChanLabel[ch]+"_"+sCut[cut],"CSV" , 100,0, 1.3);
 			// other variables 
 			fHCSVTag[ch][cut]      = CreateH1F("H_CSVTag_"     +gChanLabel[ch]+"_"+sCut[cut], "NBtagsNJets"     , 1000, 0.0, 1.0);
 			fHTopD[ch][cut]        = CreateH1F("H_TopD_"       +gChanLabel[ch]+"_"+sCut[cut], "TopDiscriminator", 1000,0.0,1.0);
@@ -1411,7 +1413,10 @@ void TreeAnalysisTop::FillDYHistograms(){
 			fHJet0Eta[chan][cut]    ->Fill(getJetEtaIndex(0),			  EventWeight);
 			fHJet1Eta[chan][cut]    ->Fill(getJetEtaIndex(1),			  EventWeight);
 			fHBtagJet0Pt[chan][cut] ->Fill(getBtagJetPtIndex(0),                    EventWeight);
-
+      			
+      			for(int k = 0; k<nJets; k++){
+        			fHJetCSV[chan][cut] -> Fill(Jet_btagCSV[k], EventWeight);
+      			}
 			int ib = getLeadingJetbTag();
 			if (ib>=0)  fHCSVTag[chan][cut] ->Fill(Jet_btagCSV[ib], EventWeight);
 
