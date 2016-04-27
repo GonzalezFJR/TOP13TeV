@@ -653,7 +653,7 @@ void TreeAnalysisTop::InsideLoop() {
 	// Calculate PU Weight
 	PUSF = 1.;
 	if (!gIsData)
-		PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); //True       //nTruePU
+		PUSF = 1.; //fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); //True       //nTruePU
   if (gIsData) {  
     if (METFilter() == false) return; 
   }
@@ -853,14 +853,14 @@ void TreeAnalysisTop::InsideLoop() {
   // Pile Up sytematics ....................................................................
   ResetOriginalObjects();
   if (!gIsData)
-    PUSF = fPUWeightUp->GetWeight(Get<Float_t>("nTrueInt")); //nTruePU
+    PUSF = 1.; //fPUWeightUp->GetWeight(Get<Float_t>("nTrueInt")); //nTruePU
   gSysSource = PUUp;
   SetEventObjects();
   FillYields(PUUp);
   
   ResetOriginalObjects();
   if (!gIsData)
-    PUSF = fPUWeightDown->GetWeight(Get<Float_t>("nTrueInt")); //nTruePU
+    PUSF = 1.; //fPUWeightDown->GetWeight(Get<Float_t>("nTrueInt")); //nTruePU
   gSysSource = PUDown;
   SetEventObjects();
   FillYields(PUDown); 
