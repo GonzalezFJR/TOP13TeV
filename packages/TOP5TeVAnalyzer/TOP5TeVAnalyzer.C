@@ -2134,11 +2134,11 @@ void TOP5TeVAnalyzer::SmearJetPts(int flag){
       // Gen info for jets... 
       genJet.SetPxPyPzE(Get<Float_t>("Jet_mcPx",*it), Get<Float_t>("Jet_mcPy",*it), Get<Float_t>("Jet_mcPz",*it), Get<Float_t>("Jet_mcEnergy",*it));        
       ojets += tmp;
-      //if(flag == 1) JetPt.at(*it) = Get<Float_t>("Jet_jecUp_pt", *it)  * Get<Float_t>("Jet_corr_JER",*it); // vary up   for flag 1
-      //if(flag == 2) JetPt.at(*it) = Get<Float_t>("Jet_jecDown_pt", *it)  * Get<Float_t>("Jet_corr_JER",*it); // vary up   for flag 1
-    if(flag == 1) JetPt.at(*it) = Get<Float_t>("Jet_rawPt",*it)*Get<Float_t>("Jet_corr_JECUp",*it)*Get<Float_t>("Jet_corr_JER",*it); // vary up   for flag 1 
-    if(flag == 2) JetPt.at(*it) = Get<Float_t>("Jet_rawPt",*it)*Get<Float_t>("Jet_corr_JECDown",*it)*Get<Float_t>("Jet_corr_JER",*it); // vary down for flag 2;
-    if(flag == 3) JetPt.at(*it) *= Get<Float_t>("Jet_corr_JERUp", *it);    // smear for flag 3 
+      
+      if(flag == 1) JetPt.at(*it) += JetPt.at(*it)*0.04   // vary up   for flag 1 
+      if(flag == 2) JetPt.at(*it) -= JetPt.at(*it)*0.04   // vary down for flag 2
+      
+      if(flag == 3) JetPt.at(*it) *= Get<Float_t>("Jet_corr_JERUp", *it);    // smear for flag 3 
       // set tmp to the scaled/smeared jet
       tmp.SetPtEtaPhiE(JetPt.at(*it), Jet_eta[*it], JetPhi.at(*it), Jet_energy[*it]);
       jets += tmp;  // add scaled/smeared jet to the new jets
