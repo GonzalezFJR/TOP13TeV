@@ -1,12 +1,12 @@
 //========================================================
-//  TreeAnalysisTop selector
+//  TOP5TeVAnalyzer selector
 //========================================================
 
-#include "TreeAnalysisTop.h"
+#include "TOP5TeVAnalyzer.h"
 #include <iostream>
 #include <math.h>
 
-ClassImp(TreeAnalysisTop);
+ClassImp(TOP5TeVAnalyzer);
 const float gJetEtCut = 30.;
 
 //#define DEBUG
@@ -14,7 +14,7 @@ const float gJetEtCut = 30.;
 //------------------------------------------------------------------------------
 // GetParameters
 //------------------------------------------------------------------------------
-void TreeAnalysisTop::GetParameters(){
+void TOP5TeVAnalyzer::GetParameters(){
   gSampleName    = GetParam<TString>("sampleName");
   gIsData        = GetParam<bool>("IsData");
   gWeight        = GetParam<float>("weight"); // cross section / events in the sample
@@ -29,23 +29,23 @@ void TreeAnalysisTop::GetParameters(){
 
   gIsMCatNLO     = GetParam<bool>("IsMCatNLO");
 
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gSampleName = %s",gSampleName.Data()));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gIsData = %d",gIsData ));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gWeight = %e", gWeight));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gLumiForPU = %f", gLumiForPU));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gTotalLumi = %f", gTotalLumi));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gDoSystStudies = %d", gDoSystStudies));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gUseCSVM = %d",gUseCSVM ));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gDoSF = %d", gDoSF));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gDoDF = %d",gDoDF ));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gStopMass = %f", gStopMass));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gLspMass = %f",gLspMass ));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gSampleName = %s",gSampleName.Data()));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gIsData = %d",gIsData ));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gWeight = %e", gWeight));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gLumiForPU = %f", gLumiForPU));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gTotalLumi = %f", gTotalLumi));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gDoSystStudies = %d", gDoSystStudies));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gUseCSVM = %d",gUseCSVM ));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gDoSF = %d", gDoSF));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gDoDF = %d",gDoDF ));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gStopMass = %f", gStopMass));
+  PAF_INFO("TOP5TeVAnalyzer::GetParameters()", Form("gLspMass = %f",gLspMass ));
 }
 
 //-----------------------------------------------------------------------------------
 // GetTreeVariables
 //-----------------------------------------------------------------------------------
-void TreeAnalysisTop::GetTreeVariables(){
+void TOP5TeVAnalyzer::GetTreeVariables(){
   nLepGood             = Get<Int_t>("nLepGood");
   nJet                 = Get<Int_t>("nJet");
   if(!gIsData){
@@ -130,9 +130,9 @@ const double *getEtaBins (gChannel chan){
 };
 
 //------------------------------------------------------------------------------------
-// TreeAnalysisTop class constructor (make sure the pointers are initialized to zero)
+// TOP5TeVAnalyzer class constructor (make sure the pointers are initialized to zero)
 //------------------------------------------------------------------------------------
-TreeAnalysisTop::TreeAnalysisTop() : PAFChainItemSelector() {
+TOP5TeVAnalyzer::TOP5TeVAnalyzer() : PAFChainItemSelector() {
 	fHDummy = 0;
 	hWeight = 0;
 	fHTopPtWeight = 0;
@@ -243,22 +243,22 @@ TreeAnalysisTop::TreeAnalysisTop() : PAFChainItemSelector() {
 //-------------------------------------------------------------------
 // Initialise
 //-------------------------------------------------------------------
-void TreeAnalysisTop::Initialise() {
-	PAF_INFO("TreeAnalysisTop", "+ Initializing...");
-	//PAF_INFO("TreeAnalysisTop", "+ Initializing paramenters...");
+void TOP5TeVAnalyzer::Initialise() {
+	PAF_INFO("TOP5TeVAnalyzer", "+ Initializing...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Initializing paramenters...");
 	GetParameters();
-	//PAF_INFO("TreeAnalysisTop", "+ Sumw2 set for all histograms...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Sumw2 set for all histograms...");
 	TH1::SetDefaultSumw2();
 	fHDummy = CreateH1F("fHDummy","",1,0,1);
-	//PAF_INFO("TreeAnalysisTop", "+ Initialise Yield histograms...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise Yield histograms...");
 	InitialiseYieldsHistos();
-	//PAF_INFO("TreeAnalysisTop", "+ Initialise Kinematic histograms...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise Kinematic histograms...");
 	InitialiseKinematicHistos();
 	if (!gIsData) {
-		//PAF_INFO("TreeAnalysisTop", "+ Initialise Gen histograms...");
+		//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise Gen histograms...");
 		InitialiseGenHistos();
 	}
-	//PAF_INFO("TreeAnalysisTop", "+ Initialise other histograms...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise other histograms...");
 	fHTopPtWeight  = CreateH1F("H_TopPtWeight" ,"TopPt Weight",100, 0, 2);
 
 	fHnGenEle  = CreateH1F("fHnGenEle" , "nGenPromptElecs"  , 11, -1.5, 9.5);
@@ -280,15 +280,15 @@ void TreeAnalysisTop::Initialise() {
 			gSampleName == "TTbar_Powheg"    ||  
 			gSampleName == "TTJets_aMCatNLO"  ||  
 			gSampleName == "TTbar_Powheg_Pythia6")  {  
-		//	PAF_INFO("TreeAnalysisTop", "+ Initialise Drell-Yan histograms...");
+		//	PAF_INFO("TOP5TeVAnalyzer", "+ Initialise Drell-Yan histograms...");
 		InitialiseDYHistos();
 	}
-	PAF_INFO("TreeAnalysisTop", "+ Initialise histograms for systematics studies...");
+	PAF_INFO("TOP5TeVAnalyzer", "+ Initialise histograms for systematics studies...");
 	InitialiseSystematicHistos();
 
 	//	PU Reweight
 	//--------------------------------------
-	//PAF_INFO("TreeAnalysisTop", "+ Initialise Pile-Up reweighting tool...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise Pile-Up reweighting tool...");
 	fPUWeight     = new PUWeight(gLumiForPU, Fall2015_25ns_matchData_poisson,"2015_25ns_76"); 
 	if (!gIsData) {
 		fPUWeightUp   = new PUWeight(18494.9,    Fall2015_25ns_matchData_poisson,"2015_25ns_76"); //  18494.9 
@@ -298,7 +298,7 @@ void TreeAnalysisTop::Initialise() {
 	//if (gUseCSVM) fBTagSF   = new BTagSFUtil("CSVM","ABCD");//ReReco
 	//else          fBTagSF   = new BTagSFUtil("CSVT","ABCD");//ReReco 
 
-	//PAF_INFO("TreeAnalysisTop", "+ Initialise b-tag scale factors...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise b-tag scale factors...");
 	if (gUseCSVM){
 		fBTagSFnom = new BTagSFUtil("mujets", "CSVv2", "Medium",  0);
 		fBTagSFbUp = new BTagSFUtil("mujets", "CSVv2", "Medium",  1);
@@ -314,24 +314,24 @@ void TreeAnalysisTop::Initialise() {
 		fBTagSFlDo = new BTagSFUtil("mujets", "CSVv2", "Tight", -3);
 	}
 
-	//PAF_INFO("TreeAnalysisTop", "+ Initialise lepton scale factors...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise lepton scale factors...");
 	fLeptonSF = new LeptonSF();
 
-	//PAF_INFO("TreeAnalysisTop", "+ Initialise random 3...");
+	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise random 3...");
 	fRand3 = new TRandom3(50);
 
 	// No systematics activaded...
 	gSysSource = Norm;
-	PAF_INFO("TreeAnalysisTop", "+ Initialisation DONE.");
+	PAF_INFO("TOP5TeVAnalyzer", "+ Initialisation DONE.");
 }
 
-void TreeAnalysisTop::InitialiseGenHistos(){
+void TOP5TeVAnalyzer::InitialiseGenHistos(){
 	fHDeltaRLepJet[Muon] = CreateH1F("H_DeltaRLepJet_"+gChanLabel[Muon],"",1000,0.,5.);
 	fHDeltaRLepJet[Elec] = CreateH1F("H_DeltaRLepJet_"+gChanLabel[Elec],"",1000,0.,5.);  
 	fHnGenLep0 = CreateH1F("H_nGenLep_ElMu_raw","",8, -0.5, 7.5);  
 }
 
-void TreeAnalysisTop::InitialiseDYHistos(){
+void TOP5TeVAnalyzer::InitialiseDYHistos(){
 	for (size_t ch=0; ch<gNCHANNELS; ch++){
 		for (size_t cut=0; cut<iNCUTS; cut++){
 			TString name = "_"+gChanLabel[ch]+"_"+sCut[cut];
@@ -344,7 +344,7 @@ void TreeAnalysisTop::InitialiseDYHistos(){
 	}
 }
 
-void TreeAnalysisTop::InitialiseYieldsHistos(){
+void TOP5TeVAnalyzer::InitialiseYieldsHistos(){
 	hWeight = CreateH1F("hWeight","",200,0,1);
 	//++ Yields histograms
 	if (gDoSF) {
@@ -386,8 +386,8 @@ void TreeAnalysisTop::InitialiseYieldsHistos(){
 	}
 }
 
-void TreeAnalysisTop::InitialiseKinematicHistos(){
-	//  PAF_DEBUG("TreeAnalysisTop::InitialiseKinematicHistos()",Form("nWeights = %i", nWeights));
+void TOP5TeVAnalyzer::InitialiseKinematicHistos(){
+	//  PAF_DEBUG("TOP5TeVAnalyzer::InitialiseKinematicHistos()",Form("nWeights = %i", nWeights));
 	//++ Kinematic histograms
 	for (size_t ch=0; ch<gNCHANNELS; ch++){
 		if (!gDoSF && ch==Muon) continue;
@@ -395,7 +395,7 @@ void TreeAnalysisTop::InitialiseKinematicHistos(){
 		if (!gDoDF && ch==ElMu) continue;
 
 		for (size_t cut=0; cut<iNCUTS; cut++){
-			//PAF_DEBUG("TreeAnalysisTop::InitialiseKinematicHistos()",Form("cut = %i", cut));
+			//PAF_DEBUG("TOP5TeVAnalyzer::InitialiseKinematicHistos()",Form("cut = %i", cut));
 			fHLHEweights[ch][cut]  = CreateH1F("H_LHEweights"  +gChanLabel[ch]+"_"+sCut[cut],"LHEweights", nWeights, -0.5, nWeights - 0.5);
 
 			fHMET[ch][cut]         = CreateH1F("H_MET_"        +gChanLabel[ch]+"_"+sCut[cut],"MET"       , 3000, 0,300);
@@ -471,7 +471,7 @@ void TreeAnalysisTop::InitialiseKinematicHistos(){
 	}
 }
 
-void TreeAnalysisTop::InitialiseSystematicHistos(){
+void TOP5TeVAnalyzer::InitialiseSystematicHistos(){
 	TString histoname = "";
 	for (size_t ch=0; ch<gNCHANNELS; ch++){
 		if (!gDoSF && ch==Muon) continue;
@@ -528,7 +528,7 @@ void TreeAnalysisTop::InitialiseSystematicHistos(){
 //---------------------------------------------------------------------------------------------------
 // Set objets, to be called once per event, saving information in tmp vectors for systematic studies.
 //---------------------------------------------------------------------------------------------------
-void TreeAnalysisTop::SetOriginalObjects(){
+void TOP5TeVAnalyzer::SetOriginalObjects(){
 	ResetHypLeptons();
 	gSysSource = Norm;
 
@@ -575,7 +575,7 @@ void TreeAnalysisTop::SetOriginalObjects(){
 	MET_Phi = Get<Float_t>("met_phi"); //met
 }
 
-void TreeAnalysisTop::SetEventObjects(){
+void TOP5TeVAnalyzer::SetEventObjects(){
 	ResetHypLeptons();
 
 	fChargeSwitch = false;
@@ -605,7 +605,7 @@ void TreeAnalysisTop::SetEventObjects(){
 	nBtags   = getNBTags();
 }
 
-void TreeAnalysisTop::ResetOriginalObjects(){
+void TOP5TeVAnalyzer::ResetOriginalObjects(){
 	// Save original values for MET, Jets and Leptons
 	TLorentzVector j;
 	for (Int_t i=0; i < nJet; i++){    
@@ -637,7 +637,7 @@ void TreeAnalysisTop::ResetOriginalObjects(){
 	setMET(Get<Float_t>("met_pt")); //met
 }
 
-void TreeAnalysisTop::ResetHypLeptons(){
+void TOP5TeVAnalyzer::ResetHypLeptons(){
   TLorentzVector vec(0., 0., 0., 0.);
   fHypLepton1 = lepton(vec, 0, -1, -1);
   fHypLepton2 = lepton(vec, 0, -1, -1);
@@ -646,7 +646,7 @@ void TreeAnalysisTop::ResetHypLeptons(){
 //-----------------------------------------------------------------------
 // InsideLoop
 //-----------------------------------------------------------------------
-void TreeAnalysisTop::InsideLoop() {
+void TOP5TeVAnalyzer::InsideLoop() {
 	fHDummy->Fill(0.5);
 	//if (METFilter() == false) return;
 
@@ -875,13 +875,13 @@ void TreeAnalysisTop::InsideLoop() {
   fChargeSwitch = false;
 }
 
-void TreeAnalysisTop::Summary(){}
+void TOP5TeVAnalyzer::Summary(){}
 
 //------------------------------------------------------------------------------
 // TRIGGER INFORMATION
 //------------------------------------------------------------------------------
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopTrigger#Run2015C_D_25_ns_data_with_RunII
-bool TreeAnalysisTop::PassTriggerMuMu() {
+bool TOP5TeVAnalyzer::PassTriggerMuMu() {
   Bool_t pass = false;
   if (!gIsData){
     pass = Get<Int_t>("HLT_BIT_HLT_IsoTkMu20_v")                       ||
@@ -900,7 +900,7 @@ bool TreeAnalysisTop::PassTriggerMuMu() {
 	return pass;
 }
 
-bool TreeAnalysisTop::PassTriggerEE(){ 
+bool TOP5TeVAnalyzer::PassTriggerEE(){ 
   Bool_t pass = false;
   if (!gIsData){
     pass = Get<Int_t>("HLT_BIT_HLT_Ele23_WPLoose_Gsf_v") ||
@@ -915,7 +915,7 @@ bool TreeAnalysisTop::PassTriggerEE(){
 	return pass;
 }
 
-bool TreeAnalysisTop::PassTriggerEMu(){ 
+bool TOP5TeVAnalyzer::PassTriggerEMu(){ 
   Bool_t pass = false;
 	if (!gIsData){
 		pass = Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v")   ||
@@ -942,20 +942,20 @@ bool TreeAnalysisTop::PassTriggerEMu(){
 //------------------------------------------------------------------------------
 // Get METHODS
 //------------------------------------------------------------------------------
-float TreeAnalysisTop::getHT(){
+float TOP5TeVAnalyzer::getHT(){
 	float ht(0);
 	for (unsigned int i=0; i<Jet.size(); i++) ht+=Jet[i].p.Pt();
 	return ht;
 }
-float TreeAnalysisTop::getJetPtIndex(unsigned int ind){
+float TOP5TeVAnalyzer::getJetPtIndex(unsigned int ind){
 	if (Jet.size() <= ind) return -999.;
 	return Jet[ind].p.Pt();
 }
-float TreeAnalysisTop::getJetEtaIndex(unsigned int ind){
+float TOP5TeVAnalyzer::getJetEtaIndex(unsigned int ind){
 	if (Jet.size() <= ind) return -999.;
 	return TMath::Abs(Jet[ind].p.Eta());
 }
-float TreeAnalysisTop::getBtagJetPtIndex(unsigned int ind){
+float TOP5TeVAnalyzer::getBtagJetPtIndex(unsigned int ind){
 	if (Jet.size() <= ind) return -999.;
 	Int_t btagInd = 0;
 	if (ind==0) btagInd = getLeadingJetbTag();
@@ -963,14 +963,14 @@ float TreeAnalysisTop::getBtagJetPtIndex(unsigned int ind){
 	return Jet[btagInd].p.Pt();
 }
 
-float TreeAnalysisTop::getMT(gChannel chan){
+float TOP5TeVAnalyzer::getMT(gChannel chan){
 	float ptl1 = fHypLepton1.p.Pt();
 	float ptl2 = fHypLepton2.p.Pt();
 	float dphi = getDelPhill();
 	return TMath::Sqrt(2*ptl1*ptl2*(1-TMath::Cos(dphi)));
 }
 
-float TreeAnalysisTop::getDPhiLepJet(){
+float TOP5TeVAnalyzer::getDPhiLepJet(){
 	if (fHypLepton1.index == -1) return -999.; if (fHypLepton2.index == -1) return -999.;
 	// Int_t ij = getLeadingJetbTag(); if (ij < 0) return -999.; 
 	if(Jet.size()<1) return -999.;
@@ -980,15 +980,15 @@ float TreeAnalysisTop::getDPhiLepJet(){
 	return TMath::Abs(plep.DeltaPhi(jet));
 }
 
-float TreeAnalysisTop::getDelPhill(){ return fHypLepton1.p.DeltaPhi(fHypLepton2.p);}
+float TOP5TeVAnalyzer::getDelPhill(){ return fHypLepton1.p.DeltaPhi(fHypLepton2.p);}
 
-float TreeAnalysisTop::getDPhiJetMet(){
+float TOP5TeVAnalyzer::getDPhiJetMet(){
 	TLorentzVector pmet;
 	pmet.SetPtEtaPhiM(getMET(), 0, getMETPhi(), 0);
 	return getDPhiClosestJet(pmet);
 }
 
-float TreeAnalysisTop::getDPhiLepMet(){
+float TOP5TeVAnalyzer::getDPhiLepMet(){
 	TLorentzVector pmet;
 	pmet.SetPtEtaPhiM(getMET(), 0, getMETPhi(), 0);
 	TLorentzVector plep = fHypLepton1.p;
@@ -996,7 +996,7 @@ float TreeAnalysisTop::getDPhiLepMet(){
 	return TMath::Abs(plep.DeltaPhi(pmet));
 }
 
-float TreeAnalysisTop::getMT2(gChannel chan){
+float TOP5TeVAnalyzer::getMT2(gChannel chan){
 	TLorentzVector plep1, plep2;
 	if (chan == Muon) {
 		plep1.SetPxPyPzE(MuPx.at(0), MuPy.at(0), MuPz.at(0), MuEnergy.at(0));
@@ -1024,27 +1024,27 @@ float TreeAnalysisTop::getMT2(gChannel chan){
 	return MT2;
 }
 
-float TreeAnalysisTop::getMeff(){
+float TOP5TeVAnalyzer::getMeff(){
 	if(Jet.size()<2) return -999.;
 	TLorentzVector pmet;
 	pmet.SetPtEtaPhiM(getMET(), 0, getMETPhi(), 0);
 	return fHypLepton1.p.Pt() + fHypLepton2.p.Pt() + Jet[0].p.Pt() + Jet[1].p.Pt() + pmet.Pt();
 }
 
-TLorentzVector TreeAnalysisTop::getPtllb(){
+TLorentzVector TOP5TeVAnalyzer::getPtllb(){
 	TLorentzVector pmet; pmet.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
 	TLorentzVector pl1 = fHypLepton1.p; TLorentzVector pl2 = fHypLepton2.p;
 	return pl1 + pl2 + pmet;
 }
 
-float TreeAnalysisTop::getDPhibMet(){
+float TOP5TeVAnalyzer::getDPhibMet(){
 	TLorentzVector pmet; pmet.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
 	TLorentzVector Ptllb = getPtllb();
 	return pmet.DeltaPhi(Ptllb); 
 }
 
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
-float TreeAnalysisTop::getJERScale(int jet){
+float TOP5TeVAnalyzer::getJERScale(int jet){
 	float eta = Jet_eta[ jet];
 	// 8 TeV
 	if(     TMath::Abs(eta) < 0.5) return 1.079;
@@ -1057,7 +1057,7 @@ float TreeAnalysisTop::getJERScale(int jet){
 }
 
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
-float TreeAnalysisTop::getJERScaleUp(int jet){
+float TOP5TeVAnalyzer::getJERScaleUp(int jet){
 	float eta = Jet_eta[ jet];
 	// up, 8 TeV
 	if(	  TMath::Abs(eta) < 0.5) return 1.053;
@@ -1070,7 +1070,7 @@ float TreeAnalysisTop::getJERScaleUp(int jet){
 }
 
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
-float TreeAnalysisTop::getJERScaleDown(int jet){
+float TOP5TeVAnalyzer::getJERScaleDown(int jet){
 	float eta = Jet_eta[ jet];
 	// down, 8 TeV
 	if(	  TMath::Abs(eta) < 0.5) return 1.105;
@@ -1082,7 +1082,7 @@ float TreeAnalysisTop::getJERScaleDown(int jet){
 	else  			 return 1.247;
 }
 
-float TreeAnalysisTop::getErrPt(float Pt, float Eta) {
+float TOP5TeVAnalyzer::getErrPt(float Pt, float Eta) {
 	float InvPerr2;
 	float N(0.), S(0.), C(0.), m(0.);
 
@@ -1128,7 +1128,7 @@ float TreeAnalysisTop::getErrPt(float Pt, float Eta) {
 	return sqrt(InvPerr2);
 }
 
-float TreeAnalysisTop::getLeptonError(gChannel chan){
+float TOP5TeVAnalyzer::getLeptonError(gChannel chan){
 	float err1(0.), err2(0.);
 	if (chan==Muon){
 		err1 = fLeptonSF->GetTightMuonSF_err(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
@@ -1145,7 +1145,7 @@ float TreeAnalysisTop::getLeptonError(gChannel chan){
 	return TMath::Sqrt(err1*err1+err2*err2);
 }
 
-float TreeAnalysisTop::getTriggerError(gChannel chan){
+float TOP5TeVAnalyzer::getTriggerError(gChannel chan){
 	float trig(0.);
 	if (chan==Muon) trig = fLeptonSF->GetDoubleMuSF_err(fHypLepton1.p.Eta(),fHypLepton2.p.Eta());
 	if (chan==ElMu) trig = fLeptonSF->GetMuEGSF_err    (fHypLepton2.p.Eta(),fHypLepton1.p.Eta());
@@ -1153,7 +1153,7 @@ float TreeAnalysisTop::getTriggerError(gChannel chan){
 	return trig;
 }
 
-float TreeAnalysisTop::getSF(gChannel chan) {
+float TOP5TeVAnalyzer::getSF(gChannel chan) {
 	if (gIsData)              return 1.; //Don't scale data
 	float id1(1.),id2(1.), trig(1.);
 	float err1(0.), err2(0.), err_trg(0.);
@@ -1175,7 +1175,7 @@ float TreeAnalysisTop::getSF(gChannel chan) {
 	return (PUSF*id1*id2*trig);
 }
 
-float TreeAnalysisTop::getTopPtSF(){
+float TOP5TeVAnalyzer::getTopPtSF(){
 	// Return SF of the pt pt of the top 
 	// Only apply SF if the process is ttbar...
 	if(!gSampleName.Contains("TTJets")) return 1.;
@@ -1205,7 +1205,7 @@ float TreeAnalysisTop::getTopPtSF(){
 //--------------------------------------------------------------------------
 // Fill histograms      
 //------------------------------------------------------------------------
-void TreeAnalysisTop::FillDYHistograms(){
+void TOP5TeVAnalyzer::FillDYHistograms(){
 	float Mll = 0.;
 	if (PassTriggerEMu()  && IsElMuEvent()){
 		// Define Hypothesis Leptons...
@@ -1364,7 +1364,7 @@ void TreeAnalysisTop::FillDYHistograms(){
 			}
 			ResetHypLeptons();
 		}
-		void TreeAnalysisTop::FillKinematicHistos(gChannel chan, iCut cut){
+		void TOP5TeVAnalyzer::FillKinematicHistos(gChannel chan, iCut cut){
 #ifdef DEBUG
 			cout << "Filling KinematicHistos("<<chan<<","<<cut<<")... ";
 			cout << fHypLepton1.index << " , " << fHypLepton2.index << endl;
@@ -1454,7 +1454,7 @@ void TreeAnalysisTop::FillDYHistograms(){
 
 }
 
-void TreeAnalysisTop::FillYieldsHistograms(gChannel chan, iCut cut, gSystFlag sys){
+void TOP5TeVAnalyzer::FillYieldsHistograms(gChannel chan, iCut cut, gSystFlag sys){
 #ifdef DEBUG
 	cout << "FillYieldsHistograms("<<chan<<","<<cut<<","<<sys<<")...";
 #endif
@@ -1527,7 +1527,7 @@ void TreeAnalysisTop::FillYieldsHistograms(gChannel chan, iCut cut, gSystFlag sy
 #endif
 	return;
 }
-void TreeAnalysisTop::FillYields(gSystFlag sys){
+void TOP5TeVAnalyzer::FillYields(gSystFlag sys){
 	ResetHypLeptons();  
 
 #ifdef DEBUG
@@ -1688,7 +1688,7 @@ void TreeAnalysisTop::FillYields(gSystFlag sys){
 //----------------------------------------------------------------------
 // Passes
 //----------------------------------------------------------------------
-bool TreeAnalysisTop::PassesMuonEta2p1(gChannel chan){
+bool TOP5TeVAnalyzer::PassesMuonEta2p1(gChannel chan){
 	if (fHypLepton1.index == -1) return false;
 	if (fHypLepton2.index == -1) return false;
 
@@ -1705,7 +1705,7 @@ bool TreeAnalysisTop::PassesMuonEta2p1(gChannel chan){
 	return false;
 }
 
-bool TreeAnalysisTop::Passes3rdLeptonVeto(){
+bool TOP5TeVAnalyzer::Passes3rdLeptonVeto(){
 	return true; // don't apply third lepton veto...
 	// Return false if there are not 2 signal leptons
 	if (fHypLepton1.index == -1) return false;
@@ -1729,7 +1729,7 @@ bool TreeAnalysisTop::Passes3rdLeptonVeto(){
 	return true;
 }
 
-bool TreeAnalysisTop::PassesMllVeto(){
+bool TOP5TeVAnalyzer::PassesMllVeto(){
 	// Check consistency.
 	if (fHypLepton1.index == -1) return false;
 	if (fHypLepton2.index == -1) return false;
@@ -1738,7 +1738,7 @@ bool TreeAnalysisTop::PassesMllVeto(){
 	return true;
 }
 
-bool TreeAnalysisTop::PassesZVeto(){
+bool TOP5TeVAnalyzer::PassesZVeto(){
 	// Check consistency.
 	if (fHypLepton1.index == -1) return false;
 	if (fHypLepton2.index == -1) return false;
@@ -1747,7 +1747,7 @@ bool TreeAnalysisTop::PassesZVeto(){
   return true;
 }
 
-bool TreeAnalysisTop::PassesTopDCut(){
+bool TOP5TeVAnalyzer::PassesTopDCut(){
 	// Check consistency.
 	if (fHypLepton1.index == -1) return false;
 	if (fHypLepton2.index == -1) return false;
@@ -1755,37 +1755,37 @@ bool TreeAnalysisTop::PassesTopDCut(){
 	return true;
 }
 
-bool TreeAnalysisTop::PassesNJetsCut(){
+bool TOP5TeVAnalyzer::PassesNJetsCut(){
 	if (getNJets() <= 1) return false;
 	return true;
 }
 
-bool TreeAnalysisTop::PassesMETCut(){
+bool TOP5TeVAnalyzer::PassesMETCut(){
 	if (getMET() < 40.) return false;
 	return true;
 }
 
-bool TreeAnalysisTop::PassesNBtagCut(){
+bool TOP5TeVAnalyzer::PassesNBtagCut(){
 	if (getNBTags() < 1) return false;
 	return true;
 }
 
-bool TreeAnalysisTop::IsElMuEvent(){
+bool TOP5TeVAnalyzer::IsElMuEvent(){
 	if (fChargeSwitch){      return (IsDileptonEvent()  == 3);   }
 	return (IsDileptonEvent() == -3);
 }
 
-bool TreeAnalysisTop::IsMuMuEvent(){
+bool TOP5TeVAnalyzer::IsMuMuEvent(){
 	if (fChargeSwitch){  return (IsDileptonEvent()  == 1); }
 	return (IsDileptonEvent() == -1);
 }
 
-bool TreeAnalysisTop::IsElElEvent(){
+bool TOP5TeVAnalyzer::IsElElEvent(){
   if (fChargeSwitch){    return (IsDileptonEvent()  == 2); }
   return (IsDileptonEvent() == -2);
 }
 
-int TreeAnalysisTop::IsDileptonEvent(){
+int TOP5TeVAnalyzer::IsDileptonEvent(){
 #ifdef DEBUG
 	cout << "IsDileptonEvent(): NLeptons =" << Lepton.size()<< endl;
 #endif
@@ -1814,13 +1814,13 @@ int TreeAnalysisTop::IsDileptonEvent(){
 //------------------------------------------------------------------------------
 bool momentumComparator(lepton i, lepton j){ return (i.p.Pt()>j.p.Pt()); }
 
-vector<lepton> TreeAnalysisTop::SortLeptonsByPt(vector<lepton>& leptons){
+vector<lepton> TOP5TeVAnalyzer::SortLeptonsByPt(vector<lepton>& leptons){
   vector<lepton> theLep = leptons;
   sort (theLep.begin(), theLep.end(), momentumComparator);
   return theLep;
 }
 
-int TreeAnalysisTop::getSelectedLeptons(){
+int TOP5TeVAnalyzer::getSelectedLeptons(){
   // Loops over the total number of Muons and Electrons and returns the Number of Leptons.
   if (Lepton.size() > 0) {
     cout << "[WARNING]: you have called this function previously... RESETTING..."<<endl;
@@ -1848,7 +1848,7 @@ int TreeAnalysisTop::getSelectedLeptons(){
   return Lepton.size();
 }
 
-bool TreeAnalysisTop::METFilter(){
+bool TOP5TeVAnalyzer::METFilter(){
   if (Get<Float_t>("Flag_HBHENoiseIsoFilter") && 
       Get<Float_t>("Flag_CSCTightHaloFilter") && 
       Get<Float_t>("Flag_goodVertices") && 
@@ -1862,7 +1862,7 @@ bool TreeAnalysisTop::METFilter(){
 //------------------------------------------------------------------------------
 // https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO
 // https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2#Tight_Muon
-bool TreeAnalysisTop::IsTightMuon(unsigned int iMuon,float ptcut){
+bool TOP5TeVAnalyzer::IsTightMuon(unsigned int iMuon,float ptcut){
    if ((TMath::Abs(LepGood_pdgId[iMuon])) != 13) return false;
    if (LepGood_pt[iMuon]              < ptcut) return false;
    if (TMath::Abs(LepGood_eta[iMuon]) > 2.4)   return false;
@@ -1873,7 +1873,7 @@ bool TreeAnalysisTop::IsTightMuon(unsigned int iMuon,float ptcut){
    return true;
 }
 
-float TreeAnalysisTop::getMuonIso(int iMuon){
+float TOP5TeVAnalyzer::getMuonIso(int iMuon){
 	if (iMuon < 0) return 9999.;
 	if ((TMath::Abs(LepGood_pdgId[iMuon])) != 13) return 9999.;
 	return LepGood_relIso04[iMuon];
@@ -1883,7 +1883,7 @@ float TreeAnalysisTop::getMuonIso(int iMuon){
 // Electron Selectors
 //------------------------------------------------------------------------------
 // https://twiki.cern.ch/twiki/bin/view/CMS/TopEGM#Spring15_selection_25ns
-bool TreeAnalysisTop::IsTightElectron(unsigned int iElec, float ptcut){
+bool TOP5TeVAnalyzer::IsTightElectron(unsigned int iElec, float ptcut){
 	if ((TMath::Abs(LepGood_pdgId[iElec])) != 11) return false; 
 	if (LepGood_pt[iElec] < ptcut) return false;
 	if (TMath::Abs(LepGood_eta[iElec]) > 2.4) return false;
@@ -1906,13 +1906,13 @@ bool TreeAnalysisTop::IsTightElectron(unsigned int iElec, float ptcut){
 	return true;
 }
 
-float TreeAnalysisTop::getElecIso(int iElec){
+float TOP5TeVAnalyzer::getElecIso(int iElec){
 	if (iElec < 0) return 9999.;
 	if ((TMath::Abs(LepGood_pdgId[iElec])) != 11) return 9999.;
 	return LepGood_relIso03[iElec];
 }
 
-float TreeAnalysisTop::getEACorrection(float eta){  // for a 0.3 CONE
+float TOP5TeVAnalyzer::getEACorrection(float eta){  // for a 0.3 CONE
 	float abseta = TMath::Abs(eta);
 	// numbers from https://indico.cern.ch/event/370494/contribution/2/material/slides/0.pdf
 	if      (abseta < 0.8)                  return 0.1013; 
@@ -1926,15 +1926,15 @@ float TreeAnalysisTop::getEACorrection(float eta){  // for a 0.3 CONE
 	return -999999.;
 }
 
-void TreeAnalysisTop::setMET(float newmet){ MET = newmet;}
+void TOP5TeVAnalyzer::setMET(float newmet){ MET = newmet;}
 
-float TreeAnalysisTop::getMET(){ return MET; }
+float TOP5TeVAnalyzer::getMET(){ return MET; }
 
-float TreeAnalysisTop::getMETPhi(){ return MET_Phi;}
+float TOP5TeVAnalyzer::getMETPhi(){ return MET_Phi;}
 
-int TreeAnalysisTop::getNJets(){ return nJets;}
+int TOP5TeVAnalyzer::getNJets(){ return nJets;}
 
-float TreeAnalysisTop::getDRClosestJet(TLorentzVector lep){
+float TOP5TeVAnalyzer::getDRClosestJet(TLorentzVector lep){
 	float minDR = 9999.;
 	for (unsigned int i=0; i<Jet.size(); i++) {
 		if (minDR > lep.DeltaR(Jet[i].p)) minDR = lep.DeltaR(Jet[i].p);
@@ -1942,7 +1942,7 @@ float TreeAnalysisTop::getDRClosestJet(TLorentzVector lep){
 	return minDR;
 }
 
-float TreeAnalysisTop::getDPhiClosestJet(TLorentzVector lep){
+float TOP5TeVAnalyzer::getDPhiClosestJet(TLorentzVector lep){
 	float minDphi = 9999.;
 	for (unsigned int i=0; i<Jet.size(); i++) {
 		if (minDphi > TMath::Abs(lep.DeltaPhi(Jet[i].p))) minDphi = TMath::Abs(lep.DeltaPhi(Jet[i].p));
@@ -1950,14 +1950,14 @@ float TreeAnalysisTop::getDPhiClosestJet(TLorentzVector lep){
 	return minDphi;
 }
 
-int TreeAnalysisTop::getLeadingJetbTag(){
+int TOP5TeVAnalyzer::getLeadingJetbTag(){
 	for (unsigned int i=0; i<Jet.size(); i++) {
 		if (Jet[i].isbtag) return i;
 	}
 	return  -1;
 }
 
-int TreeAnalysisTop::getNBTags(){
+int TOP5TeVAnalyzer::getNBTags(){
 	int ntags(0);
 	for(UInt_t i = 0; i <Jet.size(); i++){
 		if (Jet[i].isbtag) ntags++;
@@ -1965,7 +1965,7 @@ int TreeAnalysisTop::getNBTags(){
 	return ntags;
 }
 
-float TreeAnalysisTop::getDeltaPhillJet(){
+float TOP5TeVAnalyzer::getDeltaPhillJet(){
 	if (fHypLepton1.index == -1) return -999.;
 	if (fHypLepton2.index == -1) return -999.;
 	Int_t ij = getLeadingJetbTag();
@@ -1975,7 +1975,7 @@ float TreeAnalysisTop::getDeltaPhillJet(){
 	return TMath::Abs(dilep.DeltaPhi(jet));
 }
 
-float TreeAnalysisTop::getTopD(){
+float TOP5TeVAnalyzer::getTopD(){
 	if (fHypLepton1.index == -1) return -999;
 	if (fHypLepton2.index == -1) return -999;
 	// Make Dilepton system
@@ -1988,7 +1988,7 @@ float TreeAnalysisTop::getTopD(){
 	return TopD;
 }
 
-int TreeAnalysisTop::getSelectedJets(){
+int TOP5TeVAnalyzer::getSelectedJets(){
 	int nj(0);
 	if (Jet.size() > 0) {
 		cout << "[WARNING]: you have called this function previously, RESETTING..."<<endl;
@@ -2043,7 +2043,7 @@ int TreeAnalysisTop::getSelectedJets(){
   return nj;
 }
 
-bool TreeAnalysisTop::IsGoodJet(unsigned int ijet, float ptcut){
+bool TOP5TeVAnalyzer::IsGoodJet(unsigned int ijet, float ptcut){
   float minDR = 0.4;
 // https://twiki.cern.ch/twiki/bin/view/CMS/TopJME
   TLorentzVector jet;
@@ -2064,7 +2064,7 @@ bool TreeAnalysisTop::IsGoodJet(unsigned int ijet, float ptcut){
 //------------------------------------------------------------------------------
 // SelectedGenLepton
 //------------------------------------------------------------------------------
-void TreeAnalysisTop::SelectedGenLepton() {
+void TOP5TeVAnalyzer::SelectedGenLepton() {
   if (!gIsData) {
     nGenElec = 0; nGenMuon = 0;
     int charge1 = 1;
@@ -2104,14 +2104,14 @@ void TreeAnalysisTop::SelectedGenLepton() {
 }
 
 
-void TreeAnalysisTop::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
+void TOP5TeVAnalyzer::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
 	TLorentzVector met;
 	met.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
 	// set the pfMET to the old MET minus original vector plus new vector 
 	setMET( (met+oVec-nVec).Pt() );
 }
 
-std::vector<int> TreeAnalysisTop::CleanedJetIndices(float pt){
+std::vector<int> TOP5TeVAnalyzer::CleanedJetIndices(float pt){
 	std::vector<int> cleanJetsInd;
 	for(Int_t i = 0; i <nJet; i++){
 		if (IsGoodJet(i,pt)) cleanJetsInd.push_back(i);
@@ -2119,7 +2119,7 @@ std::vector<int> TreeAnalysisTop::CleanedJetIndices(float pt){
 	return cleanJetsInd;
 }
 
-void TreeAnalysisTop::SmearJetPts(int flag){
+void TOP5TeVAnalyzer::SmearJetPts(int flag){
   // Modify the jet pt for systematics studies. Either shifted or smeared propagate to the MET!!
   if(gIsData)   return; // don't smear data
   if(flag == 0) return; // 0 makes no sense
@@ -2147,7 +2147,7 @@ void TreeAnalysisTop::SmearJetPts(int flag){
   }
 }
 
-void TreeAnalysisTop::ScaleLeptons(int flag){
+void TOP5TeVAnalyzer::ScaleLeptons(int flag){
 	// Shift the lepton pts for systematics studies
 	if(gIsData) return; // don't smear data
 	if(flag == 0) return;
@@ -2178,7 +2178,7 @@ void TreeAnalysisTop::ScaleLeptons(int flag){
 	return;
 }
 
-float TreeAnalysisTop::weightNvtx(int nvtx){
+float TOP5TeVAnalyzer::weightNvtx(int nvtx){
 	float weight = 1.0;
 	if(gIsData) return weight;
 	// weights from single lepton region based on nVertex
@@ -2227,7 +2227,7 @@ float TreeAnalysisTop::weightNvtx(int nvtx){
 	return weight;
 }
 
-void TreeAnalysisTop::ScaleMET(int flag){
+void TOP5TeVAnalyzer::ScaleMET(int flag){
 	// first try on MET uncertainty
 	if(gIsData) return; // don't scale data
 	TLorentzVector umet, jets, leps, tmp;

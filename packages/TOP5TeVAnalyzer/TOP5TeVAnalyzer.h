@@ -184,12 +184,12 @@ int     getNEtaBins(gChannel chan);
 const double *getEtaBins (gChannel chan);
 
 // Your selector class
-class TreeAnalysisTop : public PAFChainItemSelector 
+class TOP5TeVAnalyzer : public PAFChainItemSelector 
 {
  public:
   // Constructor and destructor
-  TreeAnalysisTop();
-  virtual ~TreeAnalysisTop() {}
+  TOP5TeVAnalyzer();
+  virtual ~TOP5TeVAnalyzer() {}
   
   // Mandatory methods
   virtual void Initialise();
@@ -530,5 +530,5 @@ class TreeAnalysisTop : public PAFChainItemSelector
   float MET;
   float MET_Phi;
   
-  ClassDef(TreeAnalysisTop,0);
+  ClassDef(TOP5TeVAnalyzer,0);
 };
