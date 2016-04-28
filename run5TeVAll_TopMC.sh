@@ -10,13 +10,13 @@ source /nfs/fanae/PAF_releases/head/PAF_setup.sh
 
 resetpaf
 
-#root -l -b -q 'RunTree_ReReco.C("Test", 1, true)'
-root -l -b -q 'RunTree_ReReco.C("TTbar_Powheg", 5, true)'
-#root -l -b -q 'RunTree_ReReco.C("WW"   , 5, true)'
-#root -l -b -q 'RunTree_ReReco.C("WZ"   , 5, true)'
-#root -l -b -q 'RunTree_ReReco.C("TW"   , 5, true)'
-#root -l -b -q 'RunTree_ReReco.C("TbarW", 5, true)'
-#root -l -b -q 'RunTree_ReReco.C("DYJetsToLL_M50_aMCatNLO",  5, true)'
-#root -l -b -q 'RunTree_ReReco.C("WJetsToLNu_aMCatNLO"	  ,  5, true)'
-#root -l -b -q 'RunTree_ReReco.C("TTbar_Powheg_scaleDown" , 5, true)'    
-#root -l -b -q 'RunTree_ReReco.C("TTbar_Powheg_scaleUp"   , 5, true)'    
+root -l -b -q 'RunTree_ReReco5TeV.C("Test", 1, true)'
+#root -l -b -q 'RunTree_ReReco5TeV.C("TTbar_Powheg", 5, true)'
+#root -l -b -q 'RunTree_ReReco5TeV.C("WW"          , 5, true)'
+#root -l -b -q 'RunTree_ReReco5TeV.C("WZ"          , 5, true)'
+#root -l -b -q 'RunTree_ReReco5TeV.C("TW"          , 5, true)'
+#root -l -b -q 'RunTree_ReReco5TeV.C("TbarW"       , 5, true)'
+#root -l -b -q 'RunTree_ReReco5TeV.C("DYJetsToLL_M50_aMCatNLO",  5, true)'
+#root -l -b -q 'RunTree_ReReco5TeV.C("WJetsToLNu_aMCatNLO"    ,  5, true)'
+#root -l -b -q 'RunTree_ReReco5TeV.C("TTbar_Powheg_scaleDown" , 5, true)'    
+#root -l -b -q 'RunTree_ReReco5TeV.C("TTbar_Powheg_scaleUp"   , 5, true)'    

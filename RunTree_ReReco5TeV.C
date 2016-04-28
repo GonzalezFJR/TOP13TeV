@@ -5,14 +5,14 @@ R__LOAD_LIBRARY(DatasetManager/DatasetManager.C+)
 /********************************************************
  * Main function
  ********************************************************/
-void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
-			Int_t    nSlots         =  1,
-			Bool_t   DoSystStudies  =  false,
+void RunTree_ReReco5TeV(TString  sampleName     = "TTbar_Madgraph",
+			Int_t    nSlots         = 1,
+			Bool_t   DoSystStudies  = false,
 			Long64_t nEvents        = 0,
-			Bool_t G_CreateTree   = false,
-			Int_t stopMass       = 0,
-			Int_t lspMass        = 0,
-      Float_t  SusyWeight     = 0.0) {
+			Bool_t   G_CreateTree   = false,
+			Int_t    stopMass       = 0,
+			Int_t    lspMass        = 0,
+                        Float_t  SusyWeight     = 0.0) {
   
   // VARIABLES TO BE USED AS PARAMETERS...
   Float_t G_Total_Lumi    = 19664.225;   
@@ -28,15 +28,15 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   cout << endl; 
   PAFIExecutionEnvironment* pafmode = 0;
   if (nSlots <=1 ) {
-    PAF_INFO("RunTree_ReReco", "Sequential mode chosen");
+    PAF_INFO("RunTree_ReReco5TeV", "Sequential mode chosen");
     pafmode = new PAFSequentialEnvironment();
   }
   else if (nSlots <=8) {
-    PAF_INFO("RunTree_ReReco", "PROOF Lite mode chosen");
+    PAF_INFO("RunTree_ReReco5TeV", "PROOF Lite mode chosen");
     pafmode = new PAFPROOFLiteEnvironment(nSlots);
   }
   else {
-    PAF_INFO("RunTree_ReReco", "PoD mode chosen");
+    PAF_INFO("RunTree_ReReco5TeV", "PoD mode chosen");
     pafmode = new PAFPoDEnvironment(nSlots);
   }
 
@@ -46,7 +46,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
 
   // Base path to input files
   //----------------------------------------------------------------------------
-  TString dataPath = "/pool/ciencias/MC_Summer12_53X/Legacy/";
+  TString dataPath = "/pool/ciencias/TreesDR76X/5TeV/v1";
 
   // INPUT DATA SAMPLE
   //----------------------------------------------------------------------------
@@ -77,40 +77,36 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
     G_IsData = true;
   }
   else{ // Deal with MC samples
-    G_IsData = false; //true;  // only for pseudodata
+    G_IsData = false;
     dm->LoadDataset(sampleName);
-    if(sampleName != "TestHeppy")   myProject->AddDataFiles(dm->GetFiles());
-    if(sampleName == "WJetsToLNu_aMCatNLO" || 
-       sampleName == "DYJetsToLL_M50_aMCatNLO" || 
-       sampleName == "TTJets_amcatnlo" ||
-       sampleName.Contains("aMCatNLO") ||
-       sampleName.Contains("amcatnlo") ){
-			G_Event_Weight = dm->GetCrossSection() / dm->GetSumWeights();
+    if(sampleName != "Test")   myProject->AddDataFiles(dm->GetFiles());
+    if(sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo") ){
+      G_Event_Weight = dm->GetCrossSection() / dm->GetSumWeights();
 
-			cout << endl;
+      cout << endl;
       cout << " weightSum(MC@NLO) = " << dm->GetSumWeights()     << endl;
     }
-    else if(sampleName == "TestHeppy"){
-			TString localpath="/pool/ciencias/users/user/palencia/";
-			TString sample = "treeTtbar_jan19.root";
-			myProject->AddDataFile(localpath + sample);
-			G_Event_Weight = 1;
+    else if(sampleName == "Test"){
+      TString localpath="/pool/ciencias/users/user/palencia/";
+      TString sample = "treeTtbar_jan19.root";
+      myProject->AddDataFile(localpath + sample);
+      G_Event_Weight = 1;
     }
     else {	 
-    	    G_Event_Weight = dm->GetCrossSection() / dm->GetEventsInTheSample();
+      G_Event_Weight = dm->GetCrossSection() / dm->GetEventsInTheSample();
     }
     
     if(nEvents == 0) nEvents = dm->GetEventsInTheSample();
 
     cout << endl;
-    cout << " #===============================================" << endl;
-    cout << " #     sampleName = " << sampleName                 << endl;
-    cout << " # 	 x-section = " << dm->GetCrossSection()      << endl;
-    cout << " # 	   nevents = " << dm->GetEventsInTheSample() << endl;
-    cout << " # base file name = " << dm->GetBaseFileName()      << endl;
-    cout << " # 	    weight = " << G_Event_Weight	       << endl;
-    cout << " # 	    isData = " << G_IsData		     << endl;
-    cout << " #===============================================" << endl;
+    cout << " #==============================================="   << endl;
+    cout << " #      sampleName = " << sampleName		  << endl;
+    cout << " #       x-section = " << dm->GetCrossSection()	  << endl;
+    cout << " #      	nevents = " << dm->GetEventsInTheSample() << endl;
+    cout << " #  base file name = " << dm->GetBaseFileName()	  << endl;
+    cout << " #      	 weight = " << G_Event_Weight		  << endl;
+    cout << " #      	 isData = " << G_IsData 		  << endl;
+    cout << " #==============================================="   << endl;
     cout << endl;
   }
   
@@ -129,11 +125,11 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   TString outputFile = outputDir;
   outputFile += "/Tree_" + sampleName + ".root";
 
-  PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
+  PAF_INFO("RunTree_ReReco5TeV", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
 
-  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M50_aMCatNLO"){ 
-    PAF_INFO("RunTree_ReReco", "This is a MC@NLO sample!");
+  if(sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo") ){
+    PAF_INFO("RunTree_ReReco5TeV", "This is a MC@NLO sample!");
     G_IsMCatNLO = true;
   }
 
