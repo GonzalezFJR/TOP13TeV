@@ -359,9 +359,8 @@ class TreeAnalysisTop : public PAFChainItemSelector
   Bool_t  gUseCSVM;
   Bool_t  gDoSF;
   Bool_t  gDoDF;
+  Int_t   gSelection;
   Bool_t  gIsMCatNLO;
-  Float_t gStopMass;
-  Float_t gLspMass;
 
   PUWeight *fPUWeight;      //The PU weight utility
   PUWeight *fPUWeightUp;    //The PU weight utility

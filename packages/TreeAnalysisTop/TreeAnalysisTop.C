@@ -22,12 +22,11 @@ void TreeAnalysisTop::GetParameters(){
   gTotalLumi     = GetParam<float>("TotalLumi");
   gDoSystStudies = GetParam<bool>("DoSystStudies");
   gUseCSVM       = GetParam<bool>("UseCSVM");
-  gDoSF          = GetParam<bool>("DoSF");
-  gDoDF          = GetParam<bool>("DoDF");
-  gStopMass      = GetParam<float>("stopMass");
-  gLspMass       = GetParam<float>("lspMass");
+  gSelection     = GetParam<Int_t>("Selection");
 
   gIsMCatNLO     = GetParam<bool>("IsMCatNLO");
+  gDoSF = 1; if(gSelection == 2 || gSelection == 4) gDoSF = 0;
+  gDoDF = 1; if(gSelection == 3) gDoDF = 0;
 
   PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gSampleName = %s",gSampleName.Data()));
   PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gIsData = %d",gIsData ));
@@ -36,10 +35,7 @@ void TreeAnalysisTop::GetParameters(){
   PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gTotalLumi = %f", gTotalLumi));
   PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gDoSystStudies = %d", gDoSystStudies));
   PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gUseCSVM = %d",gUseCSVM ));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gDoSF = %d", gDoSF));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gDoDF = %d",gDoDF ));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gStopMass = %f", gStopMass));
-  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gLspMass = %f",gLspMass ));
+  PAF_INFO("TreeAnalysisTop::GetParameters()", Form("gSelection = %i", gSelection));
 }
 
 //-----------------------------------------------------------------------------------
@@ -686,10 +682,11 @@ void TreeAnalysisTop::InsideLoop() {
 			}
 			fHTopPtWeight->Fill(TMath::Sqrt(Weight));
 		}
-		bool isEmuDilepton = (nGenElec+nGenMuon)>=2;  // for dileptonic selection
-		//bool isEmuDilepton = (nGenElec+nGenMuon)< 2;  // for semileptonic selection
-		//bool isEmuDilepton = nGenElec>=1 && nGenMuon>=1;  // for dileptonic e-mu selection
-		//bool isEmuDilepton = ( (nGenElec==1 && nGenMuon==0) || (nGenElec==0 && nGenMuon==1) ); // for semileptonic selection
+		bool isEmuDilepton = 1; 
+    if(gSelection == 0                   ) isEmuDilepton = (nGenElec+nGenMuon) >= 2;    // for dileptonic selection
+    if(gSelection == 1                   ) isEmuDilepton = (nGenElec+nGenMuon) <  2;    // for semileptonic selection
+    if(gSelection == 2 || gSelection == 4) isEmuDilepton = nGenElec>=1 && nGenMuon>=1;  // for emu selection
+    if(gSelection == 3                   ) isEmuDilepton = nGenElec>=2 || nGenMuon>=2;  // for SF selection
 		if(!isEmuDilepton){
 			if (gSampleName == "TTbar_Powheg"              ) return;
 			if (gSampleName == "TTJets"                    ) return;
@@ -730,6 +727,12 @@ void TreeAnalysisTop::InsideLoop() {
 				if (minDRel > lep.DeltaR(jet))  minDRel = lep.DeltaR(jet);
 			}
 		}
+		if(gSelection == 4){
+			TLorentzVector l1; l1.SetPtEtaPhiM(genLep_pt[0], genLep_eta[0], genLep_phi[0], genLep_mass[0]);
+			TLorentzVector l2; l2.SetPtEtaPhiM(genLep_pt[1], genLep_eta[1], genLep_phi[1], genLep_mass[1]);
+			if ( (l1+l2).M() < 20) return;
+		}
+
 		fHDeltaRLepJet[Muon] -> Fill(minDRmu);
 		fHDeltaRLepJet[Elec] -> Fill(minDRel);
 	}
@@ -2069,30 +2072,29 @@ void TreeAnalysisTop::SelectedGenLepton() {
     nGenElec = 0; nGenMuon = 0;
     int charge1 = 1;
     for(int n = 0; n<ngenLep; n++){
-  // FIDUCIAL ___________________
-//    if( (Get<Float_t>("genLep_pt", n) > 20) && (Get<Float_t>("genLep_eta",n) < 2.4) ){ // FIDUCIAL
-      Int_t id = TMath::Abs(genLep_pdgId[n]);
-      //if(Get<Int_t>("genLep_status", n) != 23) continue; 
-        if (id == 11)  nGenElec++;
-        if (id == 13)  nGenMuon++;
-//      }
-    }
+			if(gSelection == 4) //FIUDIAL
+				if( (Get<Float_t>("genLep_pt", n) < 20) || (abs(Get<Float_t>("genLep_eta",n)) > 2.4) ) continue; 
+			Int_t id = TMath::Abs(genLep_pdgId[n]);
+			//if(Get<Int_t>("genLep_status", n) != 23) continue; 
+			if (id == 11)  nGenElec++;
+			if (id == 13)  nGenMuon++;
+		}
 
-    // add generated leptons (e/mu) from decays of taus from W/Z/h decays
-    for(int n = 0; n<Get<Int_t>("ngenLepFromTau"); n++){
-//      if( (Get<Float_t>("genLepFromTau_pt", n) > 20) && (Get<Float_t>("genLepFromTau_eta",n) < 2.4) ){ // FIDUCIAL
-        Int_t id = TMath::Abs(Get<Int_t>("genLepFromTau_pdgId", n));
-        if (id == 11)  nGenElec++;
-        if (id == 13)  nGenMuon++;
-//      }
-    }
-    fHnGenEle->Fill(nGenElec);
-    fHnGenMuo->Fill(nGenMuon);
-    //nGenTau  = ngenTau;
-    nGenLepton = nGenElec + nGenMuon + nGenTau;
-    for (Int_t i=0; i<ngenLep; i++) {
-      if (TMath::Abs(genLep_pdgId[i]) == 11){
-        fHGenElePt->Fill(genLep_pt[i]);
+		// add generated leptons (e/mu) from decays of taus from W/Z/h decays
+		for(int n = 0; n<Get<Int_t>("ngenLepFromTau"); n++){
+			if(gSelection == 4) //FIUDIAL
+				if( (Get<Float_t>("genLepFromTau_pt", n) < 20) || (abs(Get<Float_t>("genLepFromTau_eta",n)) > 2.4) ) continue; 
+			Int_t id = TMath::Abs(Get<Int_t>("genLepFromTau_pdgId", n));
+			if (id == 11)  nGenElec++;
+			if (id == 13)  nGenMuon++;
+		}
+		fHnGenEle->Fill(nGenElec);
+		fHnGenMuo->Fill(nGenMuon);
+		//nGenTau  = ngenTau;
+		nGenLepton = nGenElec + nGenMuon + nGenTau;
+		for (Int_t i=0; i<ngenLep; i++) {
+			if (TMath::Abs(genLep_pdgId[i]) == 11){
+				fHGenElePt->Fill(genLep_pt[i]);
       }
     }
     for (Int_t i=0; i<ngenLep; i++) {

@@ -22,8 +22,6 @@ void StopAnalyzer::GetParameters(){
   gTotalLumi     = GetParam<float>("TotalLumi");
   gDoSystStudies = GetParam<bool>("DoSystStudies");
   gUseCSVM       = GetParam<bool>("UseCSVM");
-  gDoSF          = GetParam<bool>("DoSF");
-  gDoDF          = GetParam<bool>("DoDF");
   gStopMass      = GetParam<Int_t>("stopMass");
   gLspMass       = GetParam<Int_t>("lspMass");
   gIsT2tt        = false;
@@ -39,8 +37,6 @@ void StopAnalyzer::GetParameters(){
   PAF_INFO("StopAnalyzer::GetParameters()", Form("gTotalLumi = %f", gTotalLumi));
   PAF_INFO("StopAnalyzer::GetParameters()", Form("gDoSystStudies = %d", gDoSystStudies));
   PAF_INFO("StopAnalyzer::GetParameters()", Form("gUseCSVM = %d",gUseCSVM ));
-  PAF_INFO("StopAnalyzer::GetParameters()", Form("gDoSF = %d", gDoSF));
-  PAF_INFO("StopAnalyzer::GetParameters()", Form("gDoDF = %d",gDoDF ));
   PAF_INFO("StopAnalyzer::GetParameters()", Form("gStopMass = %i", gStopMass));
   PAF_INFO("StopAnalyzer::GetParameters()", Form("gLspMass = %i",gLspMass ));
 }
@@ -411,22 +407,15 @@ void StopAnalyzer::InitialiseDYHistos(){
 void StopAnalyzer::InitialiseYieldsHistos(){
 	hWeight = CreateH1F("hWeight","",200,0,1);
 	//++ Yields histograms
-	if (gDoSF) {
 		fHyields[Muon][Norm]   = CreateH1F("H_Yields_"+gChanLabel[Muon],"", iNCUTS, -0.5, iNCUTS-0.5); 
 		fHyields[Elec][Norm]   = CreateH1F("H_Yields_"+gChanLabel[Elec],"", iNCUTS, -0.5, iNCUTS-0.5);
 		fHSSyields[Muon][Norm] = CreateH1F("H_SSYields_"+gChanLabel[Muon],"", iNCUTS, -0.5, iNCUTS-0.5); 
 		fHSSyields[Elec][Norm] = CreateH1F("H_SSYields_"+gChanLabel[Elec],"", iNCUTS, -0.5, iNCUTS-0.5);
-	}
-	if (gDoDF) {
 		fHyields[ElMu][Norm]   = CreateH1F("H_Yields_"+gChanLabel[ElMu],"", iNCUTS, -0.5, iNCUTS-0.5);
 		fHSSyields[ElMu][Norm] = CreateH1F("H_SSYields_"+gChanLabel[ElMu],"", iNCUTS, -0.5, iNCUTS-0.5);
-	}
 
 	if (gDoSystStudies){
 		for (size_t chan=0; chan<gNCHANNELS; chan++){
-			if (!gDoSF && chan==Muon) continue;
-			if (!gDoSF && chan==Elec) continue;
-			if (!gDoDF && chan==ElMu) continue;
 			for (size_t sys=1; sys<gNSYST; sys++){
 				fHyields[chan][sys]   = CreateH1F("H_Yields_"+gChanLabel[chan]+"_"+SystName[sys],"",iNCUTS,-0.5,iNCUTS-0.5);
 				fHSSyields[chan][sys] = CreateH1F("H_SSYields_"+gChanLabel[chan]+"_"+SystName[sys],"", iNCUTS, -0.5, iNCUTS-0.5);
@@ -440,9 +429,6 @@ void StopAnalyzer::InitialiseYieldsHistos(){
 		}
 	}
 	for (size_t chan=0; chan<gNCHANNELS; chan++){
-		if (!gDoSF && chan==Muon) continue;
-		if (!gDoSF && chan==Elec) continue;
-		if (!gDoDF && chan==ElMu) continue;
 		for (size_t cut=0; cut<iNCUTS; cut++){
 			fHLepSys [chan][cut] = CreateH1F("H_LepSys_" +gChanLabel[chan]+"_"+sCut[cut],"LepSys" , 400, 0, 0.04);
 			fHTrigSys[chan][cut] = CreateH1F("H_TrigSys_"+gChanLabel[chan]+"_"+sCut[cut],"TrigSys", 400, 0, 0.04);
@@ -454,10 +440,6 @@ void StopAnalyzer::InitialiseKinematicHistos(){
 	//  PAF_DEBUG("StopAnalyzer::InitialiseKinematicHistos()",Form("nWeights = %i", nWeights));
 	//++ Kinematic histograms
 	for (size_t ch=0; ch<gNCHANNELS; ch++){
-		if (!gDoSF && ch==Muon) continue;
-		if (!gDoSF && ch==Elec) continue;
-		if (!gDoDF && ch==ElMu) continue;
-
 		for (size_t cut=0; cut<iNCUTS; cut++){
 			//PAF_DEBUG("StopAnalyzer::InitialiseKinematicHistos()",Form("cut = %i", cut));
 			fHLHEweights[ch][cut]  = CreateH1F("H_LHEweights"  +gChanLabel[ch]+"_"+sCut[cut],"LHEweights", nWeights, -0.5, nWeights - 0.5);
@@ -542,10 +524,6 @@ void StopAnalyzer::InitialiseKinematicHistos(){
 void StopAnalyzer::InitialiseSystematicHistos(){
 	TString histoname = "";
 	for (size_t ch=0; ch<gNCHANNELS; ch++){
-		if (!gDoSF && ch==Muon) continue;
-		if (!gDoSF && ch==Elec) continue;
-		if (!gDoDF && ch==ElMu) continue;
-
 		for (size_t cut=0; cut<iNCUTS; cut++){
 			for (size_t sys=1; sys<gNSYST; sys++){
 				histoname = "H_InvMass2_"+gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys];
@@ -1724,7 +1702,6 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 	ResetHypLeptons();  
 
 #ifdef DEBUG
-	cout << "gDoDF= " << gDoDF << endl;
 	cout << "PassTriggerEMu= " << PassTriggerEMu() << endl;
 	cout << "Is ElMu/ElEl/MuMu Event= " 
 		<< IsElMuEvent() << "/" 
@@ -1732,7 +1709,7 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 		<< IsMuMuEvent() << endl;
 #endif
 
-	if (gDoDF && PassTriggerEMu()  && IsElMuEvent()){
+	if (PassTriggerEMu()  && IsElMuEvent()){
 		// Define Hypothesis Leptons...
 		EventWeight = gWeight * getSF(ElMu);// * getTopPtSF();
 		hWeight -> Fill(EventWeight,1.);
@@ -1803,7 +1780,7 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 	}
 
 	ResetHypLeptons(); 
-	if (gDoSF && PassTriggerMuMu() && IsMuMuEvent()){
+	if (PassTriggerMuMu() && IsMuMuEvent()){
 		EventWeight = gWeight * getSF(Muon); //  * getTopPtSF();
 		//EventWeight = 1.;
 #ifdef DEBUG
@@ -1860,7 +1837,7 @@ void StopAnalyzer::FillYields(gSystFlag sys){
   }
 
   ResetHypLeptons(); 
-  if (gDoSF && PassTriggerEE() && IsElElEvent()){
+  if (PassTriggerEE() && IsElElEvent()){
 		EventWeight = gWeight * getSF(Elec);// * getTopPtSF();     
 		//EventWeight = 1.;     
 #ifdef DEBUG

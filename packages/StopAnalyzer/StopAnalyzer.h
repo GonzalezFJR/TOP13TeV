@@ -414,8 +414,6 @@ class StopAnalyzer : public PAFChainItemSelector
 		Bool_t  gDoSystStudies;
 		Bool_t  gIsData;
 		Bool_t  gUseCSVM;
-		Bool_t  gDoSF;
-		Bool_t  gDoDF;
 		Bool_t  gIsMCatNLO;
 		Bool_t  gIsT2tt;
 		Int_t gStopMass;

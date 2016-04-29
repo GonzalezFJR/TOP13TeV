@@ -115,7 +115,11 @@ namespace {
 0
     };
     static const char* includePaths[] = {
+"/mnt_pool/fanae105/user/juanr/TOP13TeV/.paf/BuildDir/packages/mt2/../TreeAnalysisTop/",
+"/mnt_pool/fanae105/user/juanr/TOP13TeV/.paf/BuildDir/packages/mt2/../PUWeight/",
 "/mnt_pool/fanae105/user/juanr/TOP13TeV/.paf/BuildDir/packages/mt2/../mt2/",
+"/mnt_pool/fanae105/user/juanr/TOP13TeV/.paf/BuildDir/packages/mt2/../LeptonSF/",
+"/mnt_pool/fanae105/user/juanr/TOP13TeV/.paf/BuildDir/packages/mt2/../BTagSFUtil/",
 "/nfs/fanae/PAF_releases/head/include",
 "/mnt_pool/fanae105/root_releases/root-6.06.02.slc6/include",
 "/mnt_pool/fanae105/user/juanr/TOP13TeV/.paf/BuildDir/packages/mt2/",
