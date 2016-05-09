@@ -1032,20 +1032,21 @@ float TOP5TeVAnalyzer::getSF(gChannel chan) {
 	if (gIsData)              return 1.; //Don't scale data
 	float id1(1.),id2(1.), trig(1.);
 	float err1(0.), err2(0.), err_trg(0.);
+	float muoSF(0.990), eleSF(1.03), trigSF(0.985);
 	if (chan == Muon){
-		id1  = fLeptonSF->GetTightMuonSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
-		id2  = fLeptonSF->GetTightMuonSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
-		trig = fLeptonSF->GetDoubleMuSF (fHypLepton1.p.Eta(),fHypLepton2.p.Eta());
+		id1  = muoSF;
+		id2  = muoSF;
+		trig = trigSF;
 	} 
 	else if (chan == Elec){
-		id1  = fLeptonSF->GetTightElectronSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
-		id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta()); 
-		trig = fLeptonSF->GetDoubleElSF     (fHypLepton1.p.Eta(),fHypLepton2.p.Eta()); 
+		id1  = eleSF; 
+		id2  = eleSF; 
+		trig = trigSF; 
 	}
 	else if (chan == ElMu){
-		id1  = fLeptonSF->GetTightMuonSF    (fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
-		id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
-		trig = fLeptonSF->GetMuEGSF         (fHypLepton2.p.Eta(),fHypLepton1.p.Eta());
+		id1  = muoSF; 
+		id2  = eleSF;
+		trig = trigSF;
 	}
 	return (PUSF*id1*id2*trig);
 }
