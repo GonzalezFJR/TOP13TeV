@@ -5,7 +5,7 @@ R__LOAD_LIBRARY(DatasetManager/DatasetManager.C+)
 /********************************************************
  * Main function
  ********************************************************/
-void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
+void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
 			Int_t    nSlots         =  1,
 			Bool_t   DoSystStudies  =  false,
 			Long64_t nEvents        = 0,
@@ -80,7 +80,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   else{ // Deal with MC samples
     G_IsData = false; //true;  // only for pseudodata
     dm->LoadDataset(sampleName);
-    if(sampleName != "TestHeppy")   myProject->AddDataFiles(dm->GetFiles());
+    if(sampleName != "TestHeppy" && !sampleName.Contains("T2tt"))   myProject->AddDataFiles(dm->GetFiles());
     if(sampleName == "WJetsToLNu_aMCatNLO" || 
 	    sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || 
 	    sampleName == "DYJetsToLL_M50_aMCatNLO" || 
