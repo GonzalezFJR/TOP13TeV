@@ -25,6 +25,8 @@ void RunTree_ReReco5TeV(TString  sampleName     = "TTbar_Madgraph",
   Float_t G_LumiForPUData = 19468.3;     // luminosity in http://www.hep.uniovi.es/jfernan/PUhistos
   Bool_t  G_IsMCatNLO     = false;
 
+  TString sample = sampleName;
+
   // PAF mode
   //----------------------------------------------------------------------------
   cout << endl; 
@@ -48,7 +50,7 @@ void RunTree_ReReco5TeV(TString  sampleName     = "TTbar_Madgraph",
 
   // Base path to input files
   //----------------------------------------------------------------------------
-  TString dataPath = "/pool/ciencias/TreesDR76X/5TeV/v1";
+  TString dataPath = "/pool/ciencias/";
 
   // INPUT DATA SAMPLE
   //----------------------------------------------------------------------------
@@ -58,46 +60,53 @@ void RunTree_ReReco5TeV(TString  sampleName     = "TTbar_Madgraph",
   //dm->RedownloadFiles();
 
   // Deal with data samples
-  if ((sampleName == "DoubleEG"   ||
-       sampleName == "DoubleMuon" ||
-       sampleName == "MuonEG"     ||
-       sampleName == "SingleEle"  ||
-       sampleName == "SingleMu")) {
+  if (sampleName.Contains("Data") || sampleName.Contains("data")){
     cout << "   + Data..." << endl;
-    
-    TString datasuffix[] = {
-      "Run2015C_16Dec",
-      "Run2015D_16Dec"
-    };
-    const unsigned int nDataSamples = 3;
-    for(unsigned int i = 0; i < nDataSamples; i++) {
-      TString asample = Form("Tree_%s_%s",sampleName.Data(), datasuffix[i].Data());
-      cout << "   + Looking for " << asample << " trees..." << endl;
-      myProject->AddDataFiles(dm->GetRealDataFiles(asample));
-    }
+		TString asample = Form("Tree_%s",sampleName.Data());
+		cout << "   + Looking for " << asample << " trees..." << endl;
+		myProject->AddDataFiles(dm->GetRealDataFiles(asample));
     G_Event_Weight = 1.;
     G_IsData = true;
   }
   else{ // Deal with MC samples
+    cout << "MC sample... " << endl;
     G_IsData = false;
     dm->LoadDataset(sampleName);
-    if(sampleName != "Test")   myProject->AddDataFiles(dm->GetFiles());
-    if(sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo") ){
+   if(!sampleName.BeginsWith("5TeV")) myProject->AddDataFiles(dm->GetFiles());
+
+    if((sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo")) && !sampleName.BeginsWith("5TeV") ){
       G_Event_Weight = dm->GetCrossSection() / dm->GetSumWeights();
+			PAF_INFO("RunTree_ReReco5TeV", "This is a MC@NLO sample!");
+			G_IsMCatNLO = true;
 
       cout << endl;
       cout << " weightSum(MC@NLO) = " << dm->GetSumWeights()     << endl;
     }
-    else if(sampleName == "Test"){
+
+    else if(sampleName.BeginsWith("5TeV")){
       //TString localpath="/pool/ciencias/users/user/palencia/";
-      TString localpath="/mnt_pool/fanae105/user/juanr/";
-      TString sample = "Tree_TTbar_Powheg.root";
-      myProject->AddDataFile(localpath + sample);
+      TString localpath="/mnt_pool/fanae105/user/juanr/Trees_5TeV_april29/";
+
+      sample.ReplaceAll("5TeV_", "");
+      myProject->AddDataFile(localpath + "Tree_" + sample + ".root");
       G_Event_Weight = 1;
+      G_IsData = false;
+      if(sample == "TTbar_Powheg")             G_Event_Weight = 65.   /498000;
+      if(sample == "TW")                       G_Event_Weight = 3.04  /429600;
+      if(sample == "TbarW")                    G_Event_Weight = 3.04  /460900;
+      if(sample == "WZTo3LNU")                 G_Event_Weight = 0.21  /100000;
+      if(sample == "WWto2LNu")                 G_Event_Weight = 1.77  / 90000;
+      if(sample == "DYJetsToLL_M50_aMCatNLO")  G_Event_Weight = 2055. /6.69891e+09;
+      if(sample == "WJetsToLNU_aMCatNLO")      G_Event_Weight = 21159./1.29517e+10;
+
+      if(sample == "TTbar_Powheg_ScaleUp")     G_Event_Weight = 65./462000;
+      if(sample == "TTbar_Powheg_ScaleDown")   G_Event_Weight = 65./378500;
+
+      if(sample == "Data_SingleMu"){  G_Event_Weight = 1; G_IsData = true;}
+      
     }
-    else {	 
-      G_Event_Weight = dm->GetCrossSection() / dm->GetEventsInTheSample();
-    }
+
+    else  G_Event_Weight = dm->GetCrossSection() / dm->GetEventsInTheSample();
     
     if(nEvents == 0) nEvents = dm->GetEventsInTheSample();
 
@@ -133,10 +142,6 @@ void RunTree_ReReco5TeV(TString  sampleName     = "TTbar_Madgraph",
   PAF_INFO("RunTree_ReReco5TeV", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
 
-  if(sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo") ){
-    PAF_INFO("RunTree_ReReco5TeV", "This is a MC@NLO sample!");
-    G_IsMCatNLO = true;
-  }
 
   // Parameters for the analysis
   //----------------------------------------------------------------------------
@@ -159,9 +164,9 @@ void RunTree_ReReco5TeV(TString  sampleName     = "TTbar_Madgraph",
 
   // Additional packages
   //----------------------------------------------------------------------------
-  myProject->AddPackage("PUWeight");
-  myProject->AddPackage("BTagSFUtil");
-  myProject->AddPackage("LeptonSF");
+  //myProject->AddPackage("PUWeight");
+  //myProject->AddPackage("BTagSFUtil");
+  //myProject->AddPackage("LeptonSF");
 
 
   // Let's rock!

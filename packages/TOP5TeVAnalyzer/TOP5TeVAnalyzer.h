@@ -5,9 +5,9 @@
 
 // + Packages
 //#include "GlobalVariables.h"
-#include "PUWeight.h"
-#include "BTagSFUtil.h"
-#include "LeptonSF.h"
+//#include "PUWeight.h"
+//#include "BTagSFUtil.h"
+//#include "LeptonSF.h"
 
 // + ROOT
 #include "TH1F.h"
@@ -19,6 +19,8 @@
 
 // + C++
 #include <vector>
+
+using namespace std;
 
 const int nWeights = 248;
 const int nGenb = 0;
@@ -59,11 +61,12 @@ enum gSystFlag{
   JER,
   LESUp,
   LESDown,
-  /*  LepUp,
-      LepDown,
-      TrigUp,
-      TrigDown,
-  */
+  ElecUp,
+  ElecDown,
+  TrigUp,
+  TrigDown,
+  MuonUp,
+  MuonDown,
   PUUp,
   PUDown,
   TopPt,
@@ -80,12 +83,12 @@ const TString SystName[gNSYST] = {
   "JER",
   "LESUp",
   "LESDown",
-  /*  "LepUp",
-  "LepDown",
+  "ElecUp",
+  "ElecDown",
   "TrigUp",
-  "TrigDown",*/
-//  "METUp",
-//  "METDown",
+  "TrigDown",
+  "MuonUp",
+  "MuonDown",
   "PUUp",
   "PUDown",
   "TopPt",
@@ -236,6 +239,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   Float_t genLep_energy[maxdim];
   Int_t genLep_status[maxdim];
   Int_t genLep_MomPID[maxdim];
+  Int_t genLep_GMomPID[maxdim];
 
   Int_t nJet;
   Float_t Jet_px[maxdim];
@@ -251,8 +255,19 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   Float_t  JetPfCEF[maxdim];
   Float_t  JetPfNEF[maxdim];
   Float_t  JetPfMUF[maxdim];
+  Int_t    chargedMult[maxdim];
+  Int_t    totalMult[maxdim];
+
+  Int_t   ngenJet;
+  Float_t genJet_pt[maxdim];
+  Float_t genJet_eta[maxdim];
+  Float_t genJet_phi[maxdim];
+  Float_t genJet_m[maxdim];
+  Int_t   genJet_matchId[maxdim];
 
   Int_t evt;
+  Int_t run;
+  Int_t lum;
   Float_t met_pt;
   Float_t met_phi;
   Float_t genWeight;
@@ -305,7 +320,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   float getJERScaleUp(int);
   float getJERScale(int);
   float getJERScaleDown(int);
-  float getSF(gChannel);
+  float getSF(gChannel, gSystFlag sys = Norm);
   float getLeptonError(gChannel);
   float getTriggerError(gChannel);
   float getTopD();
@@ -319,16 +334,21 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   // Lepton selection methods
   int  getSelectedLeptons();
 //   bool IsVetoMuon(unsigned int, float ptcut=20.);
-  bool IsTightMuon(unsigned int, float ptcut=20.);
+  bool IsTightMuon(unsigned int, float ptcut=18.);
+	float getMuonIso(unsigned int iMuon);
 //   bool IsVetoElectron(unsigned int,float ptcut=20.);
 //   bool IsMVAIDElectron(unsigned int);
+  void CoutEvent(long unsigned int en = 0, TString t = " ");
   bool IsTightElectron(unsigned int,float ptcut=20.);
   std::vector<lepton> SortLeptonsByPt(std::vector<lepton>&);
   
   int getSelectedJets();
-  bool IsGoodJet(unsigned int, float ptcut=30.);
+  bool IsGoodJet(unsigned int, float ptcut=25.);
   std::vector<int> CleanedJetIndices(float);
   void SmearJetPts(int);
+	float getJetSF(int index, bool up = false);
+	float getJerSF(float eta);
+	float getJerSFerror(float eta);
   void propagateMET(TLorentzVector,TLorentzVector);
   void ScaleMET(int);
   void ScaleLeptons(int);
@@ -382,16 +402,16 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   Int_t   gSelection;
   Bool_t  gIsMCatNLO;
 
-  PUWeight *fPUWeight;      //The PU weight utility
-  PUWeight *fPUWeightUp;    //The PU weight utility
-  PUWeight *fPUWeightDown;  //The PU weight utility
+  //PUWeight *fPUWeight;      //The PU weight utility
+  //PUWeight *fPUWeightUp;    //The PU weight utility
+  //PUWeight *fPUWeightDown;  //The PU weight utility
   //BTagSFUtil *fBTagSF[5]; //The new BTag SF utility 
-  BTagSFUtil *fBTagSFnom ;
-  BTagSFUtil *fBTagSFbUp ;
-  BTagSFUtil *fBTagSFbDo ;
-  BTagSFUtil *fBTagSFlUp ;
-  BTagSFUtil *fBTagSFlDo ;
-  LeptonSF *fLeptonSF;
+  //BTagSFUtil *fBTagSFnom ;
+  //BTagSFUtil *fBTagSFbUp ;
+  //BTagSFUtil *fBTagSFbDo ;
+  //BTagSFUtil *fBTagSFlUp ;
+  //BTagSFUtil *fBTagSFlDo ;
+  //LeptonSF *fLeptonSF;
   TRandom3 *fRand3;
 
   // EventWeight
@@ -462,12 +482,18 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   TH1F* fHSSNBtagsNJets[gNCHANNELS][iNCUTS][gNSYST]; 
   TH1F* fHCSVTag[gNCHANNELS][iNCUTS]; 
   TH1F* fHJetCSV[gNCHANNELS][iNCUTS];
-  TH1F* fHDelPhillJet[gNCHANNELS][iNCUTS];
+	TH1F* fHDelPhillJet[gNCHANNELS][iNCUTS];
 
-  TH1F* fHDRLep[gNCHANNELS][iNCUTS];
-  TH1F* fHDRLep0Jet[gNCHANNELS][iNCUTS];
-  TH1F* fHDPhiLep0Jet[gNCHANNELS][iNCUTS];
-  TH1F* fHDRLep1Jet[gNCHANNELS][iNCUTS];
+	TH1F* fMuonIsoCharged[gNCHANNELS][iNCUTS];
+	TH1F* fMuonIsoNeutral[gNCHANNELS][iNCUTS];
+	TH1F* fMuonIsoPhotons[gNCHANNELS][iNCUTS];
+	TH1F* fMuonIsoPU[gNCHANNELS][iNCUTS];       
+	TH1F* fMuonIso[gNCHANNELS][iNCUTS];          
+
+	TH1F* fHDRLep[gNCHANNELS][iNCUTS];
+	TH1F* fHDRLep0Jet[gNCHANNELS][iNCUTS];
+	TH1F* fHDPhiLep0Jet[gNCHANNELS][iNCUTS];
+	TH1F* fHDRLep1Jet[gNCHANNELS][iNCUTS];
   TH1F* fHDPhiLep1Jet[gNCHANNELS][iNCUTS];
   
   /// STOP
