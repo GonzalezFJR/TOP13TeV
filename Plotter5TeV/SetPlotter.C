@@ -1,3 +1,6 @@
+#ifndef SetPlotter_h
+#define SetPlotter_h
+
 #include <iomanip>
 #include "TTree.h"
 #include "TFile.h"
@@ -31,9 +34,10 @@
 using namespace std;
 
 
-const TString path = "/mnt_pool/fanae105/user/juanr/TOP13TeV/temp/";
-//const TString path = "/mnt_pool/fanae105/user/juanr/TOP13TeV/Trees5TeV/may11/";
+//const TString path = "/mnt_pool/fanae105/user/juanr/TOP13TeV/temp/";
+const TString path = "/mnt_pool/fanae105/user/juanr/TOP13TeV/Trees5TeV/may16/";
 
+bool IsFidu = false;
 const Int_t nVars=23;
 const Int_t nLevels=6;
 const Int_t nChannels = 5;
@@ -44,6 +48,7 @@ const Int_t nTSyst = 6;
 const Int_t nBkgs = 12;
 //const float Lumi = 1264; // pb^-1
 const float Lumi = 25.8; // pb^-1
+const TString Chan = "ElMu"; const TString Level = "2jets";
 const TString syst[nSyst] = {"BtagUp", "BtagDown", "MisTagUp", "MisTagDown", "LESUp", "LESDown", "PUUp", "PUDown", "JER", "TopPt"}; // "JESUp", "JESDown", 
 const TString sample[nSamples] = {
   "TTJets",
@@ -215,3 +220,4 @@ void SetHRatio(TString var){
   hratio->SetMinimum(0.2);
   hratio->SetMaximum(1.8);
 }
+#endif

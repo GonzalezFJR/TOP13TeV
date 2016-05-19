@@ -10,12 +10,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef DrawPlots_h
+#define DrawPlots_h
 #include "SetPlotter.C"
 
-double getYield(TString sample, TString chan = "ElMu", TString level = "2jets", TString syst = "0");
-double yield(TString process, TString chan = "ElMu", TString level = "2jets", TString syst = "0");
+double getYield(TString sample, TString chan = "ElMu", TString level = "2jets", TString syst = "0", bool isSS = false);
+double yield(TString process, TString chan = "ElMu", TString level = "2jets", TString syst = "0", bool isSS = false);
 void PrintYields(TString chan);
-double getStatError(TString sample, TString chan = "ElMu", TString level = "2jets", TString syst = "0");
+double getStatError(TString sample, TString chan = "ElMu", TString level = "2jets", TString syst = "0", bool isSS = false);
 
 TH1F* loadHistogram(TString sample, TString var, TString chan, TString level);
 TH1F* H_data(TString var, TString chan, TString level);
@@ -46,7 +48,7 @@ bool dodata    = true;
 //#######################################//
 //################ Yields ###############//
 
-double getYield(TString sample, TString chan, TString level, TString syst){
+double getYield(TString sample, TString chan, TString level, TString syst, bool isSS){
   if(chan == "All")   return getYield(sample, "ElMu", level, syst) + getYield(sample, "Muon", level, syst) + getYield(sample, "Elec", level, syst); 
   if(chan == "sameF") return getYield(sample, "Muon", level, syst) + getYield(sample, "Elec", level, syst); 
 
@@ -60,8 +62,9 @@ double getYield(TString sample, TString chan, TString level, TString syst){
  
   TH1F* h;
   TFile* inputfile = TFile::Open(path + "/Tree_" + sample + ".root");
-  if(syst == "0")  inputfile->GetObject("H_Yields_" + chan, h);
-  else             inputfile->GetObject("H_Yields_" + chan + "_" + syst, h);
+  TString prefix = "H_Yields_"; if(isSS) prefix = "H_SSYields_";
+  if(syst == "0")  inputfile->GetObject(prefix + chan, h);
+  else             inputfile->GetObject(prefix + chan + "_" + syst, h);
   double yield = h->GetBinContent(bin);
   delete inputfile;
   if( (sample.Contains("amcatnlo") || sample.Contains("aMCatNLO")) && ( sample.Contains("TTbar") || sample.Contains("TTJets") ) ) yield *= (1.08*0.9)*(1.08*0.9);
@@ -69,42 +72,43 @@ double getYield(TString sample, TString chan, TString level, TString syst){
   else return yield;
 }
 
-double yield(TString process, TString chan, TString level, TString syst){
+double yield(TString process, TString chan, TString level, TString syst, bool isSS){
   double y = 0;
-  if       (process == "ttbar"  ) y = getYield("TTbar_Powheg", chan, level, syst);// + getYield("TTbar_PowhegSemi", chan, level);
-  else if  (process == "tW"     ) y = getYield("TbarW", chan, level, syst) + getYield("TW", chan, level, syst);
- // else if  (process == "DY"     ) y = getYield("DYJetsToLL_M10to50_aMCatNLO", chan, level, syst) + getYield("DYJetsToLL_M50_aMCatNLO", chan, level, syst);
-  else if  (process == "DY"     ) y = getYield("DYJetsToLL_M50_aMCatNLO", chan, level, syst);
-  else if  (process == "VV"     ) y = getYield("WW", chan, level, syst) + getYield("WZ", chan, level, syst);// + getYield("ZZ", chan, level, syst);
-  else if  (process == "fake"||process == "NonW/Z" ||process=="NonW")  y = getYield("WJetsToLNu_aMCatNLO", chan, level, syst) + getYield("TTbar_PowhegSemi", chan, level, syst); 
-  else if  (process == "bkg"    ) {y = yield("ttbar", chan, level, syst) + yield("tW", chan, level, syst) + yield("DY", chan, level, syst) + yield("VV", chan, level, syst) + yield("fake", chan, level, syst); return y;}
+  if       (process == "ttbar"  ) y = getYield("TTbar_Powheg", chan, level, syst, isSS);
+  else if  (process == "tW"     ) y = getYield("TbarW", chan, level, syst, isSS) + getYield("TW", chan, level, syst, isSS);
+  else if  (process == "DY"     ) y = getYield("DYJetsToLL_M10to50_aMCatNLO", chan, level, syst, isSS) + getYield("DYJetsToLL_M50_aMCatNLO", chan, level, syst, isSS);
+ // else if  (process == "DY"     ) y = getYield("DYJetsToLL_M50_aMCatNLO", chan, level, syst, isSS);
+  else if  (process == "VV"     ) y = getYield("WW", chan, level, syst, isSS) + getYield("WZ", chan, level, syst, isSS);// + getYield("ZZ", chan, level, syst, isSS);
+  else if  (process == "fake"||process == "NonW/Z" ||process=="NonW")  y = getYield("WJetsToLNu_aMCatNLO", chan, level, syst, isSS) + getYield("TTbar_PowhegSemi", chan, level, syst, isSS); 
+  else if  (process == "bkg"    ) {y = yield("ttbar", chan, level, syst, isSS) + yield("tW", chan, level, syst, isSS) + yield("DY", chan, level, syst, isSS) + yield("VV", chan, level, syst, isSS) + yield("fake", chan, level, syst, isSS); return y;}
   else if  (process == "data" || process == "Data"   ){ 
    // if      (chan == "ElMu") y = getYield("MuonEG", chan, level); 
    // else if (chan == "Elec") y = getYield("DoubleEG", chan, level);
    // else if (chan == "Muon") y = getYield("DoubleMuon", chan, level); 
-   y = getYield("Data_SingleMu", chan, level) + getYield("Data_SingleElec", chan, level);
+   y = getYield("Data_SingleMu", chan, level, "0", isSS) + getYield("Data_SingleElec", chan, level, "0", isSS);
   }
-  else y = getYield(process, chan, level, syst);
+  else y = getYield(process, chan, level, syst, isSS);
   return y;
 }
 
-double getStatError(TString sample, TString chan, TString level, TString syst){
-  if(chan == "All")   return getStatError(sample, "ElMu", level, syst) + getStatError(sample, "Muon", level, syst) + getStatError(sample, "Elec", level, syst);
-  if(chan == "sameF") return getStatError(sample, "Muon", level, syst) + getStatError(sample, "Elec", level, syst);
+double getStatError(TString sample, TString chan, TString level, TString syst, bool isSS){
+  if(chan == "All")   return getStatError(sample, "ElMu", level, syst, isSS) + getStatError(sample, "Muon", level, syst, isSS) + getStatError(sample, "Elec", level, syst, isSS);
+  if(chan == "sameF") return getStatError(sample, "Muon", level, syst, isSS) + getStatError(sample, "Elec", level, syst, isSS);
 
-  if     (sample == "ttbar"  ) return getStatError("TTbar_Powheg", chan, level, syst);
-  else if(sample == "tW"     ) return getStatError("TbarW", chan, level, syst) + getStatError("TW", chan, level, syst);
-  else if  (sample == "DY"   ) return getStatError("DYJetsToLL_M50_aMCatNLO", chan, level, syst);
-  else if  (sample == "VV"   ) return getStatError("WW", chan, level, syst) + getStatError("WZ", chan, level, syst);// + getStatError("ZZ", chan, level, syst);
-  else if  (sample == "fake"||sample == "NonW/Z" ||sample =="NonW")  return getStatError("WJetsToLNu_aMCatNLO", chan, level, syst) + getStatError("TTbar_PowhegSemi", chan, level, syst); 
-  else if  (sample == "bkg"  ) return  getStatError("tW", chan, level, syst) + getStatError("DY", chan, level, syst) + getStatError("VV", chan, level, syst) + getStatError("fake", chan, level, syst);
-  else if  (sample == "data" || sample == "Data"   ) return getStatError("Data_SingleMu", chan, level) + getStatError("Data_SingleElec", chan, level);
+  if     (sample == "ttbar"  ) return getStatError("TTbar_Powheg", chan, level, syst, isSS);
+  else if(sample == "tW"     ) return getStatError("TbarW", chan, level, syst, isSS) + getStatError("TW", chan, level, syst, isSS);
+  else if  (sample == "DY"   ) return getStatError("DYJetsToLL_M50_aMCatNLO", chan, level, syst, isSS) + getStatError("DYJetsToLL_M10to50_aMCatNLO", chan, level, syst, isSS);
+  else if  (sample == "VV"   ) return getStatError("WW", chan, level, syst, isSS) + getStatError("WZ", chan, level, syst, isSS);// + getStatError("ZZ", chan, level, syst);
+  else if  (sample == "fake"||sample == "NonW/Z" ||sample =="NonW")  return getStatError("WJetsToLNu_aMCatNLO", chan, level, syst, isSS) + getStatError("TTbar_PowhegSemi", chan, level, syst, isSS); 
+  else if  (sample == "bkg"  ) return  getStatError("tW", chan, level, syst, isSS) + getStatError("DY", chan, level, syst, isSS) + getStatError("VV", chan, level, syst, isSS) + getStatError("fake", chan, level, syst, isSS);
+  else if  (sample == "data" || sample == "Data"   ) return getStatError("Data_SingleMu", chan, level, syst, isSS) + getStatError("Data_SingleElec", chan, level, syst, isSS);
 
 
   int bin = 0; if(level == "dilepton") bin = 1; if(level == "ZVeto") bin = 2;  if(level == "MET") bin = 3; if(level == "2jets") bin = 4; if(level == "1btag") bin = 5; if(level == "DYVeto") bin = 6;
   TH1F* h; TFile* inputfile = TFile::Open(path + "/Tree_" + sample + ".root");
-  if(syst == "0")  inputfile->GetObject("H_Yields_" + chan, h);
-  else             inputfile->GetObject("H_Yields_" + chan + "_" + syst, h);
+  TString prefix = "H_Yields_"; if(isSS) prefix = "H_SSYields_";
+  if(syst == "0")  inputfile->GetObject(prefix + chan, h);
+  else             inputfile->GetObject(prefix + chan + "_" + syst, h);
   double err = h->GetBinError(bin);
   delete inputfile;
   if(!sample.Contains("Data")) return err*Lumi;
@@ -210,9 +214,9 @@ TH1F* H_VV(TString var, TString chan, TString level, TString sys){
 
 TH1F* H_DY(TString var, TString chan, TString level, TString sys){
   TH1F* h1; TH1F* h2;
-  //h2   = loadHSyst("DYJetsToLL_M10to50_aMCatNLO", var, chan, level, "0");
+  h2   = loadHSyst("DYJetsToLL_M10to50_aMCatNLO", var, chan, level, "0");
   h1   = loadHSyst("DYJetsToLL_M50_aMCatNLO", var, chan, level, "0");
-  //h1->Add(h2);
+  h1->Add(h2);
   h1->SetFillColor(kYellow);
   return h1;
 }
@@ -436,3 +440,4 @@ void DrawPlots(){
  }
 }
 
+#endif 
