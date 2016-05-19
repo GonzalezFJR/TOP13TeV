@@ -136,6 +136,9 @@ TreeAnalysisTop::TreeAnalysisTop() : PAFChainItemSelector() {
 	fHnGenMuo = 0;
 	fHGenElePt = 0;
 	fHGenMuoPt = 0;
+  fHFidu = 0;
+  fHWeightsFidu  = 0;
+
 
 	for (unsigned int ichan = 0; ichan < gNCHANNELS; ichan++) {
 		for (unsigned int isyst = 0; isyst < gNSYST; isyst++) {
@@ -246,6 +249,8 @@ void TreeAnalysisTop::Initialise() {
 	//PAF_INFO("TreeAnalysisTop", "+ Sumw2 set for all histograms...");
 	TH1::SetDefaultSumw2();
 	fHDummy = CreateH1F("fHDummy","",1,0,1);
+  fHFidu = CreateH1F("YieldFidu","",1,0,1);
+  fHWeightsFidu  = CreateH1F("hPDFweightsFidu","hPDFweightsFidu", Get<Int_t>("nLHEweight"), -0.5, Get<Int_t>("nLHEweight") - 0.5);
 	//PAF_INFO("TreeAnalysisTop", "+ Initialise Yield histograms...");
 	InitialiseYieldsHistos();
 	//PAF_INFO("TreeAnalysisTop", "+ Initialise Kinematic histograms...");
@@ -687,22 +692,9 @@ void TreeAnalysisTop::InsideLoop() {
     if(gSelection == 1                   ) isEmuDilepton = (nGenElec+nGenMuon) <  2;    // for semileptonic selection
     if(gSelection == 2 || gSelection == 4) isEmuDilepton = nGenElec>=1 && nGenMuon>=1;  // for emu selection
     if(gSelection == 3                   ) isEmuDilepton = nGenElec>=2 || nGenMuon>=2;  // for SF selection
+    if(gSelection == 5                   ) isEmuDilepton = nGenElec>=1 && nGenMuon>=1;  // for emu selection
 		if(!isEmuDilepton){
-			if (gSampleName == "TTbar_Powheg"              ) return;
-			if (gSampleName == "TTJets"                    ) return;
-			if (gSampleName == "TTJets_MLM"                ) return;
-			if (gSampleName == "TTbar_Powheg_scaleUp"      ) return;
-			if (gSampleName == "TTbar_Powheg_scaleDown"    ) return;
-			if (gSampleName == "TTbar_Powheg_mtop1695"     ) return;
-			if (gSampleName == "TTbar_Powheg_mtop1755"     ) return;
-			if (gSampleName == "TTbar_Powheg_2L"	         ) return;
-			if (gSampleName == "TTbar_Powheg_Pythia6"      ) return;
-			if (gSampleName == "TTbar_Powheg_Herwig"       ) return;
-			if (gSampleName == "TTJets_aMCatNLO"	         ) return;
-			if (gSampleName == "TTJets_aMCatNLO_ScaleUp"   ) return;
-			if (gSampleName == "TTJets_aMCatNLO_ScaleDown" ) return;
-			if (gSampleName == "TTJets_aMCatNLO_mtop1695"  ) return;
-			if (gSampleName == "TTJets_aMCatNLO_mtop1755"  ) return;
+			if (gSampleName.Contains("TTbar") || gSampleName.Contains("TTJets")) return;
 		}
 		// Fill Gen Info 
 		//----------------------------------------------------------------------------
@@ -727,10 +719,14 @@ void TreeAnalysisTop::InsideLoop() {
 				if (minDRel > lep.DeltaR(jet))  minDRel = lep.DeltaR(jet);
 			}
 		}
-		if(gSelection == 4){
+		if(gSelection == 4 || gSelection == 5){
 			TLorentzVector l1; l1.SetPtEtaPhiM(genLep_pt[0], genLep_eta[0], genLep_phi[0], genLep_mass[0]);
 			TLorentzVector l2; l2.SetPtEtaPhiM(genLep_pt[1], genLep_eta[1], genLep_phi[1], genLep_mass[1]);
 			if ( (l1+l2).M() < 20) return;
+		}
+    fHFidu->Fill(0.5);
+		for(int i = 0; i<Get<Int_t>("nLHEweight"); i++){
+			fHWeightsFidu->Fill(i, EventWeight*Get<Float_t>("LHEweight_wgt", i));
 		}
 
 		fHDeltaRLepJet[Muon] -> Fill(minDRmu);
@@ -1542,6 +1538,16 @@ void TreeAnalysisTop::FillYields(gSystFlag sys){
 		<< IsMuMuEvent() << endl;
 #endif
 
+  if(gSelection == 5){
+    EventWeight = gWeight;
+    FillYieldsHistograms(ElMu, iDilepton, sys);
+//    ZVeto
+//    if(PassesNGenJetsCut()) FillYieldsHistograms(ElMu, i2jets, sys);
+//    1btag
+  return;
+  }
+
+
 	if (gDoDF && PassTriggerEMu()  && IsElMuEvent()){
 		// Define Hypothesis Leptons...
 		EventWeight = gWeight * getSF(ElMu);// * getTopPtSF();
@@ -2082,7 +2088,7 @@ void TreeAnalysisTop::SelectedGenLepton() {
 
 		// add generated leptons (e/mu) from decays of taus from W/Z/h decays
 		for(int n = 0; n<Get<Int_t>("ngenLepFromTau"); n++){
-			if(gSelection == 4) //FIUDIAL
+			if(gSelection == 4 || gSelection == 5) //FIUDIAL
 				if( (Get<Float_t>("genLepFromTau_pt", n) < 20) || (abs(Get<Float_t>("genLepFromTau_eta",n)) > 2.4) ) continue; 
 			Int_t id = TMath::Abs(Get<Int_t>("genLepFromTau_pdgId", n));
 			if (id == 11)  nGenElec++;

@@ -388,6 +388,8 @@ class TreeAnalysisTop : public PAFChainItemSelector
   
   //++ Yields
   TH1F* fHDummy;
+  TH1F* fHFidu;
+  TH1F* fHWeightsFidu;
   TH1F* hWeight;
   TH1F* fHyields     [gNCHANNELS][gNSYST];
   TH1F* fHWeightyield[gNCHANNELS][gNWEIGHT];
