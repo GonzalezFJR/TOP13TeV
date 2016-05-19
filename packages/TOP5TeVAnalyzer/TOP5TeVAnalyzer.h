@@ -22,7 +22,7 @@
 
 using namespace std;
 
-const int nWeights = 248;
+const int nWeights = 170;
 const int nGenb = 0;
 const double pi = 3.1415926535897932384;
 
@@ -295,6 +295,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   bool PassTriggerEMu();
   bool PassesZVeto();
   bool PassesNJetsCut();
+  bool PassesNGenJetsCut();
   bool PassesMETCut();
   bool PassesNBtagCut();
   bool PassesMllVeto();
@@ -428,7 +429,8 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   
   //++ Yields
   TH1F* fHDummy;
-  TH1F* hWeight;
+  TH1F* fHFidu;
+	TH1F* fHWeightsFidu;
   TH1F* fHyields     [gNCHANNELS][gNSYST];
   TH1F* fHWeightyield[gNCHANNELS][gNWEIGHT];
   TH1F* fHSSyields   [gNCHANNELS][gNSYST];
@@ -440,6 +442,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   TH1F* fHnGenLep0;
   TH1F* fHGenElePt;
   TH1F* fHGenMuoPt;
+  TH1F* fHnGenLeptons;
 
   TH2F* fHDY_InvMassVsNPV   [gNCHANNELS][iNCUTS];
   TH2F* fHDY_InvMassVsMET   [gNCHANNELS][iNCUTS];
@@ -452,6 +455,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
 //  TH2F* fHOrigins[gNCHANNELS][iNCUTS];
   
   //++ Kinematic  
+  TH1F* fHWeights[gNCHANNELS][iNCUTS];
   TH1F* fHMET[gNCHANNELS][iNCUTS];       
   TH1F* fHLep0Eta[gNCHANNELS][iNCUTS];    
   TH1F* fHLep1Eta[gNCHANNELS][iNCUTS];    

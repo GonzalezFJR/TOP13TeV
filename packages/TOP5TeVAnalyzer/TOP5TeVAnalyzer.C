@@ -170,12 +170,14 @@ const double *getEtaBins (gChannel chan){
 //------------------------------------------------------------------------------------
 TOP5TeVAnalyzer::TOP5TeVAnalyzer() : PAFChainItemSelector() {
 	fHDummy = 0;
-	hWeight = 0;
+	fHFidu = 0;
 	fHTopPtWeight = 0;
 	fHnGenEle = 0;
 	fHnGenMuo = 0;
 	fHGenElePt = 0;
 	fHGenMuoPt = 0;
+	fHWeightsFidu  = 0;
+	fHnGenLeptons = 0;
 
 	for (unsigned int ichan = 0; ichan < gNCHANNELS; ichan++) {
 		for (unsigned int isyst = 0; isyst < gNSYST; isyst++) {
@@ -200,6 +202,7 @@ TOP5TeVAnalyzer::TOP5TeVAnalyzer() : PAFChainItemSelector() {
 			//  fHOrigins[ichan][icut] = 0;
 
 			//++ Kinematic  
+			fHWeights[ichan][icut] = 0;
 			fHMET[ichan][icut] = 0;       
 			fHLep0Eta[ichan][icut] = 0;    
 			fHLep1Eta[ichan][icut] = 0;    
@@ -281,6 +284,8 @@ void TOP5TeVAnalyzer::Initialise() {
 	//PAF_INFO("TOP5TeVAnalyzer", "+ Sumw2 set for all histograms...");
 	TH1::SetDefaultSumw2();
 	fHDummy = CreateH1F("fHDummy","",1,0,1);
+	fHFidu = CreateH1F("YieldFidu","",1,0,1);
+	fHWeightsFidu  = CreateH1F("hPDFweightsFidu","hPDFweightsFidu", nWeights, -0.5, nWeights - 0.5);
 	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise Yield histograms...");
 	InitialiseYieldsHistos();
 	//PAF_INFO("TOP5TeVAnalyzer", "+ Initialise Kinematic histograms...");
@@ -296,6 +301,7 @@ void TOP5TeVAnalyzer::Initialise() {
 	fHnGenMuo  = CreateH1F("fHnGenMuo" , "nGenPromptMuons"  , 11, -1.5, 9.5);
 	fHGenElePt = CreateH1F("fHGenElePt", "GenPromptElecs Pt", 500, 0, 500);
 	fHGenMuoPt = CreateH1F("fHGenMuoPt", "GenPromptMuons Pt", 500, 0, 500);
+	fHnGenLeptons  = CreateH1F("fHnGenLeptons" , "nGenLeptons"  , 9, -1.5, 7.5);
 
 	if (gSampleName.Contains("Data") ||     
 			gSampleName == "DoubleEG"        || 
@@ -378,7 +384,6 @@ void TOP5TeVAnalyzer::InitialiseDYHistos(){
 }
 
 void TOP5TeVAnalyzer::InitialiseYieldsHistos(){
-	hWeight = CreateH1F("hWeight","",200,0,1);
 	//++ Yields histograms
 	if (gDoSF) {
 		fHyields[Muon][Norm]   = CreateH1F("H_Yields_"+gChanLabel[Muon],"", iNCUTS, -0.5, iNCUTS-0.5); 
@@ -429,7 +434,7 @@ void TOP5TeVAnalyzer::InitialiseKinematicHistos(){
 
 		for (size_t cut=0; cut<iNCUTS; cut++){
 			//PAF_DEBUG("TOP5TeVAnalyzer::InitialiseKinematicHistos()",Form("cut = %i", cut));
-
+			fHWeights[ch][cut]  = CreateH1F("hPDFweights_"  +gChanLabel[ch]+"_"+sCut[cut],"hPDFweights", nWeights, -0.5, nWeights - 0.5);
 			fHMET[ch][cut]         = CreateH1F("H_MET_"        +gChanLabel[ch]+"_"+sCut[cut],"MET"       , 3000, 0,300);
 			fHLep0Eta[ch][cut]     = CreateH1F("H_Lep0Eta_"    +gChanLabel[ch]+"_"+sCut[cut],"Lep0Eta"   , 50  ,0 ,2.5);
 			fHLep1Eta[ch][cut]     = CreateH1F("H_Lep1Eta_"    +gChanLabel[ch]+"_"+sCut[cut],"Lep1Eta"   , 50  ,0 ,2.5);
@@ -704,23 +709,11 @@ void TOP5TeVAnalyzer::InsideLoop() {
     if(gSelection == 0                   ) isEmuDilepton = (nGenElec+nGenMuon) >= 2;    // for dileptonic selection
     if(gSelection == 1                   ) isEmuDilepton = (nGenElec+nGenMuon) <  2;    // for semileptonic selection
     if(gSelection == 2 || gSelection == 4) isEmuDilepton = nGenElec>=1 && nGenMuon>=1;  // for emu selection
+    if(gSelection == 5                   ) isEmuDilepton = nGenElec>=1 && nGenMuon>=1;  // for emu selection
     if(gSelection == 3                   ) isEmuDilepton = nGenElec>=2 || nGenMuon>=2;  // for SF selection
 		if(!isEmuDilepton){
-			if (gSampleName == "TTbar_Powheg"              ) return;
-			if (gSampleName == "TTJets"                    ) return;
-			if (gSampleName == "TTJets_MLM"                ) return;
-			if (gSampleName == "TTbar_Powheg_scaleUp"      ) return;
-			if (gSampleName == "TTbar_Powheg_scaleDown"    ) return;
-			if (gSampleName == "TTbar_Powheg_mtop1695"     ) return;
-			if (gSampleName == "TTbar_Powheg_mtop1755"     ) return;
-			if (gSampleName == "TTbar_Powheg_2L"	         ) return;
-			if (gSampleName == "TTbar_Powheg_Pythia6"      ) return;
-			if (gSampleName == "TTbar_Powheg_Herwig"       ) return;
-			if (gSampleName == "TTJets_aMCatNLO"	         ) return;
-			if (gSampleName == "TTJets_aMCatNLO_ScaleUp"   ) return;
-			if (gSampleName == "TTJets_aMCatNLO_ScaleDown" ) return;
-			if (gSampleName == "TTJets_aMCatNLO_mtop1695"  ) return;
-			if (gSampleName == "TTJets_aMCatNLO_mtop1755"  ) return;
+			if (gSampleName.Contains("TTbar")  ) return;
+			if (gSampleName.Contains("TTJets") ) return;
 		}
 		// Fill Gen Info 
 		//----------------------------------------------------------------------------
@@ -750,13 +743,23 @@ void TOP5TeVAnalyzer::InsideLoop() {
 		fHDeltaRLepJet[Muon] -> Fill(minDRmu);
 		fHDeltaRLepJet[Elec] -> Fill(minDRel);
 */
-/*
-		if(gSelection == 4 && !gIsData){
-			TLorentzVector l1; l1.SetPtEtaPhiE(genLep_pt[0], genLep_eta[0], genLep_phi[0], genLep_energy[0]);
-			TLorentzVector l2; l2.SetPtEtaPhiE(genLep_pt[1], genLep_eta[1], genLep_phi[1], genLep_energy[1]);
-			if ( (l1+l2).M() < 20) return;
-		}*/
 
+		if((gSelection == 4 || gSelection == 5) && !gIsData){
+			TLorentzVector l1; l1.SetPtEtaPhiE(genLep_pt[0], genLep_eta[0], genLep_phi[0], genLep_energy[0]); int l1Id = genLep_pdgId[0];
+			for(int k = 1; k< ngenLep; k++){ // Search for the emu pair!
+				if(genLep_pdgId[0] == genLep_pdgId[k]) continue;
+				else{
+					TLorentzVector l2; l2.SetPtEtaPhiE(genLep_pt[k], genLep_eta[k], genLep_phi[k], genLep_energy[k]);
+					if ( (l1+l2).M() < 20) return;
+          break;
+				}
+			}
+		}
+		fHFidu->Fill(0.5);
+		for(int i = 0; i < nWeights; i++){
+			fHWeightsFidu->Fill(i, EventWeight*Get<Float_t>("hWeight", i));
+		}
+		fHnGenLeptons->Fill(nGenLepton);
 	}
 	// Fill Yields ...............................................................
 #ifdef DEBUG
@@ -948,6 +951,7 @@ void TOP5TeVAnalyzer::Summary(){}
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopTrigger#Run2015C_D_25_ns_data_with_RunII
 bool TOP5TeVAnalyzer::PassTriggerMuMu() {
   Bool_t pass = false;
+  return true;
   if      (gSampleName == "Data_SingleMu") pass = HLT_HIL2Mu15_v1;
   else if (gSampleName == "Data_SingleElec") pass = (HLT_HIDoublePhoton15_Eta2p5_Mass50_1000_R9SigmaHECut_v1 && !HLT_HIL2Mu15_v1);
   else    pass = (HLT_HIL2Mu15_v1) || HLT_HIDoublePhoton15_Eta2p5_Mass50_1000_R9SigmaHECut_v1;
@@ -955,6 +959,7 @@ bool TOP5TeVAnalyzer::PassTriggerMuMu() {
 }
 
 bool TOP5TeVAnalyzer::PassTriggerEE(){ 
+  return true;
   Bool_t pass = false;
   if      (gSampleName == "Data_SingleMu") pass = HLT_HIL2Mu15_v1;
   else if (gSampleName == "Data_SingleElec") pass = (HLT_HIDoublePhoton15_Eta2p5_Mass50_1000_R9SigmaHECut_v1 && !HLT_HIL2Mu15_v1);
@@ -1314,6 +1319,16 @@ void TOP5TeVAnalyzer::FillKinematicHistos(gChannel chan, iCut cut){
 	if (gSysSource != Norm)      return;  //only fill histograms for nominal distributions...
 	if (fChargeSwitch == true  ) return;
 
+	if (!gIsData) {
+    Int_t nWeightsTree = Get<Int_t>("nWeights");
+		for(int i = 0; i < nWeightsTree; i++){
+			fHWeights[chan][cut]->Fill(i, EventWeight*Get<Float_t>("hWeight", i));
+		}
+	}
+
+
+
+
 	//++ met info
 	fHMET[chan][cut]           ->Fill(getMET(),             EventWeight);
 	fHMT[chan][cut]            ->Fill(getMT(chan),          EventWeight);
@@ -1467,10 +1482,17 @@ void TOP5TeVAnalyzer::FillYields(gSystFlag sys){
 		<< IsMuMuEvent() << endl;
 #endif
 
+	if (gSelection == 5){
+		EventWeight = gWeight;
+		FillYieldsHistograms(ElMu, iDilepton, sys);
+    if(PassesNGenJetsCut()) FillYieldsHistograms(ElMu, i2jets, sys);
+    return;
+	}
+
+
 	if (gDoDF && PassTriggerEMu()  && IsElMuEvent()){
 		// Define Hypothesis Leptons...
 		EventWeight = gWeight * getSF(ElMu, sys);// * getTopPtSF();
-		hWeight -> Fill(EventWeight,1.);
 #ifdef DEBUG
 		cout << " pass trigger + emu, ";
 #endif
@@ -1672,6 +1694,16 @@ bool TOP5TeVAnalyzer::PassesZVeto(){
 	if (fHypLepton2.index == -1) return false;
 	float InvMass = (fHypLepton1.p+fHypLepton2.p).M();
   if (InvMass > 76. && InvMass < 106.) return false;
+  return true;
+}
+bool TOP5TeVAnalyzer::PassesNGenJetsCut(){
+	TLorentzVector genjet;
+  int nGenJets = 0;
+	for(int k = 0; k < ngenJet; k++){ 
+			genjet.SetPtEtaPhiM(genJet_pt[k], genJet_eta[k], genJet_phi[k], genJet_m[k]);
+      if(genjet.Pt()>gJetEtCut) nGenJets++;
+		}
+  if(nGenJets <= 1) return false;
   return true;
 }
 
@@ -1944,15 +1976,16 @@ bool TOP5TeVAnalyzer::IsGoodJet(unsigned int ijet, float ptcut){
 //------------------------------------------------------------------------------
 void TOP5TeVAnalyzer::SelectedGenLepton() {
 	if (!gIsData) {
-		nGenElec = 0; nGenMuon = 0;
+		nGenElec = 0; nGenMuon = 0; bool isOS = 0;
 		for(int n = 0; n<ngenLep; n++){
 			Int_t id = TMath::Abs(genLep_pdgId[n]);
 			if(abs(genLep_MomPID[n]) != 24 && abs(genLep_MomPID[n]) != 15) continue; 
 			if(abs(genLep_MomPID[n]) == 15){
 				if(abs(genLep_GMomPID[n]) != 24) continue;
 			}
-			if(gSelection == 4) //FIUDIAL
-				if( (genLep_pt[n] < 18) || (abs(genLep_eta[n]) > 2.4) ) continue;
+			if(gSelection == 4 || gSelection == 5) //FIUDIAL
+				if((id == 13) && ((genLep_pt[n] < 18) || (abs(genLep_eta[n]) > 2.4)) ) continue;
+				if((id == 11) && ((genLep_pt[n] < 20) || (abs(genLep_eta[n]) > 2.4)) ) continue;
 			if (id == 11)  nGenElec++;
 			if (id == 13)  nGenMuon++;
 		}

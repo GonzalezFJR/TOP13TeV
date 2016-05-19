@@ -137,6 +137,7 @@ void RunTree_ReReco5TeV(TString  sampleName     = "TTbar_Madgraph",
   if     (Selection == 0)  outputFile += "/Tree_" + sampleName          + ".root";
   else if(Selection == 1)  outputFile += "/Tree_" + sampleName + "Semi" + ".root";
   else if(Selection == 4)  outputFile += "/Tree_" + sampleName + "Fidu" + ".root";
+  else if(Selection == 5)  outputFile += "/Tree_" + sampleName + "Part" + ".root";
   else                     outputFile += "/Tree_" + sampleName          + ".root";
 
   PAF_INFO("RunTree_ReReco5TeV", Form("Output file = %s", outputFile.Data()));
