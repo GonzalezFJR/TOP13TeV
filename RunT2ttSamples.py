@@ -5,13 +5,15 @@ import sys
 inputpath = "/pool/ciencias/TreesDR74X/heppyTrees/v2/";
 nSamples = 9;
 samplename = [
-"T2tt_150to175LSP1to100", "T2tt_250LSP1to175", "T2tt_275LSP75to200",
+"T2tt_150to175LSP1to100", 
+"T2tt_250LSP1to175", "T2tt_275LSP75to200",
 "T2tt_200LSP1to125", "T2tt_300to375LSP1to300",     "T2tt_400to475LSP1to400",
 "T2tt_225LSP25to150", "T2tt_500to550LSP1to475", "T2tt_600to950LSP1to450"
 ];
 
 NeutralinoMass = []; StopMass = []; Events = [];
 Counts = TH3D();
+jobscounter = 0;
 
 mstop = 0.; mchi = 0.; nEvents = 0.;
 def GetValues(sample):
@@ -77,33 +79,72 @@ def getxsec(StopMass):
   elif StopMass == 975: return 0.00735655;
   else: print "No Cross Section for that mass!!"  
 
-def Analyze(sample = "All"):
+def Analyze(sample = "All", sendjobs = False):
 	if (sample == "All"):
 		for k in range(len(samplename)):
 			print ">>> Progress: sample ", k+1, "/", len(samplename)
 			Analyze(samplename[k])
+	elif (sample == "jobs"):
+		for k in range(len(samplename)):
+			print ">>> Sending jobs for processing sample ", k+1, "/", len(samplename)
+			Analyze(samplename[k], True) 
 	else:
 		#StopMass = []; NeutralinoMass = []; Events = [];
-		print ">>> Sample: ", sample
-		print ">>> Getting masses of Stop and Neutralino... "
-		del NeutralinoMass[:]; del StopMass[:]; del Events[:];
-		GetValues(sample)
-		print ">>> Done! \n"
-		for m in range(len(StopMass)):
-			xsec = getxsec(StopMass[m])
-			print ">>> Analyzing sample: ", sample 
-			print ">>> MStop   = ", StopMass[m]
-			print ">>> MLSP    = ", NeutralinoMass[m]		
-			print ">>> nEvents = ", Events[m]
-			print ">>> xsec    = ", xsec
-			print ">>> Progress: point", m+1, "/", len(StopMass), "..."
-			print " "
-			weight = xsec/Events[m]
-			os.system("root -l -q -b 'RunTree_ReReco.C(\"" + sample + "\", 4, false, 0, true, " + str(StopMass[m]) + ", " + str(NeutralinoMass[m]) + ", " + str(weight) + ")'")
+		if (sendjobs):
+			del NeutralinoMass[:]; del StopMass[:]; del Events[:];
+			GetValues(sample)
+			for m in range(len(StopMass)):
+				#if(StopMass[m] != 150 or NeutralinoMass[m] != 1): continue
+				xsec = getxsec(StopMass[m])
+				weight = xsec/Events[m]
+        #jobdir = "./temp/jobs/tempjobs" + str(StopMass[m]) + str(NeutralinoMass[m]) + "/"
+        #os.system("mkdir " + jobdir)
+				#tempfile = jobdir + "tempjobs" + str(StopMass[m]) + str(NeutralinoMass[m]) + ".txt"
+				tempfile = "tempjobs" + str(StopMass[m]) + str(NeutralinoMass[m]) + ".txt"
+				runroot = "root -l -q -b " + "\'RunTree_ReReco.C(\\\"" + sample + "\\\", 1, false, 0, true, " + str(StopMass[m]) + ", " + str(NeutralinoMass[m]) + ", " + str(weight) + ")\'"
+
+				l1 = "#!/bin/bash"
+				l2 = "#PBS -e log/error"  + str(StopMass[m]) + "_" + str(NeutralinoMass[m]) + ".log"
+				l3 = "#PBS -o log/output" + str(StopMass[m]) + "_" + str(NeutralinoMass[m]) + ".log"
+				l4 = "MAINDIR=/nfs/fanae/user/juanr/StopTOP"
+				l5 = "WDIR=temp/jobs/job" + str(StopMass[m]) + "_" + str(NeutralinoMass[m])
+
+				os.system("echo \"" + l1 + "\" > " + tempfile)
+				os.system("echo \"" + l2 + "\" >> " + tempfile)
+				os.system("echo \"" + l3 + "\" >> " + tempfile)
+				os.system("echo \"" + l4 + "\" >> " + tempfile)
+				os.system("echo \"" + l5 + "\" >> " + tempfile)
+
+
+				os.system("cat job_template.txt >> " + tempfile)
+				os.system("echo \"" + runroot + "\" >> " + tempfile)
+				os.system("qsub " + tempfile)	
+				print "Submited: " + str(StopMass[m]) + " " + str(NeutralinoMass[m])
+				os.remove(tempfile)
+		else:
+			print ">>> Sample: ", sample
+			print ">>> Getting masses of Stop and Neutralino... "
+			del NeutralinoMass[:]; del StopMass[:]; del Events[:];
+			GetValues(sample)
+			print ">>> Done! \n"
+			for m in range(len(StopMass)):
+				#if(StopMass[m] != 850 or NeutralinoMass[m] != 100): continue;
+				xsec = getxsec(StopMass[m])
+				print ">>> Analyzing sample: ", sample 
+				print ">>> MStop   = ", StopMass[m]
+				print ">>> MLSP    = ", NeutralinoMass[m]		
+				print ">>> nEvents = ", Events[m]
+				print ">>> xsec    = ", xsec
+				print ">>> Progress: point", m+1, "/", len(StopMass), "..."
+				print " "
+				weight = xsec/Events[m]
+				os.system("root -l -q -b 'RunTree_ReReco.C(\"" + sample + "\", 4, false, 0, true, " + str(StopMass[m]) + ", " + str(NeutralinoMass[m]) + ", " + str(weight) + ")'")
 
 if __name__ == "__main__":
   if   len(sys.argv) == 1:
     Analyze()
   elif len(sys.argv) == 2:
     Analyze(str(sys.argv[1]))
+  else:
+    Analyze(str(sys.argv[1]), True)
 
