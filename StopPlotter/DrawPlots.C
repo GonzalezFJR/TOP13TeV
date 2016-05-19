@@ -1,12 +1,13 @@
-//////////////////////////////////////////////////////////////////////////
+
 // Use the definitions in SetPlotter.C
 // Reads the rootfiles and plot histograms and get yields
 // The plots are saved in plotfolder
 //
 // Usage:
-// root -l -q -b 'DrawPlots(500, 200, 850, 100)'
-// DrawPlots(500, 100, 850, 100);
-// T2ttStackPlots("MET", "ElMu", "1btag", 850, 100, 500, 100);
+// PlotStackStop(TString var, TString chan, TString level);
+// PlotStackStop("MET", "ElMu", "1btag");
+// DrawPlots();
+// T2ttStackPlots("MET", "ElMu", "1btag", 850, 100, 500, 100)
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -40,10 +41,11 @@ void DrawPlots(int mStop1, int mLsp1, int mStop2 = 0, int mLsp2 = 0);
 
 // Constants:
 const TString plotfolder = "/nfs/fanae/user/juanr/StopTOP/plots/";
-bool doSys     = false;
-bool doSetLogy = true;
-bool dodata    = true;
-bool do8TeV    = false;
+bool doSys      = false;
+bool doSetLogy  = true;
+bool dodata     = true;
+bool doYields   = false;
+bool do8TeV     = false;
 
 //#######################################//
 //################ Yields ###############//
@@ -62,8 +64,8 @@ double getYield(TString sample, TString chan, TString level){
  
   TH1F* h;
   TFile* inputfile = TFile::Open(path + "/Tree_" + sample + ".root");
-  inputfile->GetObject("H_Yields_" + chan, h);
-  double yield = h->GetBinContent(bin);
+  inputfile->GetObject("H_InvMass_" + chan + "_" + level, h);
+  double yield = h->Integral() + h->GetBinContent(h->GetNbinsX()+2);
   delete inputfile;
   if(sample != "DoubleMuon" && sample != "DoubleEG" && sample != "MuonEG") return yield*Lumi;
   else return yield;
@@ -71,20 +73,20 @@ double getYield(TString sample, TString chan, TString level){
 
 double yield(TString process, TString chan, TString level){
   double y = 0;
-//  if       (process == "ttbar"  ) y = getYield("TTbar_Powheg", chan, level) + getYield("TTJetsSemi", chan, level);
   if       (process == "ttbar"  ) y = getYield("TTJets", chan, level);//+ getYield("TTJetsSemi", chan, level);
   else if  (process == "tW"     ) y = getYield("TbarW", chan, level) + getYield("TW", chan, level);
- // else if  (process == "DY"     ) y = getYield("DYJetsToLL_M10to50_aMCatNLO", chan, level) + getYield("DYJetsToLL_M50_aMCatNLO", chan, level);
-  else if  (process == "DY"     ) y = getYield("DYJetsToLL_M5to50_MLM", chan, level) + getYield("DYJetsToLL_M50_MLM", chan, level);
+  else if  (process == "DY"     ) y = getYield("DYJetsToLL_M10to50_aMCatNLO", chan, level) + getYield("DYJetsToLL_M50_aMCatNLO", chan, level);
   else if  (process == "VV"     ) y = getYield("WW", chan, level) + getYield("WZ", chan, level) + getYield("ZZ", chan, level);
   else if  (process == "ttV"    ) y = getYield("TTWToLNu", chan, level) + getYield("TTWToQQ", chan, level) + getYield("TTZToQQ", chan, level);
   else if  (process == "fake"||process == "NonW/Z"||process == "WJets")  y = getYield("WJetsToLNu_aMCatNLO", chan, level); 
   //else if  (process == "fake"||process == "NonW/Z"||process == "WJets")  y = getYield("WJetsToLNu_MLM", chan, level); 
   else if  (process == "bkg"    ) {y = yield("ttbar", chan, level) + yield("tW", chan, level) + yield("DY", chan, level) + yield("VV", chan, level) + yield("fake", chan, level) + yield("ttV", chan, level); return y;}
   else if  (process == "data" || process == "Data"   ){ 
-    if      (chan == "ElMu") y = getYield("MuonEG", chan, level); 
-    else if (chan == "Elec") y = getYield("DoubleEG", chan, level);
-    else if (chan == "Muon") y = getYield("DoubleMuon", chan, level); 
+    TH1F* hdata = H_data("InvMass", chan, level);
+    y = hdata->Integral();
+   // if      (chan == "ElMu") y = getYield("MuonEG", chan, level); 
+   // else if (chan == "Elec") y = getYield("DoubleEG", chan, level);
+   // else if (chan == "Muon") y = getYield("DoubleMuon", chan, level); 
   }
   else y = getYield(process, chan, level);
   return y;
@@ -221,10 +223,8 @@ TH1F* H_VV(TString var, TString chan, TString level, TString sys){
 
 TH1F* H_DY(TString var, TString chan, TString level, TString sys){
   TH1F* h1; TH1F* h2;
-  //h1   = loadHSyst("DYJetsToLL_M10to50_aMCatNLO", var, chan, level, "0");
-  //h2   = loadHSyst("DYJetsToLL_M50_aMCatNLO", var, chan, level, "0");
-  h1   = loadHSyst("DYJetsToLL_M5to50_MLM", var, chan, level, "0");
-  h2   = loadHSyst("DYJetsToLL_M50_MLM", var, chan, level, "0");
+  h1   = loadHSyst("DYJetsToLL_M10to50_aMCatNLO", var, chan, level, "0");
+  h2   = loadHSyst("DYJetsToLL_M50_aMCatNLO", var, chan, level, "0");
   h1->Add(h2);
   h1->SetFillColor(kYellow);
   return h1;
@@ -280,6 +280,7 @@ TH1F* loadHSyst(TString sample, TString var, TString chan, TString level, TStrin
   if(sample.BeginsWith("T2tt")) thefile = path + "/Susy/Tree_" + sample + ".root";
 	else                          thefile = path + "Tree_" + sample + ".root";
   TFile* inputfile = TFile::Open(thefile);
+  inputfile->GetObject("H_" + var + "_" + chan + "_" + level + "_" + syst,hist);
   hist -> SetStats(0);
 
   if( (sample == "MuonEG") || (sample == "DoubleEG") || (sample == "DoubleMuon") ){
@@ -300,7 +301,7 @@ void RebinHist(TH1F* hist, TString var){
   if( (var=="DelLepPhi") || (var == "DelPhiLepMet") || (var == "DelPhiJetMet") || (var == "DelPhiLepJet") || (var == "DelPhiPllbMet")) hist -> Rebin(10);
   if( (var == "Meff") ) hist -> Rebin(100);
   if(var == "InvMass") hist-> Rebin(40);
-  if(var == "MT2") hist -> Rebin(10);
+  if((var == "MT2") || (var.BeginsWith("MT2_")) ) hist -> Rebin(10);
   if(var == "MinDPhiMetJets") hist -> Rebin(4);
   if((var == "MT2") || (var == "MT2lblb")) hist->SetBinContent(1, 0);
 }
@@ -327,7 +328,9 @@ float* BinVar2(TString var, TString chan, TString level){
   float vpos = 0; float vneg = 0; float f; float valnom = 0; float valsys = 0;
   TH1F* hnom = (TH1F*) TH_bkg(var, chan, level)->GetStack()->Last();
   TH1F* hsys[nSyst];
-  for(int s = 0; s < nSyst; s++) hsys[s] = BkgSystH(var, chan, level, syst[s]);
+	for(int s = 0; s < nSyst; s++){ 
+		hsys[s] = BkgSystH(var, chan, level, syst[s]);
+	}
   int n = hnom->GetNbinsX()+1;
   float *v; v = new float[2*n+1];
   float staterr = 0;
@@ -440,7 +443,8 @@ void PlotStackStop(TString var, TString chan, TString level){
   delete c;
 }
 
-void DrawPlots(int mStop1, int mLsp1, int mStop2 = 0, int mLsp2 = 0){
+void DrawPlots(int mStop1, int mLsp1, int mStop2, int mLsp2){
+ //TString levels[3] = {"dilepton", "2jets", "1btag"};
  TString levels[4] = {"dilepton", "2jets", "1btag","DYVeto"};
  for(int k = 0; k<4; k++){
   for(int i = 0; i<nVars; i++){
@@ -452,7 +456,8 @@ void DrawPlots(int mStop1, int mLsp1, int mStop2 = 0, int mLsp2 = 0){
 }
 
 
-void T2ttStackPlots(TString var, TString chan = "All", TString level = "DYVeto", int mStop1 = 0, int mLsp1 = 0, int mStop2 = 0, int mLsp2 = 0){
+//void T2ttStackPlots(TString var, TString chan = "All", TString level = "DYVeto", int mStop1 = 0, int mLsp1 = 0, int mStop2 = 0, int mLsp2 = 0){
+void T2ttStackPlots(TString var, TString chan, TString level, int mStop1, int mLsp1, int mStop2, int mLsp2){
   TH1F* h_stop_1;
   TH1F* h_stop_2;
   TCanvas* c = SetCanvas();
@@ -474,42 +479,55 @@ void T2ttStackPlots(TString var, TString chan = "All", TString level = "DYVeto",
   hs->GetYaxis()->SetTitleOffset(0.5);
   hs->GetYaxis()->SetNdivisions(505);
   hs->GetXaxis()->SetLabelSize(0.0);
-  if (dodata) hdata->Draw("pesame");
-  plot->RedrawAxis("same");
-  TString signal1 = Form("T2tt_mStop%i_mLsp%i", mStop1, mLsp1);
-  TString signal2 = Form("T2tt_mStop%i_mLsp%i", mStop2, mLsp2);
-  if(mStop1 != 0){
-    h_stop_1 = loadHistogram(signal1, var, chan, level);
-    h_stop_1->SetFillColor(0);
-    h_stop_1->SetLineColor(kMagenta-4);
-    h_stop_1->SetLineWidth(2);
-    h_stop_1->SetLineStyle(1);
-  }
-  if(mStop2 != 0){
-    h_stop_2 = loadHistogram(signal2, var, chan, level);
-    h_stop_2->SetFillColor(0);
-    h_stop_2->SetLineColor(kBlue+3);
-    h_stop_2->SetLineWidth(2);
-    h_stop_2->SetLineStyle(1);
-  }
+	if (dodata) hdata->Draw("pesame");
+	plot->RedrawAxis("same");
+	TString signal1 = Form("T2tt_mStop%i_mLsp%i", mStop1, mLsp1);
+	TString signal2 = Form("T2tt_mStop%i_mLsp%i", mStop2, mLsp2);
+	if(mStop1 != 0){
+		h_stop_1 = loadHistogram(signal1, var, chan, level); 
+		h_stop_1->SetFillColor(0); 
+		h_stop_1->SetLineColor(kMagenta-4);    
+		h_stop_1->SetLineWidth(2); 
+		h_stop_1->SetLineStyle(1); 
+	}
+	if(mStop2 != 0){
+		h_stop_2 = loadHistogram(signal2, var, chan, level);
+		h_stop_2->SetFillColor(0); 
+		h_stop_2->SetLineColor(kBlue+3);
+		h_stop_2->SetLineWidth(2); 
+		h_stop_2->SetLineStyle(1); 
+	}
 
-  SetLegend();
-  leg->AddEntry(H_ttbar(var,chan,level, "0"), Form("ttbar: %5.2f", yield("ttbar", chan, level)), "f");
-  leg->AddEntry(H_tW(var,chan,level, "0"), Form("tW: %5.2f", yield("tW", chan, level)), "f");
-  leg->AddEntry(H_DY(var,chan,level, "0"), Form("DY: %5.2f", yield("DY", chan, level)), "f");
-  leg->AddEntry(H_VV(var,chan,level, "0"), Form("VV: %5.2f", yield("VV", chan, level)), "f");
-  leg->AddEntry(H_ttV(var,chan,level, "0"), Form("ttV: %5.2f", yield("ttV", chan, level)), "f");
-  leg->AddEntry(H_fake(var,chan,level, "0"), Form("W+Jets: %5.2f", yield("fake", chan, level)), "f");
-  TH1F* hh = H_ttbar(var,chan,level, "0"); hh->SetFillStyle(1001); hh->SetFillColor(kBlack);
-  leg->AddEntry(hh, Form("All bkg: %5.2f", yield("bkg", chan, level)), "");
-  if (dodata) leg->AddEntry(hdata, Form("Data: %5.2f", yield("data", chan, level)), "pl");
-  if(mStop1 != 0) leg->AddEntry(h_stop_1, Form("S.%i-%i (x20) : %5.2f", mStop1, mLsp1, h_stop_1->Integral()), "l");
-  if(mStop2 != 0) leg->AddEntry(h_stop_2, Form("S.%i-%i (x20) : %5.2f", mStop2, mLsp2, h_stop_2->Integral()), "l");
+	SetLegend();
+	if(doYields){
+		leg->AddEntry(H_ttbar(var,chan,level, "0"), Form("ttbar: %5.2f", yield("ttbar", chan, level)), "f");
+		leg->AddEntry(H_tW(var,chan,level, "0"), Form("tW: %5.2f", yield("tW", chan, level)), "f");
+		leg->AddEntry(H_DY(var,chan,level, "0"), Form("DY: %5.2f", yield("DY", chan, level)), "f");
+		leg->AddEntry(H_VV(var,chan,level, "0"), Form("VV: %5.2f", yield("VV", chan, level)), "f");
+		leg->AddEntry(H_ttV(var,chan,level, "0"), Form("ttV: %5.2f", yield("ttV", chan, level)), "f");
+		leg->AddEntry(H_fake(var,chan,level, "0"), Form("W+Jets: %5.2f", yield("fake", chan, level)), "f");
+		TH1F* hh = H_ttbar(var,chan,level, "0"); hh->SetFillStyle(1001); hh->SetFillColor(kBlack);
+		leg->AddEntry(hh, Form("All bkg: %5.2f", yield("bkg", chan, level)), "");
+		if (dodata) leg->AddEntry(hdata, Form("Data: %5.2f", ((TH1F*) H_data("InvMass", chan, level))->Integral()), "pl");
+		if(mStop1 != 0) leg->AddEntry(h_stop_1, Form("S.%i-%i (x20) : %5.2f", mStop1, mLsp1, h_stop_1->Integral()), "l");
+		if(mStop2 != 0) leg->AddEntry(h_stop_2, Form("S.%i-%i (x20) : %5.2f", mStop2, mLsp2, h_stop_2->Integral()), "l");
+  }
+  else{
+		leg->AddEntry(H_ttbar(var,chan,level, "0"), "ttbar", "f");
+		leg->AddEntry(H_tW(var,chan,level, "0"), "tW", "f");
+		leg->AddEntry(H_DY(var,chan,level, "0"), "DY", "f");
+		leg->AddEntry(H_VV(var,chan,level, "0"), "VV", "f");
+		leg->AddEntry(H_ttV(var,chan,level, "0"), "ttV", "f");
+		leg->AddEntry(H_fake(var,chan,level, "0"), "W+Jets", "f");
+		if (dodata) leg->AddEntry(hdata, "Data", "pl");
+		if(mStop1 != 0) leg->AddEntry(h_stop_1, Form("S.%i-%i (x20)", mStop1, mLsp1), "l");
+		if(mStop2 != 0) leg->AddEntry(h_stop_2, Form("S.%i-%i (x20)", mStop2, mLsp2), "l");
+  }
 
   leg->Draw("same"); texlumi->Draw("same"); texcms->Draw("same");
   SetTexChan(chan, level); texchan->Draw("same");
-  if(mStop1 != 0) h_stop_1->Scale(20);  h_stop_1->Draw("same,hist");
-  if(mStop2 != 0) h_stop_2->Scale(20);  h_stop_2->Draw("same,hist");
+  if(mStop1 != 0){ h_stop_1->Scale(20);  h_stop_1->Draw("same,hist");}
+  if(mStop2 != 0){ h_stop_2->Scale(20);  h_stop_2->Draw("same,hist");}
 
   TH1F* mh = (TH1F*)hs->GetStack()->Last()->Clone();
   

@@ -71,6 +71,13 @@ const TString var[nVars] = {
   "MET", "Ptllb", "Meff", "HT",                            // 12, 13, 14, 15
   "DelLepPhi", "DelPhiLepMet", "DelPhiJetMet", "DelPhiLepJet", "DelPhiPllbMet", // 16, 17, 18, 19, 20
   "METHT", "MinDPhiMetJets"}; // 21, 22  
+enum SR{
+ AA, AB, AC, BA, BB, BC, CA, CB, CC,
+ nSR
+};
+const TString SRlabel[nSR] = {
+"AA", "AB", "AC", "BA", "BB", "BC", "CA", "CB", "CC"
+};
 
 TPad* plot; TPad* pratio;
 TLegend* leg;

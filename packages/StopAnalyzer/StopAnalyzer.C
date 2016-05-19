@@ -208,6 +208,9 @@ StopAnalyzer::StopAnalyzer() : PAFChainItemSelector() {
 			fHChi0StopMass[ichan][icut] = 0;
 			fHvertices[ichan][icut] = 0;
 			fHgoodvertices[ichan][icut] = 0;
+      for(unsigned int iSR = 0; iSR < nSR; iSR++){
+           fMT2SR[ichan][icut][iSR] = 0;
+      }
 
 			for (unsigned int isyst = 0; isyst < gNSYST; isyst++) {
 				fHInvMass[ichan][icut][isyst] = 0;   
@@ -469,6 +472,9 @@ void StopAnalyzer::InitialiseKinematicHistos(){
 
 			fHInvMass[ch][cut][0]       = CreateH1F("H_InvMass_"      +gChanLabel[ch]+"_"+sCut[cut],"InvMass"      ,  1000,  0., 1000.);
 			fHMET[ch][cut][0]           = CreateH1F("H_MET_"          +gChanLabel[ch]+"_"+sCut[cut],"MET"          , 600, 0,600);
+			for(unsigned int iSR = 0; iSR < nSR; iSR++){
+				fMT2SR[ch][cut][iSR] = CreateH1F("H_MT2_"  +SRlabel[iSR] + "_"  +gChanLabel[ch]+"_"+sCut[cut],"MT2"          , 300,0.,300);
+			}
 			fHMT2[ch][cut][0]           = CreateH1F("H_MT2_"          +gChanLabel[ch]+"_"+sCut[cut],"MT2"          , 300,0.,300);
 			fHMT2b[ch][cut][0]          = CreateH1F("H_MT2bb_"        +gChanLabel[ch]+"_"+sCut[cut],"MT2bb"        , 800,0.,800);
 			fHMT2lb[ch][cut][0]         = CreateH1F("H_MT2lblb_"      +gChanLabel[ch]+"_"+sCut[cut],"MT2lblb"      , 600,0.,600);
@@ -1359,7 +1365,6 @@ float StopAnalyzer::getTopPtSF(){
 //------------------------------------------------------------------------
 void StopAnalyzer::FillDYHistograms(){
 	float Mll = 0.;
-	Float_t genWeight = genWeight;
 	if (PassTriggerEMu()  && IsElMuEvent()){
 		// Define Hypothesis Leptons...
 		EventWeight = gWeight * getSF(ElMu);
@@ -1391,13 +1396,13 @@ void StopAnalyzer::FillDYHistograms(){
 						fHDY_InvMassVsNjets [ElMu][i1btag]->Fill(getNJets() , Mll, EventWeight);
 						fHDY_InvMassVsNbtags[ElMu][i1btag]->Fill(getNBTags(), Mll, EventWeight);
 						fHDY_InvMass        [ElMu][i1btag]->Fill(             Mll, EventWeight);
-            if(PassesDYVetoCut()){
-              fHDY_InvMassVsNPV   [ElMu][iDYVeto]->Fill(nGoodVertex, Mll, EventWeight);
-              fHDY_InvMassVsMET   [ElMu][iDYVeto]->Fill(getMET()   , Mll, EventWeight);
-              fHDY_InvMassVsNjets [ElMu][iDYVeto]->Fill(getNJets() , Mll, EventWeight);
-              fHDY_InvMassVsNbtags[ElMu][iDYVeto]->Fill(getNBTags(), Mll, EventWeight);
-              fHDY_InvMass        [ElMu][iDYVeto]->Fill(             Mll, EventWeight);
-            }
+						if(PassesDYVetoCut()){
+							fHDY_InvMassVsNPV   [ElMu][iDYVeto]->Fill(nGoodVertex, Mll, EventWeight);
+							fHDY_InvMassVsMET   [ElMu][iDYVeto]->Fill(getMET()   , Mll, EventWeight);
+							fHDY_InvMassVsNjets [ElMu][iDYVeto]->Fill(getNJets() , Mll, EventWeight);
+							fHDY_InvMassVsNbtags[ElMu][iDYVeto]->Fill(getNBTags(), Mll, EventWeight);
+							fHDY_InvMass        [ElMu][iDYVeto]->Fill(             Mll, EventWeight);
+						}
 					}
 				}
 			}
@@ -1465,17 +1470,17 @@ void StopAnalyzer::FillDYHistograms(){
 						fHDY_InvMass        [Muon][i1btag]->Fill(             Mll, EventWeight);
 						if(PassesDYVetoCut()){
 							fHDY_InvMassVsNPV   [Muon][iDYVeto]->Fill(nGoodVertex, Mll, EventWeight);
-              fHDY_InvMassVsMET   [Muon][iDYVeto]->Fill(getMET()   , Mll, EventWeight);
-              fHDY_InvMassVsNjets [Muon][iDYVeto]->Fill(getNJets() , Mll, EventWeight);
-              fHDY_InvMassVsNbtags[Muon][iDYVeto]->Fill(getNBTags(), Mll, EventWeight);
-              fHDY_InvMass        [Muon][iDYVeto]->Fill(             Mll, EventWeight);
-            }
-				  }
-			  }
-      }
-    }
-  }
-  ResetHypLeptons(); 
+							fHDY_InvMassVsMET   [Muon][iDYVeto]->Fill(getMET()   , Mll, EventWeight);
+							fHDY_InvMassVsNjets [Muon][iDYVeto]->Fill(getNJets() , Mll, EventWeight);
+							fHDY_InvMassVsNbtags[Muon][iDYVeto]->Fill(getNBTags(), Mll, EventWeight);
+							fHDY_InvMass        [Muon][iDYVeto]->Fill(             Mll, EventWeight);
+						}
+					}
+				}
+			}
+		}
+	}
+	ResetHypLeptons(); 
 	if (PassTriggerEE()   && IsElElEvent()){
 		EventWeight = gWeight * getSF(Elec);
 		if(gIsMCatNLO)    EventWeight = EventWeight * genWeight; 
@@ -1552,16 +1557,16 @@ void StopAnalyzer::FillKinematicHistos(gChannel chan, iCut cut){
 		}
 	}
 
-  //++ jet info		  
-  int njets = getNJets(); 
-  if(getHT()>0){
-     fHHT2[chan][cut]     ->Fill(getHT(),                                 EventWeight);
-     fHHT3[chan][cut]     ->Fill(getHT(),                                 EventWeight);
-     fHHT4[chan][cut]     ->Fill(getHT(),                                 EventWeight);
-     fHHT5[chan][cut]     ->Fill(getHT(),                                 EventWeight);
-  }
-  fHJet0Eta[chan][cut]    ->Fill(getJetEtaIndex(0),			  EventWeight);
-  fHJet1Eta[chan][cut]    ->Fill(getJetEtaIndex(1),			  EventWeight);
+	//++ jet info		  
+	int njets = getNJets(); 
+	if(getHT()>0){
+		fHHT2[chan][cut]     ->Fill(getHT(),                                 EventWeight);
+		fHHT3[chan][cut]     ->Fill(getHT(),                                 EventWeight);
+		fHHT4[chan][cut]     ->Fill(getHT(),                                 EventWeight);
+		fHHT5[chan][cut]     ->Fill(getHT(),                                 EventWeight);
+	}
+	fHJet0Eta[chan][cut]    ->Fill(getJetEtaIndex(0),			  EventWeight);
+	fHJet1Eta[chan][cut]    ->Fill(getJetEtaIndex(1),			  EventWeight);
 	fHBtagJet0Pt[chan][cut] ->Fill(getBtagJetPtIndex(0),                    EventWeight);
 
 	int ib = getLeadingJetbTag();
@@ -1670,7 +1675,25 @@ void StopAnalyzer::FillYieldsHistograms(gChannel chan, iCut cut, gSystFlag sys){
 			if(getNJets()>1){
 				fHMT2b[chan][cut][sys]          ->Fill(getMT2b(chan),                           EventWeight);
 				fHMT2lb[chan][cut][sys]         ->Fill(getMT2lb(chan),                          EventWeight);
+				if(sys==Norm){
+					float bb = getMT2b(chan);
+					float lb = getMT2lb(chan);
+					int iSR = 0;
+					if     (lb<100 && bb<170)                     iSR = AA;
+					else if(lb<100 && bb>170 && bb<270)           iSR = AB;
+					else if(lb<100 && bb>270)                     iSR = AC;
+					else if(lb<200 && lb>100 && bb<170)           iSR = BA;
+					else if(lb<200 && lb>100 && bb<270)           iSR = BB;
+					else if(lb<200 && lb>100 && bb>270)           iSR = BC;
+					else if(lb>200 && bb<170)                     iSR = CA;
+					else if(lb>200 && bb>170 && bb<270)           iSR = CB;
+					else if(lb>200 && bb>270)                     iSR = CC;
+					else cout << "No region for evt " << Get<Int_t>("evt") << endl;
+
+					fMT2SR[chan][cut][iSR] -> Fill(getMT2ll(chan), EventWeight);
+				}
 			}
+
 			fHPtllb[chan][cut][sys]         ->Fill(getPtllb().Pt(),                         EventWeight);
 			fHMeff[chan][cut][sys]          ->Fill(getMeff(),                               EventWeight);
 			if(getHT()>0){

@@ -60,6 +60,13 @@ enum iCut{
   iExact2btag,
   iNCUTS
 };
+enum SR{
+ AA, AB, AC, BA, BB, BC, CA, CB, CC,
+ nSR
+};
+const TString SRlabel[nSR] = {
+	"AA", "AB", "AC", "BA", "BB", "BC", "CA", "CB", "CC"      
+};
 const TString sCut[iNCUTS] = {"dilepton", "ZVeto", "MET", "2jets", "1btag","DYVeto","Exact1btag","Exact2btag"};
 enum gSystFlag{
   Norm,
@@ -520,6 +527,7 @@ class StopAnalyzer : public PAFChainItemSelector
 
 		//------------------------------------------------------------
 		//------------------------------------------------------------
+		TH1F*fMT2SR[gNCHANNELS][iNCUTS][nSR];
 
 		TH1F* fHInvMass2[gNCHANNELS][iNCUTS][gNSYST];   
 		TH1F* fHSSInvMass[gNCHANNELS][iNCUTS][gNSYST];   
