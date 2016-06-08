@@ -2384,7 +2384,7 @@ void TopPlotter::CalculateDYBkg(){
     Double_t nout_ee(0.),nin_ee(0.),nout_err_ee(0.),nin_err_ee(0.);
     Double_t nout_mm(0.),nin_mm(0.),nout_err_mm(0.),nin_err_mm(0.);
     nin_mm  = DY.MllHistos[Muon][cut]->Integral(low_in, up_in); nin_err_mm = TMath::Sqrt(nin_mm);
-    nin_ee  = DY.MllHistos[Elec][cut]->Integral(low_in, up_in); nin_err_mm = TMath::Sqrt(nin_ee); 
+    nin_ee  = DY.MllHistos[Elec][cut]->Integral(low_in, up_in); nin_err_ee = TMath::Sqrt(nin_ee); 
     
     nout_mm = DY.MllHistos[Muon][cut]->Integral(0, 200)-nin_mm; nout_err_mm = TMath::Sqrt(nout_mm);
     nout_ee = DY.MllHistos[Elec][cut]->Integral(0, 200)-nin_ee; nout_err_ee = TMath::Sqrt(nout_ee);
@@ -2433,8 +2433,8 @@ void TopPlotter::CalculateDYBkg(){
     fOUTSTREAM << "                  |       El/El      |       Mu/Mu      |       El/Mu      ||" << endl;
     fOUTSTREAM << "-----------------------------------------------------------------------------" << endl;
     fOUTSTREAM << Form(" n_in (MC)        | %7.1f +/- %4.1f | %7.1f +/- %4.1f |                  ||",   		       
-		       nin_ee, N_in_err[Elec], 
-		       nin_mm, N_in_err[Muon]) << endl;
+		       nin_ee, nin_err_ee, 
+		       nin_mm, nin_err_mm) << endl;
     fOUTSTREAM << Form(" n_out (MC)       | %7.1f +/- %4.1f | %7.1f +/- %4.1f |                  ||",   		       
 		       nout_ee, N_out_err[Elec], 
 		       nout_mm, N_out_err[Muon]) << endl;
