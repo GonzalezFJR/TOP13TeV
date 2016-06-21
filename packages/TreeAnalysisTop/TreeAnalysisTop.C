@@ -250,7 +250,7 @@ void TreeAnalysisTop::Initialise() {
 	TH1::SetDefaultSumw2();
 	fHDummy = CreateH1F("fHDummy","",1,0,1);
   fHFidu = CreateH1F("YieldFidu","",1,0,1);
-  fHWeightsFidu  = CreateH1F("hPDFweightsFidu","hPDFweightsFidu", Get<Int_t>("nLHEweight"), -0.5, Get<Int_t>("nLHEweight") - 0.5);
+  fHWeightsFidu  = CreateH1F("hPDFweightsFidu","hPDFweightsFidu", nWeights, -0.5, nWeights - 0.5);
 	//PAF_INFO("TreeAnalysisTop", "+ Initialise Yield histograms...");
 	InitialiseYieldsHistos();
 	//PAF_INFO("TreeAnalysisTop", "+ Initialise Kinematic histograms...");
@@ -725,7 +725,8 @@ void TreeAnalysisTop::InsideLoop() {
 			if ( (l1+l2).M() < 20) return;
 		}
     fHFidu->Fill(0.5);
-		for(int i = 0; i<Get<Int_t>("nLHEweight"); i++){
+        Int_t nWTree = Get<Int_t>("nLHEweight");
+		for(int i = 0; i<nWeights; i++){
 			fHWeightsFidu->Fill(i, EventWeight*Get<Float_t>("LHEweight_wgt", i));
 		}
 
@@ -1373,7 +1374,7 @@ void TreeAnalysisTop::FillDYHistograms(){
 			if (fChargeSwitch == true  ) return;
 
 			if (!gIsData) {
-				for(int i = 0; i<Get<Int_t>("nLHEweight"); i++){
+				for(int i = 0; i<nWeights; i++){
 					fHLHEweights[chan][cut]->Fill(i, EventWeight*Get<Float_t>("LHEweight_wgt", i));
 				}
 			}
