@@ -71,7 +71,8 @@ Running the Stop Analysis
 
 Use the macro 'RunStopAnalysis.C'. To analyze one stop sample you must specify the masses of stop and neutralino and the weight for normalization. Example:
 
-    root -l -b -q 'RunTree_ReReco.C("T2tt_150to175LSP1to100", 1, true, 0, true, 150, 50, 0.0134)'
+    root -l -b -q 'RunStopAnalysis.C("T2tt_150to175LSP1to100", 1, true, 0, true, 150, 50, 0.0134)'
+    root -l -b -q 'RunStopAnalysis.C("TTbar_Powheg", 10)'
     
 To analyze all masses in one file or just evey point use the RunT2ttSamples.py script as follows:
 
