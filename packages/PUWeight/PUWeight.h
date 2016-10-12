@@ -49,7 +49,9 @@ enum EMCDistribution {
 
   Summer2015_25ns_poisson,     /* Summer15*/
   
-  Fall2015_25ns_matchData_poisson
+  Fall2015_25ns_matchData_poisson,
+	
+  Spring2016_25ns_poisson_OOTPU /* Spring16 */	
 };
 
 class PUWeight {
