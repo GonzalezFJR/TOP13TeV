@@ -197,6 +197,8 @@ class TreeAnalysisTop : public PAFChainItemSelector
     virtual void Summary();
 
   // Frequantly used variables in the trees
+  TLorentzVector genElec;
+  TLorentzVector genMuon;
   Int_t   nLepGood;
   Int_t   ngenLep;
   Int_t   ngenLepFromTau;
@@ -495,6 +497,9 @@ class TreeAnalysisTop : public PAFChainItemSelector
   std::vector<Double_t>       PtGen_Jet;
   std::vector<Double_t>       PtGen_b;
 
+  Int_t ngenJetsGood = 0;
+  Int_t ngenbJetsGood = 0;
+
   Int_t nGenElec;
   Int_t nGenMuon;
   Int_t nGenTau;
@@ -511,6 +516,9 @@ class TreeAnalysisTop : public PAFChainItemSelector
   Int_t nMuon;
   Int_t nElec;
   Int_t nLeptons;
+
+  TLorentzVector l1;
+  TLorentzVector l2;
 
   ///// OBJECTS
   std::vector<lepton> Lepton;

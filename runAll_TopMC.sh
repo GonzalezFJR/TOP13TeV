@@ -11,7 +11,7 @@ source /nfs/fanae/PAF_releases/head/PAF_setup.sh
 resetpaf
 
 #root -l -b -q 'RunTree_ReReco.C("TestHeppy", 1, 0, true)'
-root -l -b -q 'RunTree_ReReco.C("TTbar_Powheg", 15, 0, true)'
+root -l -b -q 'RunTree_ReReco.C("TTbar_Powheg", 1, 0, true, 1000)'
 #root -l -b -q 'RunTree_ReReco.C("TTbar_Powheg", 15, 1, true)' # Semileptonic selection
 #root -l -b -q 'RunTree_ReReco.C("ZZ"   , 5, 0, true)'
 #root -l -b -q 'RunTree_ReReco.C("WW"   , 5, 0, true)'
