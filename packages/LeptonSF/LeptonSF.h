@@ -110,7 +110,8 @@ class LeptonSF {
 			   const char* histo = "DATA_over_MC_Tight");
   TH2D* LoadTightMuonIsoSF(const char* file = "http://www.hep.uniovi.es/iglez/CMS/WZ/MuonISOSF.root",
 			   const char* histo = "DATA_over_MC_Tight");
-  TH2D* LoadTightMuonSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/76X/MuonSF_IdIso_Z_RunCD_Reco76X_Feb15.root",
+  //TH2D* LoadTightMuonSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/76X/MuonSF_IdIso_Z_RunCD_Reco76X_Feb15.root",
+  TH2D* LoadTightMuonSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/GlobalMuonSFs.root",
   			  const char* histo = "GlobalSF");
   
   // + Elec SFs
@@ -122,7 +123,8 @@ class LeptonSF {
 			       const char* histo = "electronsDATAMCratio_FO_ID_ISO");
   
   //TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/elec_tight_sf2D_13TeV_RunD.root",
-  TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/76X/CutBasedID_MediumWP_76X_18Feb.txt_SF2D.root",
+  //TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/76X/CutBasedID_MediumWP_76X_18Feb.txt_SF2D.root",
+  TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/egammaEffiMedium.txt_SF2D_runBCD_12p9fb.root",
 			     const char* histo = "EGamma_SF2D");
 
   // + Trigger SFs
