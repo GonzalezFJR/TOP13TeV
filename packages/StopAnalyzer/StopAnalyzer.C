@@ -212,7 +212,7 @@ StopAnalyzer::StopAnalyzer() : PAFChainItemSelector() {
            fMT2SR[ichan][icut][iSR] = 0;
       }
 
-			for (unsigned int isyst = 0; isyst < gNSYST; isyst++) {
+			for (unsigned int isyst = 1; isyst < gNSYST; isyst++) {
 				fHInvMass[ichan][icut][isyst] = 0;   
 				fHInvMass2[ichan][icut][isyst] = 0;   
 				fHSSInvMass[ichan][icut][isyst] = 0;   
@@ -291,14 +291,9 @@ void StopAnalyzer::Initialise() {
 			gSampleName == "SingleMu"        || 
 			gSampleName == "SingleElectron"  || 
 			gSampleName == "MuonEG"	       ||	    
-			gSampleName == "TTJets    "      ||  
-			gSampleName == "DYJetsToLL_M50_aMCatNLO"     ||
-			gSampleName == "DYJetsToLL_M10to50_aMCatNLO" ||
-			gSampleName == "ZJets_MLM"       ||
-			gSampleName == "DYJets_MLM"      ||
-			gSampleName == "TTbar_Powheg"    ||  
-			gSampleName == "TTbar_aMCatNLO"  ||  
-			gSampleName == "TTbar_Powheg_Pythia6")  {  
+			gSampleName.Contains("TTJets") || gSampleName.Contains("TTbar") || 
+			gSampleName.Contains("DY") ||
+			gSampleName.Contains("ZJets")){
 		//	PAF_INFO("StopAnalyzer", "+ Initialise Drell-Yan histograms...");
 		InitialiseDYHistos();
 	}
@@ -308,11 +303,12 @@ void StopAnalyzer::Initialise() {
 	//	PU Reweight
 	//--------------------------------------
 	//PAF_INFO("StopAnalyzer", "+ Initialise Pile-Up reweighting tool...");
-	fPUWeight     = new PUWeight(gLumiForPU,Summer2015_25ns_poisson,"2015_25ns");
-	if (!gIsData) {
-		fPUWeightUp   = new PUWeight(18494.9,   Summer2015_25ns_poisson,"2015_25ns"); //  18494.9  (5% down)
-		fPUWeightDown = new PUWeight(20441.7,   Summer2015_25ns_poisson,"2015_25ns"); //  20441.7  (5% up  )
-	}
+  fPUWeight     = new PUWeight(gLumiForPU, Fall2015_25ns_matchData_poisson,"2015_25ns_76");
+  if (!gIsData) {
+    fPUWeightUp   = new PUWeight(18494.9,    Fall2015_25ns_matchData_poisson,"2015_25ns_76"); //  18494.9 
+    fPUWeightDown = new PUWeight(20441.7,    Fall2015_25ns_matchData_poisson,"2015_25ns_76"); //  20441.7 
+  }
+
 
 	//if (gUseCSVM) fBTagSF   = new BTagSFUtil("CSVM","ABCD");//ReReco
 	//else          fBTagSF   = new BTagSFUtil("CSVT","ABCD");//ReReco 
@@ -473,9 +469,9 @@ void StopAnalyzer::InitialiseKinematicHistos(){
 			fHInvMass[ch][cut][0]       = CreateH1F("H_InvMass_"      +gChanLabel[ch]+"_"+sCut[cut],"InvMass"      ,  1000,  0., 1000.);
 			fHMET[ch][cut][0]           = CreateH1F("H_MET_"          +gChanLabel[ch]+"_"+sCut[cut],"MET"          , 600, 0,600);
 			for(unsigned int iSR = 0; iSR < nSR; iSR++){
-				fMT2SR[ch][cut][iSR] = CreateH1F("H_MT2_"  +SRlabel[iSR] + "_"  +gChanLabel[ch]+"_"+sCut[cut],"MT2"          , 300,0.,300);
+				fMT2SR[ch][cut][iSR] = CreateH1F("H_MT2_"  +SRlabel[iSR] + "_"  +gChanLabel[ch]+"_"+sCut[cut],"MT2"          , 400,0.,400);
 			}
-			fHMT2[ch][cut][0]           = CreateH1F("H_MT2_"          +gChanLabel[ch]+"_"+sCut[cut],"MT2"          , 300,0.,300);
+			fHMT2[ch][cut][0]           = CreateH1F("H_MT2_"          +gChanLabel[ch]+"_"+sCut[cut],"MT2"          , 400,0.,400);
 			fHMT2b[ch][cut][0]          = CreateH1F("H_MT2bb_"        +gChanLabel[ch]+"_"+sCut[cut],"MT2bb"        , 800,0.,800);
 			fHMT2lb[ch][cut][0]         = CreateH1F("H_MT2lblb_"      +gChanLabel[ch]+"_"+sCut[cut],"MT2lblb"      , 600,0.,600);
 			fHPtllb[ch][cut][0]         = CreateH1F("H_Ptllb_"        +gChanLabel[ch]+"_"+sCut[cut],"PTllb"        , 800,0.,800);
@@ -775,8 +771,7 @@ void StopAnalyzer::InsideLoop() {
 
 	// Calculate PU Weight
 	PUSF = 1.;
-	if (!gIsData)
-		PUSF = fPUWeight->GetWeight(Get<Int_t>("nTrueInt")); //True       //nTruePU
+	//if (!gIsData) PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); //True       //nTruePU
 
 	// Init data members ........................................................
 	GetTreeVariables();
@@ -786,11 +781,7 @@ void StopAnalyzer::InsideLoop() {
 	// Get number of generated leptons ........................................................
 	if (!gIsData) {
 		SelectedGenLepton();
-		if (gSampleName == "TTJets_MadSpin"       ||
-				gSampleName == "TTbar_Powheg"         ||        
-				gSampleName == "TTbar_Powheg_Pythia6" ||        
-				gSampleName == "TTJets_aMCatNLO"      ||        
-				gSampleName == "TTJets"               ){
+		if (gSampleName.Contains("TTJets") || gSampleName.Contains("TTbar_Powheg")){
 			Float_t Weight = 1.; 
 			TLorentzVector top;
 			for (Int_t t=0; t<Get<Int_t>("nGenTop"); t++){ 
@@ -807,25 +798,8 @@ void StopAnalyzer::InsideLoop() {
     bool isEmuDilepton = true;
 		//bool isEmuDilepton = (nGenElec+nGenMuon)>=2;  // for dileptonic selection
 		//bool isEmuDilepton = (nGenElec+nGenMuon)< 2;  // for semileptonic selection
-		//bool isEmuDilepton = nGenElec>=1 && nGenMuon>=1;  // for dileptonic e-mu selection
-		//bool isEmuDilepton = ( (nGenElec==1 && nGenMuon==0) || (nGenElec==0 && nGenMuon==1) ); // for semileptonic selection
-		if(!isEmuDilepton){
-			if (gSampleName == "TTbar_Powheg"              ) return;
-			if (gSampleName == "TTJets"                    ) return;
-			if (gSampleName == "TTJets_MLM"                ) return;
-			if (gSampleName == "TTbar_Powheg_ScaleUp"      ) return;
-			if (gSampleName == "TTbar_Powheg_ScaleDown"    ) return;
-			if (gSampleName == "TTbar_Powheg_mtop1695"     ) return;
-			if (gSampleName == "TTbar_Powheg_mtop1755"     ) return;
-			if (gSampleName == "TTbar_Powheg_2L"	         ) return;
-			if (gSampleName == "TTbar_Powheg_Pythia6"      ) return;
-			if (gSampleName == "TTbar_Powheg_Herwig"       ) return;
-			if (gSampleName == "TTJets_aMCatNLO"	         ) return;
-			if (gSampleName == "TTJets_aMCatNLO_ScaleUp"   ) return;
-			if (gSampleName == "TTJets_aMCatNLO_ScaleDown" ) return;
-			if (gSampleName == "TTJets_aMCatNLO_mtop1695"  ) return;
-			if (gSampleName == "TTJets_aMCatNLO_mtop1755"  ) return;
-		}
+		if(!isEmuDilepton && (gSampleName.Contains("TTbar") || gSampleName.Contains("TTJets"))) return;
+
 		// Fill Gen Info 
 		//----------------------------------------------------------------------------
 		TLorentzVector lep,jet;
@@ -877,11 +851,8 @@ void StopAnalyzer::InsideLoop() {
 			gSampleName == "SingleMu"        || 
 			gSampleName == "SingleElectron"  || 
 			gSampleName == "MuonEG"	       ||	  
-			gSampleName == "ZJets_MLM"       ||
-			gSampleName == "DYJets_MLM"      ||
-			gSampleName == "DYJetsToLL_M50_aMCatNLO"     ||
-			gSampleName == "DYJetsToLL_M10to50_aMCatNLO" 
-		 )  {
+			gSampleName.Contains("ZJets")   ||
+			gSampleName.Contains("DY"))  {
 		FillDYHistograms();
 	}
 
@@ -972,14 +943,14 @@ void StopAnalyzer::InsideLoop() {
   // Pile Up sytematics ....................................................................
   ResetOriginalObjects();
   if (!gIsData)
-    PUSF = fPUWeightUp->GetWeight(Get<Int_t>("nTrueInt")); //nTruePU
+    PUSF = fPUWeightUp->GetWeight(Get<Float_t>("nTrueInt")); //nTruePU
   gSysSource = PUUp;
   SetEventObjects();
   FillYields(PUUp);
   
   ResetOriginalObjects();
   if (!gIsData)
-    PUSF = fPUWeightDown->GetWeight(Get<Int_t>("nTrueInt")); //nTruePU
+    PUSF = fPUWeightDown->GetWeight(Get<Float_t>("nTrueInt")); //nTruePU
   gSysSource = PUDown;
   SetEventObjects();
   FillYields(PUDown); 
@@ -1001,21 +972,21 @@ void StopAnalyzer::Summary(){}
 //------------------------------------------------------------------------------
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopTrigger#Run2015C_D_25_ns_data_with_RunII
 bool StopAnalyzer::PassTriggerMuMu() {
-  return true;
-	Bool_t pass = Get<Float_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+  Bool_t pass = true;
+	//Bool_t pass = Get<Float_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
 	return pass;
 }
 
 bool StopAnalyzer::PassTriggerEE(){ 
-  return true;
-	Bool_t pass = Get<Float_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+  Bool_t pass = true;
+	//Bool_t pass = Get<Float_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
 	return pass;
 }
 
 bool StopAnalyzer::PassTriggerEMu(){ 
-  return true;
-	Bool_t pass = (Get<Float_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || 
-			Get<Float_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v")); 
+  Bool_t pass = true;
+	//Bool_t pass = (Get<Float_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || 
+	//		Get<Float_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v")); 
 	return pass;
 }
 
@@ -1596,9 +1567,9 @@ void StopAnalyzer::FillKinematicHistos(gChannel chan, iCut cut){
 		fHDPhiLep0Jet[chan][cut]  ->Fill(getDPhiClosestJet(fHypLepton1.p), EventWeight);
 		fHDPhiLep1Jet[chan][cut]  ->Fill(getDPhiClosestJet(fHypLepton2.p), EventWeight);
 	}
-	Int_t nVert =  Get<Int_t>("nVert");
-	fHvertices[chan][cut]     ->Fill(nVert, EventWeight); // for now, using the same
-	fHgoodvertices[chan][cut] ->Fill(nVert, EventWeight); // for now, using the same
+	//Float_t nVert =  Get<Float_t>("nVert");
+	//fHvertices[chan][cut]     ->Fill(nVert, EventWeight); // for now, using the same
+	//fHgoodvertices[chan][cut] ->Fill(nVert, EventWeight); // for now, using the same
 
 #ifdef DEBUG
 	cout << " DONE!" << endl;
@@ -1991,11 +1962,13 @@ bool StopAnalyzer::PassesTopDCut(){
 
 bool StopAnalyzer::PassesNJetsCut(){
 	if (getNJets() <= 1) return false;
+  if (getBtagJetPtIndex(0) < 50) return false; // aaa
+	if (getMeff() < 300.) return false;
 	return true;
 }
 
 bool StopAnalyzer::PassesMETCut(){
-	if (getMET() < 80.) return false;
+	if (getMET() < 50.) return false;
 	return true;
 }
 
@@ -2152,14 +2125,14 @@ float StopAnalyzer::getElecIso(int iElec){
 
 bool StopAnalyzer::getMultiIso(unsigned int index){
   float max_mRelIso;  
-	if      ((TMath::Abs(LepGood_pdgId[index])) == 11) max_mRelIso = 0.13;  // Tight for electrons
-	else if ((TMath::Abs(LepGood_pdgId[index])) == 13) max_mRelIso = 0.2;   // Medium for muons
-  else return false;
+	//if      ((TMath::Abs(LepGood_pdgId[index])) == 11) max_mRelIso = 0.13;  // Tight for electrons
+	//else if ((TMath::Abs(LepGood_pdgId[index])) == 13) max_mRelIso = 0.2;   // Medium for muons
+	max_mRelIso = 0.088; // Very Tight
   float mRelIso = Get<Float_t>("LepGood_miniRelIso", index);
   float ptRatio = Get<Float_t>("LepGood_jetPtRatiov2", index);
   float ptRel   = Get<Float_t>("LepGood_jetPtRelv2", index);
   float min_ptRatio = 0.84; // Very tight
-  float min_ptRel   = 0.72; // Tight
+  float min_ptRel   = 7.2 ; // Tight
   // min_ptRatio = 0; min_ptRel = 0; // No MultiIso
   return (mRelIso < max_mRelIso && (ptRatio > min_ptRatio || ptRel > min_ptRel));
 }
@@ -2407,7 +2380,7 @@ void StopAnalyzer::ScaleLeptons(int flag){
 	float scale = 0.005; 
 	TLorentzVector oleps, leps, tmp;
 	for(Int_t k = 0; k < nMuon; ++k){ //xxx Muon
-		//if(TMath::Abs(LepGood_pdgId[i]) != 13) continue; 
+		if(TMath::Abs(LepGood_pdgId[k]) != 13) continue; 
 		tmp.SetPxPyPzE(MuPx.at(k), MuPy.at(k), MuPz.at(k), MuEnergy.at(k)); 
 		oleps += tmp;
 		if(flag == 1) { MuPx.at(k) += scale*MuPx.at(k); MuPy.at(k) += scale*MuPy.at(k); }
@@ -2418,7 +2391,6 @@ void StopAnalyzer::ScaleLeptons(int flag){
 	//scale = 0.0015; // 0.15% for electrons
 	scale = 0.01; 
 	for(Int_t i = 0; i < nElec; ++i){ //xxx Elec
-		if(TMath::Abs(LepGood_pdgId[i]) != 11) continue; 
 		if(TMath::Abs(LepGood_pdgId[i]) != 11) continue; 
 		tmp.SetPxPyPzE(ElPx.at(i), ElPy.at(i), ElPz.at(i), ElEnergy.at(i)); 
 		oleps += tmp;

@@ -9,7 +9,7 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
 			Int_t    nSlots         =  1,
 			Bool_t   DoSystStudies  =  false,
 			Long64_t nEvents        = 0,
-			Bool_t G_CreateTree   = false,
+			Bool_t G_CreateTree   = true,
 			Int_t stopMass       = 0,
 			Int_t lspMass        = 0,
       Float_t  SusyWeight     = 0.0) {
@@ -29,7 +29,7 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
     PAF_INFO("RunTree_ReReco", "Sequential mode chosen");
     pafmode = new PAFSequentialEnvironment();
   }
-  else if (nSlots <=8) {
+  else if (nSlots <=80) {
     PAF_INFO("RunTree_ReReco", "PROOF Lite mode chosen");
     pafmode = new PAFPROOFLiteEnvironment(nSlots);
   }
@@ -50,7 +50,8 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
   //----------------------------------------------------------------------------
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
   DatasetManager* dm = DatasetManager::GetInstance();
-  dm->SetTab("DR76X25nsMiniAODv2");
+  //dm->SetTab("DR74X25nsMiniAODv2");
+  dm->SetTab("DR80XasymptoticMiniAODv2");
   //dm->RedownloadFiles();
 
   // Deal with data samples
@@ -61,14 +62,17 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
        sampleName == "SingleMu")) {
     cout << "   + Data..." << endl;
     
-    TString datasuffix[] = {
-      "Run2015C_16Dec",
-      "Run2015D_16Dec"
+    TString datasuffix[] = { // 17.24
+      "Run2016B_PromptReco_v2", // 5.86
+      "Run2016C_PromptReco_v2", // 2.64
+      "Run2016D_PromptReco_v2", // 4.35
+      "Run2016G_PromptReco_v1", // 4.39
+      //"Run2015D_16Dec"
       //"Run2015C_05Oct",
       //"C_7016",
       //"D_7360"
     };
-    const unsigned int nDataSamples = 3;
+    const unsigned int nDataSamples = 4;
     for(unsigned int i = 0; i < nDataSamples; i++) {
       TString asample = Form("Tree_%s_%s",sampleName.Data(), datasuffix[i].Data());
       cout << "   + Looking for " << asample << " trees..." << endl;
@@ -81,10 +85,7 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
     G_IsData = false; //true;  // only for pseudodata
     dm->LoadDataset(sampleName);
     if(sampleName != "TestHeppy" && !sampleName.Contains("T2tt"))   myProject->AddDataFiles(dm->GetFiles());
-    if(sampleName == "WJetsToLNu_aMCatNLO" || 
-	    sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || 
-	    sampleName == "DYJetsToLL_M50_aMCatNLO" || 
-	    sampleName == "TTJets_amcatnlo" ||
+    if(
 	    sampleName == "TTWToLNu"  || 
 	    sampleName == "TTWToQQ" || 
 	    sampleName == "TTZToQQ" || 
@@ -99,7 +100,7 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
       cout << " weightSum(MC@NLO) = " << dm->GetSumWeights()     << endl;
     }
     else if(sampleName.BeginsWith("T2tt")){
-      TString lp = "/pool/ciencias/TreesDR74X/heppyTrees/v2/";
+      TString lp = "/pool/ciencias/HeppyTreesDR80X/v1/";
       cout << "Analyzing Stop sample" << endl;
       G_Event_Weight = SusyWeight;
       myProject->AddDataFile(lp + "Tree_" + sampleName + "_0.root");
@@ -149,8 +150,10 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
 
-  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || sampleName == "DYJetsToLL_M50_aMCatNLO" || sampleName == "TTJets_amcatnlo"){ //||
-        //     sampleName == "TTWToLNu"  || sampleName == "TTWToQQ" || sampleName == "TTZToQQ" || sampleName == "WWZ" || sampleName == "WZZ" || sampleName == "ZZZ"){
+  if(sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo") ||
+     sampleName == "TTWToLNu"       || sampleName == "TTWToQQ"          || 
+     sampleName == "TTZToQQ"        || sampleName == "WWZ"              || 
+     sampleName == "WZZ"            || sampleName == "ZZZ"           ){
     PAF_INFO("RunTree_ReReco", "This is a MC@NLO sample!");
     G_IsMCatNLO = true;
   }

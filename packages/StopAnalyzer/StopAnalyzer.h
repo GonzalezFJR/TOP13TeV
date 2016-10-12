@@ -586,7 +586,7 @@ class StopAnalyzer : public PAFChainItemSelector
 		Int_t nSGenElec;
 
 		Int_t nGoodVertex;
-		Int_t nVertex;
+		Float_t nVertex;
 		Int_t nBtags;
 		Int_t nJets;
 		Int_t nMuon;
