@@ -47,15 +47,11 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   //----------------------------------------------------------------------------
   PAFProject* myProject = new PAFProject(pafmode);
 
-  // Base path to input files
-  //----------------------------------------------------------------------------
-  TString dataPath = "/pool/ciencias/MC_Summer12_53X/Legacy/";
-
   // INPUT DATA SAMPLE
   //----------------------------------------------------------------------------
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
   DatasetManager* dm = DatasetManager::GetInstance();
-  dm->SetTab("DR76X25nsMiniAODv2");
+  dm->SetTab("DR80X25nsMiniAODv2");
   //dm->RedownloadFiles();
 
   // Deal with data samples
@@ -67,8 +63,9 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
     cout << "   + Data..." << endl;
     
     TString datasuffix[] = {
-      "Run2015C_16Dec",
-      "Run2015D_16Dec"
+      "Run2016B_PromptReco_v2",
+      "Run2016C_PromptReco_v2",
+      "Run2016D_PromptReco_v2"
       //"Run2015C_05Oct",
       //"C_7016",
       //"D_7360"
@@ -148,7 +145,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
 
-  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || sampleName == "DYJetsToLL_M50_aMCatNLO" || sampleName == "TTJets_amcatnlo"){ //||
+  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || sampleName == "DYJetsToLL_M50_aMCatNLO" || sampleName == "TTJets_amcatnlo" || sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo")){ //||
         //     sampleName == "TTWToLNu"  || sampleName == "TTWToQQ" || sampleName == "TTZToQQ" || sampleName == "WWZ" || sampleName == "WZZ" || sampleName == "ZZZ"){
     PAF_INFO("RunTree_ReReco", "This is a MC@NLO sample!");
     G_IsMCatNLO = true;
