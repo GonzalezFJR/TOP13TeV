@@ -36,7 +36,7 @@ class LeptonSF {
     for(int i = 0; i < fTrackerMuonSF->GetN(); i++){
       xlow  = fTrackerMuonSF->GetX()[i] - fTrackerMuonSF->GetErrorXlow(i);
       xhigh = fTrackerMuonSF->GetX()[i] + fTrackerMuonSF->GetErrorXhigh(i);
-      if(xlow < eta && xhigh > eta) val = fTrackerMuonSF->GetY()[i];
+      if(xlow <= eta && xhigh > eta) val = fTrackerMuonSF->GetY()[i];
     }
     return val;
   }
