@@ -42,10 +42,6 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
   //----------------------------------------------------------------------------
   PAFProject* myProject = new PAFProject(pafmode);
 
-  // Base path to input files
-  //----------------------------------------------------------------------------
-  TString dataPath = "/pool/ciencias/MC_Summer12_53X/Legacy/";
-
   // INPUT DATA SAMPLE
   //----------------------------------------------------------------------------
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
@@ -186,7 +182,7 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
   myProject->AddPackage("mt2");
   myProject->AddPackage("PUWeight");
   myProject->AddPackage("BTagSFUtil");
-  myProject->AddPackage("LeptonSF");
+  myProject->AddPackage("SusyLeptonSF");
 
 
   // Let's rock!

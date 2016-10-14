@@ -303,10 +303,10 @@ void StopAnalyzer::Initialise() {
 	//	PU Reweight
 	//--------------------------------------
 	//PAF_INFO("StopAnalyzer", "+ Initialise Pile-Up reweighting tool...");
-  fPUWeight     = new PUWeight(gLumiForPU, Spring2016_25ns_poisson_OOTPU, "2016_ichep");
+  fPUWeight     = new PUWeight(gLumiForPU, Fall2015_25ns_matchData_poisson,"2015_25ns_76");
   if (!gIsData) {
-    fPUWeightUp   = new PUWeight(18494.9,  Spring2016_25ns_poisson_OOTPU, "2016_ichep"); //  18494.9 
-    fPUWeightDown = new PUWeight(20441.7,  Spring2016_25ns_poisson_OOTPU, "2016_ichep"); //  20441.7 
+    fPUWeightUp   = new PUWeight(18494.9,    Fall2015_25ns_matchData_poisson,"2015_25ns_76"); //  18494.9 
+    fPUWeightDown = new PUWeight(20441.7,    Fall2015_25ns_matchData_poisson,"2015_25ns_76"); //  20441.7 
   }
 
 
@@ -330,7 +330,7 @@ void StopAnalyzer::Initialise() {
 	}
 
 	//PAF_INFO("StopAnalyzer", "+ Initialise lepton scale factors...");
-	fLeptonSF = new SusyLeptonSF();
+	fLeptonSF = new LeptonSF();
 
 	//PAF_INFO("StopAnalyzer", "+ Initialise random 3...");
 	fRand3 = new TRandom3(50);
@@ -770,7 +770,8 @@ void StopAnalyzer::InsideLoop() {
 	//if (METFilter() == false) return;
 
 	// Calculate PU Weight
-	if (!gIsData) PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); //True       //nTruePU
+	PUSF = 1.;
+	//if (!gIsData) PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); //True       //nTruePU
 
 	// Init data members ........................................................
 	GetTreeVariables();
@@ -1300,7 +1301,6 @@ float StopAnalyzer::getSF(gChannel chan) {
     id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
     trig = fLeptonSF->GetMuEGSF         (fHypLepton2.p.Eta(),fHypLepton1.p.Eta());
   }
-  trig = 1;
   return (PUSF*id1*id2*trig);
 }
 
@@ -1962,13 +1962,11 @@ bool StopAnalyzer::PassesTopDCut(){
 
 bool StopAnalyzer::PassesNJetsCut(){
 	if (getNJets() <= 1) return false;
-  if (getBtagJetPtIndex(0) < 50) return false; // aaa
-	if (getMeff() < 300.) return false;
 	return true;
 }
 
 bool StopAnalyzer::PassesMETCut(){
-	if (getMET() < 50.) return false;
+	if (getMET() < 80.) return false;
 	return true;
 }
 

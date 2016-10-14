@@ -51,7 +51,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   //----------------------------------------------------------------------------
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
   DatasetManager* dm = DatasetManager::GetInstance();
-  dm->SetTab("DR80X25nsMiniAODv2");
+  dm->SetTab("DR80XasymptoticMiniAODv2");
   //dm->RedownloadFiles();
 
   // Deal with data samples

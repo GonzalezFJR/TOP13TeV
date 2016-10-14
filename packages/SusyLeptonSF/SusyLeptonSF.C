@@ -1,9 +1,9 @@
-#include "LeptonSF.h"
+#include "SusyLeptonSF.h"
 #include "TFile.h"
 
 #include <iostream>
 
-LeptonSF::LeptonSF(bool loadhistos):
+SusyLeptonSF::SusyLeptonSF(bool loadhistos):
   fTightMuonIDSF(0),
   fTrackerMuonSF(0),
   fTightMuonIsoSF(0),
@@ -35,60 +35,60 @@ LeptonSF::LeptonSF(bool loadhistos):
 
 
 
-TH2D* LeptonSF::LoadTightMuonIDSF(const char* file, 
+TH2D* SusyLeptonSF::LoadTightMuonIDSF(const char* file, 
 					 const char* histo) {
   fTightMuonIDSF = GetHistogramFromFileD(file, histo, "fTightMuonIDSF");
   return fTightMuonIDSF;
 }
 
-TH2D* LeptonSF::LoadTrackerElectronSF(const char* file, const char* histo) {
+TH2D* SusyLeptonSF::LoadTrackerElectronSF(const char* file, const char* histo) {
   fTrackerElectronSF = GetHistogramFromFileD(file, histo, "fTrackerElectronSF");
   return fTrackerElectronSF;
 }
 
-TH2D* LeptonSF::LoadTightMuonIsoSF(const char* file, 
+TH2D* SusyLeptonSF::LoadTightMuonIsoSF(const char* file, 
 				   const char* histo) {
   fTightMuonIsoSF = GetHistogramFromFileD(file, histo, "fTightMuonISOSF");
   return fTightMuonIsoSF;
 }
-TH2D* LeptonSF::LoadTightMuonSF(const char* file, 
+TH2D* SusyLeptonSF::LoadTightMuonSF(const char* file, 
 				const char* histo) {
   fTightMuonSF = GetHistogramFromFileD(file, histo, "fTightMuonSF");
   return fTightMuonSF;
 }
 
-TH2D* LeptonSF::LoadTightElectronIDSF(const char* file, 
+TH2D* SusyLeptonSF::LoadTightElectronIDSF(const char* file, 
 				      const char* histo) {
   fTightElectronIDSF = GetHistogramFromFileD(file, histo, "fTightElectronIDSF");
   return fTightElectronIDSF;
 }
 
-TGraphAsymmErrors* LeptonSF::LoadTrackerMuonSF(const char* file, const char* histo){
+TGraphAsymmErrors* SusyLeptonSF::LoadTrackerMuonSF(const char* file, const char* histo){
  TFile *f = TFile::Open(file);
  f->GetObject(histo, fTrackerMuonSF);
  return fTrackerMuonSF;
 }
 
-TH2D* LeptonSF::LoadTightElectronSF(const char* file, 
+TH2D* SusyLeptonSF::LoadTightElectronSF(const char* file, 
 				    const char* histo) {
   fTightElectronSF = GetHistogramFromFileD(file, histo, "fTightElectronSF");
   return fTightElectronSF;
 }
 
 
-TH2F* LeptonSF::LoadDoubleMuonSF(const char* file, 
+TH2F* SusyLeptonSF::LoadDoubleMuonSF(const char* file, 
 				 const char* histo){
   fDoubleMuSF = GetHistogramFromFileF(file, histo, "fDoubleMuSF");
   return fDoubleMuSF;
 }
 
-TH2F* LeptonSF::LoadDoubleElectronSF(const char* file, 
+TH2F* SusyLeptonSF::LoadDoubleElectronSF(const char* file, 
 				     const char* histo){
   fDoubleElSF = GetHistogramFromFileF(file, histo, "fDoubleElSF");
   return fDoubleElSF;
 }
 
-TH2F* LeptonSF::LoadElMuSF(const char* file, 
+TH2F* SusyLeptonSF::LoadElMuSF(const char* file, 
 			   const char* histo){
   fMuEGSF = GetHistogramFromFileF(file, histo, "fMuEGSF");
   return fMuEGSF;
@@ -99,18 +99,18 @@ TH2F* LeptonSF::LoadElMuSF(const char* file,
 
 
 
-TH2D* LeptonSF::GetHistogramFromFileD(const char* filename, 
+TH2D* SusyLeptonSF::GetHistogramFromFileD(const char* filename, 
 				      const char* histoname, 
 				      const char* newhname) {
   TFile* file  = TFile::Open(filename);
   if (!file) {
-    std::cerr << "ERROR[LeptonSF]: Could not load file" << std::endl
+    std::cerr << "ERROR[SusyLeptonSF]: Could not load file" << std::endl
 	      << "                 " << filename << std::endl;
     return 0;
   }
   TH2D* h = (TH2D*) file->Get(histoname)->Clone(newhname);
   if (!h) {
-    std::cerr << "ERROR[LeptonSF]: Could not find histogram " 
+    std::cerr << "ERROR[SusyLeptonSF]: Could not find histogram " 
 	      << histoname << std::endl;
     return 0;
   }
@@ -120,18 +120,18 @@ TH2D* LeptonSF::GetHistogramFromFileD(const char* filename,
   return h;
 }
 
-TH2F* LeptonSF::GetHistogramFromFileF(const char* filename, 
+TH2F* SusyLeptonSF::GetHistogramFromFileF(const char* filename, 
 				      const char* histoname, 
 				      const char* newhname) const {
   TFile* file  = TFile::Open(filename);
   if (!file) {
-      std::cerr << "ERROR[LeptonSF]: Could not load file" << std::endl
+      std::cerr << "ERROR[SusyLeptonSF]: Could not load file" << std::endl
 		<< "                 " << filename << std::endl;
       return 0;
   }
   TH2F* h = (TH2F*) file->Get(histoname)->Clone(newhname);
   if (!h) {
-    std::cerr << "ERROR[LeptonSF]: Could not find histogram " 
+    std::cerr << "ERROR[SusyLeptonSF]: Could not find histogram " 
 	      << histoname << std::endl;
     return 0;
     }
@@ -141,7 +141,7 @@ TH2F* LeptonSF::GetHistogramFromFileF(const char* filename,
   return h;
 }
 
-TCanvas* LeptonSF::Draw() {
+TCanvas* SusyLeptonSF::Draw() {
   //gStyle->SetOptStat(0);
   //gStyle->SetPalette(1);
   //gStyle->SetPaintTextFormat("4.3f");

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////
 //
-//    FILE: LeptonSF.h
-//   CLASS: LeptonSF
+//    FILE: SusyLeptonSF.h
+//   CLASS: SusyLeptonSF
 // AUTHORS: S. Folgueras, I. Gonzalez
 //    DATE: February, 2014
 //
@@ -17,10 +17,10 @@
 #include "TCanvas.h"
 #include "TGraphAsymmErrors.h"
 
-class LeptonSF {
+class SusyLeptonSF {
  public:
-  LeptonSF(bool loadhistos = true);
-  ~LeptonSF() {}
+  SusyLeptonSF(bool loadhistos = true);
+  ~SusyLeptonSF() {}
 
   
   
@@ -119,10 +119,9 @@ class LeptonSF {
 			   const char* histo = "DATA_over_MC_Tight");
   TH2D* LoadTightMuonIsoSF(const char* file = "http://www.hep.uniovi.es/iglez/CMS/WZ/MuonISOSF.root",
 			   const char* histo = "DATA_over_MC_Tight");
-  //TH2D* LoadTightMuonSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Muons/GlobalMuonSFs_T.root",  const char* histo = "GlobalSF_T");
-  //TGraphAsymmErrors* LoadTrackerMuonSF (const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Muons/ratios.root",	   const char* histo = "ratio_eta");
-  TGraphAsymmErrors* LoadTrackerMuonSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/muonTrackerEffRatios.root",	   const char* histo = "ratio_eta");
-					TH2D* LoadTightMuonSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/GlobalMuonSFs.root",		const char* histo = "GlobalSF");
+  TH2D* LoadTightMuonSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Muons/GlobalMuonSFs_T.root",  const char* histo = "GlobalSF_T");
+  TGraphAsymmErrors* LoadTrackerMuonSF (const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Muons/ratios.root",	   const char* histo = "ratio_eta");
+	//				TH2D* LoadTightMuonSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/GlobalMuonSFs.root",		const char* histo = "GlobalSF");
   
   // + Elec SFs
   // http://fcouderc.web.cern.ch/fcouderc/EGamma/scaleFactors/moriond2016_76X/eleCutBasedID/
@@ -131,13 +130,12 @@ class LeptonSF {
   //	  		        const char* histo = "sfTIGHT");
   TH2D* LoadTightElectronIDSF (const char* file = "http://www.hep.uniovi.es/iglez/CMS/WZ/ElectronMVAIDIsoSF.root",
 			       const char* histo = "electronsDATAMCratio_FO_ID_ISO");
- //TH2D* LoadTrackerElectronSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons/trakingElectronSF.root",
- TH2D* LoadTrackerElectronSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/egammaTrackerEffi.txt_SF2D.root",
+ TH2D* LoadTrackerElectronSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons/trakingElectronSF.root",
          const char* histo = "EGamma_SF2D");
   
   //TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/elec_tight_sf2D_13TeV_RunD.root",
-  //TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons/GlobalElectronSFs_T.root",                          		     const char* histo = "GlobalSF_T");
-TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/egammaEffiMedium.txt_SF2D_runBCD_12p9fb.root", const char* histo = "EGamma_SF2D");
+  TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons/GlobalElectronSFs_T.root",                          		     const char* histo = "GlobalSF_T");
+//TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/egammaEffiMedium.txt_SF2D_runBCD_12p9fb.root", const char* histo = "EGamma_SF2D");
 
   // + Trigger SFs
   TH2F* LoadDoubleElectronSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/76X/triggerSummary_ee.root",

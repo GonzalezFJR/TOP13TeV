@@ -18,7 +18,7 @@
 #include "mt2.h"
 #include "PUWeight.h"
 #include "BTagSFUtil.h"
-#include "LeptonSF.h"
+#include "SusyLeptonSF.h"
 
 // + ROOT
 #include "TH1F.h"
@@ -436,7 +436,7 @@ class StopAnalyzer : public PAFChainItemSelector
 		BTagSFUtil *fBTagSFbDo ;
 		BTagSFUtil *fBTagSFlUp ;
 		BTagSFUtil *fBTagSFlDo ;
-		LeptonSF *fLeptonSF;
+		SusyLeptonSF *fLeptonSF;
 		TRandom3 *fRand3;
 
 		// EventWeight
