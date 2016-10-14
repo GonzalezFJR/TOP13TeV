@@ -32,7 +32,13 @@ class SusyLeptonSF {
     return fTightMuonIsoSF->GetBinContent(fTightMuonIsoSF->FindBin(TMath::Abs(eta), pt));
   }
   double GetTrackerMuonSF(double eta){
-    return fTrackerMuonSF->Eval(eta);
+    float val = 0; float xlow = 0; float xhigh = 0;
+    for(int i = 0; i < fTrackerMuonSF->GetN(); i++){
+      xlow  = fTrackerMuonSF->GetX()[i] - fTrackerMuonSF->GetErrorXlow(i);
+      xhigh = fTrackerMuonSF->GetX()[i] + fTrackerMuonSF->GetErrorXhigh(i);
+      if(xlow < eta && xhigh > eta) val = fTrackerMuonSF->GetY()[i];
+    }
+    return val;
   }
   
   // Electron SFs
