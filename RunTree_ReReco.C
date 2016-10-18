@@ -141,6 +141,8 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   else if(Selection == 1)  outputFile += "/Tree_" + sampleName + "Semi" + ".root";
   else if(Selection == 4)  outputFile += "/Tree_" + sampleName + "Fidu" + ".root";
   else                     outputFile += "/Tree_" + sampleName          + ".root";
+  if(outputFile.Contains("_ext2")) outputFile.ReplaceAll("_ext2","");
+  if(outputFile.Contains("_ext"))  outputFile.ReplaceAll("_ext","");
 
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
