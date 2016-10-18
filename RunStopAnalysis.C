@@ -139,9 +139,9 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
 
 	TString LumiString = oss.str();
   TString outputFile = outputDir;
-  //if(sampleName == "TTbar_Powheg") outputFile += "/Tree_TTJets.root";
-  //else 
-                            outputFile += "/Tree_" + sampleName + ".root";
+  outputFile += "/Tree_" + sampleName + ".root";
+  if(outputFile.Contains("_ext2")) outputFile.ReplaceAll("_ext2","");
+  if(outputFile.Contains("_ext"))  outputFile.ReplaceAll("_ext","");
 
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
