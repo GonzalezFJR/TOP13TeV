@@ -1813,7 +1813,8 @@ int TreeAnalysisTop::IsDileptonEvent(){
 #ifdef DEBUG
 	cout << "IsDileptonEvent(): NLeptons =" << Lepton.size()<< endl;
 #endif
-	if(Lepton.size() < 2) return 0;
+	if(Lepton.size() < 2)   return 0;
+	if(Lepton[0].p.Pt()<25) return 0;  // require leading lepton pT<25 GeV
 	int select = Lepton[0].charge*Lepton[1].charge;
 	int result = 0;
 	if      (Lepton[0].type == 0 && Lepton[1].type == 0) result = 1; // mu/mu
