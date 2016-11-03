@@ -2113,7 +2113,7 @@ bool StopAnalyzer::IsTightElectron(unsigned int iElec, float ptcut){
 	if (TMath::Abs(LepGood_etaSc[iElec]) > 1.4442 && 
 			TMath::Abs(LepGood_etaSc[iElec]) < 1.566) return false;
 	if (Get<Float_t>("LepGood_sip3d", iElec) > 4.0) return false;
-	if(TMath::Abs(Get<Int_t>("LepGood_tightId", iElec)) < 1) return false;
+	if(TMath::Abs(Get<Int_t>("LepGood_tightId", iElec)) < 3) return false;
 	return true;
 }
 
