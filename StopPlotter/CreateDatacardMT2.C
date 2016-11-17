@@ -15,11 +15,11 @@
 #include "DrawPlots.C"
 
 void MT2ShapeHistos(TString chan, float somelumi, int mStop, int mLsp);
-float getYield2(TString rootfile, TString process);
+float getYield(TString rootfile, TString process);
 void WriteDatacard(TString rootfile, float systfac);
 void WriteCombinationDatacard(TString rootfile, float systfac);
-//void CreateDatacard(Int_t mStop, Int_t mLsp, TString chan, float somelumi, bool systfac, float cut);
-//void CreateDatacardCombination(Int_t mStop, Int_t mLsp, float somelumi, bool systfac, float cut);
+void CreateDatacardMT2(Int_t mStop, Int_t mLsp, TString chan, float somelumi, bool systfac, float cut);
+void CreateDatacardCombination(Int_t mStop, Int_t mLsp, float somelumi, bool systfac, float cut);
 
 void MT2YieldHistos(TString chan, float somelumi, float cut);
 float Get8TeVStopScale(int mStop);
@@ -31,7 +31,7 @@ void WriteDatacardSR(TString rootfile, float systfac);
 bool IsEmptySR(TString SR, TString ch, TString rootfile);
 void IntegrateEmptySR(TString rootfile);
 void merge(TString MergeSF, TString rootfile, TString ch);
-void CreateDatacard(Int_t mStop, Int_t mLsp, float somelumi, int systfac, float cut);
+void CreateDatacard(Int_t mStop, Int_t mLsp, float somelumi, bool systfac, float cut);
 
 
 // Constants
@@ -39,7 +39,6 @@ const TString LimitHistosFolder = "/mnt_pool/fanae105/user/juanr/CMSSW_7_4_7_pat
 const TString DatacardFolder = "/mnt_pool/fanae105/user/juanr/CMSSW_7_4_7_patch1/StopLimits2016/datacards/";
 const TString mt2 = "MT2";
 const TString ulevel = "DYVeto";
-const bool doAA = true;
 
 const int nSignals = 2;
 const TString signals[nSignals] = {"T2tt_500_325", "T2tt_850_100"};
@@ -82,20 +81,20 @@ void MT2ShapeHistos(TString chan, float somelumi, int mStop, int mLsp){
 }
 
 // With Signal Regions:
-/*
+
 enum SR{ //ADG, 
- //ADG,
+ BEH, BEI, 
  ADH, ADI, AEG, AEH, AEI, AFG, AFH, AFI,
- BDG, BDH, BDI, BEG, BFG, BFH, BFI, BEH, BEI, 
+ BDG, BDH, BDI, BEG, BFG, BFH, BFI,
  CDG, CDH, CDI, CEG, CEH, CEI, CFG, CFH, CFI,
  nSR
 };
 const TString SRlabel[nSR] = { //"ADG", 
- //"ADG", 
- "ADH", "ADI", "AEG", "AEH", "AEI", "AFG", "AFH", "AFI", 
- "BDG", "BDH", "BDI", "BEG", "BFG", "BFH", "BFI", "BEH", "BEI", 
+ "BEH", "BEI", 
+ "ADH", "ADI", "AEG", "AEH", "AEI", "AFG", "AFH", "AFI",
+ "BDG", "BDH", "BDI", "BEG", "BFG", "BFH", "BFI",
  "CDG", "CDH", "CDI", "CEG", "CEH", "CEI", "CFG", "CFH", "CFI"
-};*/
+};
 
 int ESR[200]; 
 const int ESRpos[3] = {0, 50, 100}; 
@@ -106,7 +105,6 @@ void MT2ShapeSR(TString chan, float somelumi, int mStop, int mLsp, TString SR){
   //TH1F* hS500_325; TH1F* hS850_100;
   TH1F* hStop;
   TString mt2 = "MT2_" + SR;
-  if(SR == "0") mt2 = "MT2";
   TString stopsample = Form("T2tt_mStop%i_mLsp%i", mStop, mLsp);
   htt    = H_ttbar(mt2, chan, ulevel, "0"); htt   ->Scale(somelumi/Lumi); htt   ->SetName("h_tt"      ); StackOverflow(htt);
   htW    = H_tW(   mt2, chan, ulevel, "0"); htW   ->Scale(somelumi/Lumi); htW   ->SetName("h_tW"      ); StackOverflow(htW);
@@ -115,16 +113,14 @@ void MT2ShapeSR(TString chan, float somelumi, int mStop, int mLsp, TString SR){
   hVV    = H_VV(   mt2, chan, ulevel, "0"); hVV   ->Scale(somelumi/Lumi); hVV   ->SetName("h_VV"      ); StackOverflow(hVV);
   hWJets = H_fake( mt2, chan, ulevel, "0"); hWJets->Scale(somelumi/Lumi); hWJets->SetName("h_WJets"   ); StackOverflow(hWJets);
   hdata  = H_data( mt2, chan, ulevel); hdata ->Scale(somelumi/Lumi); hdata ->SetName("h_data_obs"); StackOverflow(hdata);
-
   hStop = loadHistogram(stopsample, mt2, chan, ulevel); hStop->Scale(somelumi/Lumi); hStop->SetName("h_Stop"); StackOverflow(hStop);
   if(do8TeV)  hStop->Scale(Get8TeVStopScale(mStop));
   TH1F* hlumi = new TH1F("thelumi", "thelumi", 1, 0, 1);
   hlumi->SetBinContent(1, somelumi);
 
   TFile* t;
-  if(SR != "0") t = new TFile(LimitHistosFolder + "MT2" + SR + Form("_%i_%i_", mStop, mLsp) + chan + ".root" , "recreate");
-  else          t = new TFile(LimitHistosFolder + "MT2" +      Form("_%i_%i_", mStop, mLsp) + chan + ".root" , "recreate");
-  //else       t = new TFile(LimitHistosFolder + "MT2" + SR + Form("_%i_%i.root", mStop, mLsp), "recreate");
+  if(docomb) t = new TFile(LimitHistosFolder + "MT2" + SR + Form("_%i_%i_", mStop, mLsp) + chan + ".root" , "recreate");
+  else       t = new TFile(LimitHistosFolder + "MT2" + SR + Form("_%i_%i.root", mStop, mLsp), "recreate");
   htt->Write(); htW->Write(); hDY->Write(); hVV->Write(); httV->Write(); hdata->Write(); hWJets->Write(); hStop->Write(); 
   hlumi->Write(); delete hlumi;
   delete htt; delete htW; delete hDY; delete hVV; delete httV; delete hdata; delete hWJets;
@@ -137,15 +133,14 @@ void MT2ShapeSR(TString chan, float somelumi, int mStop, int mLsp, TString SR){
 //######################################################################################
 //###### Create Datacards                       ########################################
 //######################################################################################
-
-float getYield2(TString rootfile, TString process){
+float getYield(TString rootfile, TString process){
   TFile *inputfile = TFile::Open(LimitHistosFolder+rootfile);
   TH1F* hist; inputfile->GetObject("h_" + process, hist);
   float yield = hist->Integral();
   delete inputfile; 
   return yield;
 }
-/*
+
 void WriteDatacard(TString rootfile, float systfac){
   TString(rootfile).ReplaceAll(".root","");
   rootfile += ".root";
@@ -225,7 +220,7 @@ void CreateDatacardMT2(Int_t mStop, Int_t mLsp, TString chan, float somelumi, bo
     return;
   }
 }
-*/
+
 void WriteCombinationDatacard(TString rootfile, float systfac){
   TString(rootfile).ReplaceAll(".root","");
   //rootfile += "_ElMu.root";
@@ -235,7 +230,7 @@ void WriteCombinationDatacard(TString rootfile, float systfac){
   float thelumi = lumihist->GetBinContent(1);
   inputfile->Close(); delete inputfile;
 
-  TString filename = DatacardFolder + "/datacard_" + TString(rootfile).ReplaceAll(".root","") + ".txt";
+  TString filename = DatacardFolder + "/datacard_" + TString(rootfile).ReplaceAll(".root","") + "_comb.txt";
   ofstream outputfile;
   outputfile.open(filename);
 
@@ -243,22 +238,22 @@ void WriteCombinationDatacard(TString rootfile, float systfac){
   int nbkgs = 5;
   int nsyst = 7;
   TString pro[]   = {"Stop", "tt", "tW", "ttV", "DY", "VV"};
-  float systunc[] = {40.   , 50. , 25. ,  25. , 25. , 25. };
+  float systunc[] = {20.   , 25. , 25. ,  25. , 25. , 25. };
 
   outputfile << Form("imax %i\n", nchannels);
   outputfile << Form("jmax %i\n", nbkgs);
   outputfile << Form("kmax %i\n", nsyst);
   outputfile << "-----------\n";
   for(int k = 0; k<3; k++){
-    TString ch = Chan[k];
+    TString ch = chan[k];
     outputfile << "shapes * " + ch + " " + LimitHistosFolder + rootfile + "_" + ch + ".root" + " h_$PROCESS $PROCESS_$SYSTEMATIC\n";
   }
   outputfile << "-----------\n"; 
   TString bin = "bin ";
   TString obs = "observation ";
   for(int k = 0; k<3; k++){
-    bin += Chan[k] + "  "; 
-    obs += Form("   %2.3f  ", getYield2(rootfile + "_" + Chan[k] + ".root", "data_obs"));
+    bin += chan[k] + "  "; 
+    obs += Form("   %2.3f  ", getYield(rootfile + "_" + chan[k] + ".root", "data_obs"));
   }
   outputfile << bin + " \n";
   outputfile << obs + " \n";
@@ -271,12 +266,12 @@ void WriteCombinationDatacard(TString rootfile, float systfac){
   TString lumisyst = "lumi lnN        ";
   float y;
   for(int k = 0; k<3; k++){
-    TString ch = Chan[k];
+    TString ch = chan[k];
     for(int i = 0; i<nbkgs+1; i++){
       bin2      += ch + "    ";
       process1 += (pro[i] + "   ");
       process2 += Form("%i     ", i); 
-      rate     += Form("%2.3f     ", getYield2(rootfile + "_" + ch + ".root", pro[i]));
+      rate     += Form("%2.3f     ", getYield(rootfile + "_" + ch + ".root", pro[i]));
       lumisyst += Form("%2.3f     ", 1.0);
     }
   }
@@ -298,7 +293,7 @@ void WriteCombinationDatacard(TString rootfile, float systfac){
   }
   outputfile.close();
 }
-/*
+
 void CreateDatacardCombination(Int_t mStop, Int_t mLsp, float somelumi, bool systfac, float cut){
   TString rootfile = Form("MT2shape_%i_%i", mStop, mLsp);
   for(int k = 0; k < 3; k++) MT2ShapeHistos("comb_" + chan[k], somelumi, mStop, mLsp);
@@ -308,24 +303,22 @@ void CreateDatacardCombination(Int_t mStop, Int_t mLsp, float somelumi, bool sys
 	WriteCombinationDatacard(rootfile, fact);
 	return;
 }
-*/
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FillEmptySRvector(TString rootfile){
 	for (int i = 0; i < 200; i++) ESR[i] = 0;
 	for(int k=0; k<3; k++){
-		TString ch = Chan[k];
+		TString ch = chan[k];
 		for(int s = 0; s<nSR; s++){
 			TString sr = SRlabel[s];
-      if(sr == "AA" && !doAA) continue;
 			if(IsEmptySR(sr, ch, rootfile)) ESR[ESRpos[k] + s] = 1;
 		}
 	}
 }
 
 bool IsEmptySR(TString SR, TString ch, TString rootfile){
- // if (SR != "ADG" && SR != "BDG" && SR != "CDG") return 1; else return 0;
 	TString(rootfile).ReplaceAll(".root","");
 	TString rootname = TString(rootfile);
 	rootname.ReplaceAll("MT2", "MT2"+SR);
@@ -333,25 +326,24 @@ bool IsEmptySR(TString SR, TString ch, TString rootfile){
 	TString pro[]   = {"Stop", "tt", "tW", "ttV", "DY", "VV"};
 	float y_Stop = 0;
 	float y_bkg = 0;
-	y_Stop = getYield2(rootname + "_" + ch + ".root", "Stop");
+	y_Stop = getYield(rootname + "_" + ch + ".root", "Stop");
 	for(int i = 1; i<nbkgs+1; i++){
-		y_bkg += getYield2(rootname + "_" + ch + ".root", pro[i]);
+		y_bkg += getYield(rootname + "_" + ch + ".root", pro[i]);
 	}
 	if( (y_Stop < 1e-3) || (y_bkg < 5e-2) ){
-		//cout << "  Stop yield = " << y_Stop << ";    "; cout << "Bkg yield = " << y_bkg << "; ";
-		return 1; //merge(MergeSF, rootname, ch);
-	}
+   //cout << "  Stop yield = " << y_Stop << ";    "; cout << "Bkg yield = " << y_bkg << "; ";
+   return 1; //merge(MergeSF, rootname, ch);
+}
 	else return 0;
 }
 
 void IntegrateEmptySR(TString rootfile){
 	TString rootname = TString(rootfile);
 	for(int k=0; k<3; k++){
-		TString MergeSF = "AB";//"ADH"; // ADH
-		TString ch = Chan[k];
+		TString MergeSF = "ADH";
+		TString ch = chan[k];
 		for(int s = 0; s<nSR; s++){
       TString sr = SRlabel[s];
-      if(sr == "AA" && !doAA) continue;
       if(sr == MergeSF) continue;
       rootname = TString(rootfile);
 			rootname.ReplaceAll("MT2", "MT2"+sr);
@@ -380,7 +372,6 @@ void merge(TString MergeSF, TString rootfile, TString ch){
   float y0_bkg  = htt0->Integral() + htW0->Integral() + hDY0->Integral() + hVV0->Integral() + httV0->Integral();
   float y0_stop = hStop0->Integral();
   cout << "   Stop yield = " << y0_stop << ";    "; cout << "Bkg yield = " << y0_bkg << "; ";
-  
   if( (y0_bkg == 0) && (y0_stop == 0) ){
     cout << "  Totaly empty SR! Skipping..." << endl;
     return;
@@ -392,7 +383,7 @@ void merge(TString MergeSF, TString rootfile, TString ch){
   }
   
   TString rootfile2 = TString(rootfile);
-  rootfile2.ReplaceAll("MT2" + TString(rootfile[3]) + TString(rootfile[4]), "MT2"+MergeSF);
+  rootfile2.ReplaceAll("MT2" + TString(rootfile[3]) + TString(rootfile[4]) + TString(rootfile[5]), "MT2"+MergeSF);
   TFile* t = new TFile(LimitHistosFolder + rootfile2 + "_" + ch + ".root");
   t->GetObject("h_tt", htt);    
   htt->Add(htt0); htt   ->SetDirectory(0);
@@ -427,15 +418,11 @@ void merge(TString MergeSF, TString rootfile, TString ch){
 
 
 void WriteDatacardSR(TString rootfile, float systfac){
-  if(systfac < 0){
-    WriteCombinationDatacard(rootfile, 1); 
-  return ;
-  } 
 	TString(rootfile).ReplaceAll(".root","");
 	TString rootname = TString(rootfile); 
 
   FillEmptySRvector(rootfile);
-	rootname.ReplaceAll("MT2", "MT2AB");
+	rootname.ReplaceAll("MT2", "MT2ADH");
 	TFile *inputfile = TFile::Open(LimitHistosFolder+rootname + "_ElMu.root");
 
 	TH1F* lumihist; inputfile->GetObject("thelumi", lumihist);
@@ -453,7 +440,6 @@ void WriteDatacardSR(TString rootfile, float systfac){
 
 	int nchannels = 0;
 	for(int s=0; s<nSR; s++){
-    if(SRlabel[s] == "AA" && !doAA) continue;
 		for(int k=0; k<3; k++){
 			//if(!IsEmptySR(SRlabel[s],chan[k], rootfile)) nchannels++;
 			if(!ESR[ESRpos[k]+s]) nchannels++; 
@@ -466,11 +452,10 @@ void WriteDatacardSR(TString rootfile, float systfac){
 	outputfile << Form("kmax %i\n", nsyst);
 	outputfile << "-----------\n";
 	for(int s = 0; s<nSR; s++){
-    if(SRlabel[s] == "AA" && !doAA) continue;
 		rootname = TString(rootfile);
 		rootname.ReplaceAll("MT2", "MT2"+SRlabel[s]);
 		for(int k = 0; k<3; k++){
-			TString ch = Chan[k];
+			TString ch = chan[k];
 			//if(IsEmptySR(SRlabel[s],ch, rootfile)) continue;
 			if(ESR[ESRpos[k]+s]) continue; 
 			outputfile << "shapes * " + ch + SRlabel[s] + " " + LimitHistosFolder + rootname + "_" + ch + ".root" + " h_$PROCESS $PROCESS_$SYSTEMATIC\n";
@@ -480,14 +465,13 @@ void WriteDatacardSR(TString rootfile, float systfac){
 	TString bin = "bin ";
   TString obs = "observation ";
 	for(int s = 0; s<nSR; s++){
-    if(SRlabel[s] == "AA" && !doAA) continue;
 		rootname = TString(rootfile);
 		rootname.ReplaceAll("MT2", "MT2"+SRlabel[s]);
 		for(int k = 0; k<3; k++){
-			//if(IsEmptySR(SRlabel[s],Chan[k], rootfile)) continue;
+			//if(IsEmptySR(SRlabel[s],chan[k], rootfile)) continue;
 			if(ESR[ESRpos[k]+s]) continue; 
-			bin += Chan[k] + SRlabel[s] + "  "; 
-			obs += Form("   %2.3f  ", getYield2(rootname + "_" + Chan[k] + ".root", "data_obs"));
+			bin += chan[k] + SRlabel[s] + "  "; 
+			obs += Form("   %2.3f  ", getYield(rootname + "_" + chan[k] + ".root", "data_obs"));
 		}
 	}
   outputfile << bin + " \n";
@@ -501,18 +485,17 @@ void WriteDatacardSR(TString rootfile, float systfac){
 	TString lumisyst = "lumi lnN        ";
 	float y;
 	for(int s = 0; s<nSR; s++){
-    if(SRlabel[s] == "AA" && !doAA) continue;
 		rootname = TString(rootfile);
 		rootname.ReplaceAll("MT2", "MT2"+SRlabel[s]);
 		for(int k = 0; k<3; k++){
-			//if(IsEmptySR(SRlabel[s],Chan[k], rootfile)) continue;
+			//if(IsEmptySR(SRlabel[s],chan[k], rootfile)) continue;
 			if(ESR[ESRpos[k]+s]) continue; 
-			TString ch = Chan[k];
+			TString ch = chan[k];
 			for(int i = 0; i<nbkgs+1; i++){
 				bin2      += ch + SRlabel[s] + "    ";
 				process1 += (pro[i] + "   ");
 				process2 += Form("%i     ", i); 
-				rate     += Form("%2.3f     ", getYield2(rootname + "_" + ch + ".root", pro[i]));
+				rate     += Form("%2.3f     ", getYield(rootname + "_" + ch + ".root", pro[i]));
 				lumisyst += Form("%2.3f     ", 1.0);
 			}
 		}
@@ -533,8 +516,7 @@ void WriteDatacardSR(TString rootfile, float systfac){
     }
     TString LongString = "";
     for(int k = 0; k < 3; k ++) for(int s = 0; s<nSR; s++){ 
-			if(SRlabel[s] == "AA" && !doAA) continue;
-			//if(IsEmptySR(SRlabel[s],Chan[k], rootfile)) continue;
+			//if(IsEmptySR(SRlabel[s],chan[k], rootfile)) continue;
 			if(ESR[ESRpos[k]+s]) continue; 
 			LongString += prosyst;
 		}
@@ -543,7 +525,7 @@ void WriteDatacardSR(TString rootfile, float systfac){
   outputfile.close();
 }
 
-void CreateDatacard(Int_t mStop, Int_t mLsp, float somelumi, int systfac, float cut){
+void CreateDatacard(Int_t mStop, Int_t mLsp, float somelumi, bool systfac, float cut){
 	TString rootfile = Form("MT2_%i_%i", mStop, mLsp);
   int i = 0;
   cout << "\n  ############################" << endl;
@@ -552,23 +534,17 @@ void CreateDatacard(Int_t mStop, Int_t mLsp, float somelumi, int systfac, float 
 	for(int s = 0; s < nSR; s++){
 		for(int k = 0; k < 3; k++){
     i++;
-    if(SRlabel[s] == "AA" && !doAA) continue;
     cout << Form("   Rootfile created %i/%i...", i, nSR*3) << endl;
-			MT2ShapeSR(Chan[k], somelumi, mStop, mLsp, SRlabel[s]);
+			MT2ShapeSR(chan[k], somelumi, mStop, mLsp, SRlabel[s]);
 		}
 	}
-	for(int k = 0; k < 3; k++){
-		cout << "   Rootfile created MT2 nominal " << Chan[k] << ".." << endl;
-		MT2ShapeSR(Chan[k], somelumi, mStop, mLsp, "0");
-	}
-	cout << "\n  ############################" << endl;
+  cout << "\n  ############################" << endl;
   cout << "  ## (2) Merging empty SRs  ##" << endl;
   cout << "  ############################\n" << endl;
   IntegrateEmptySR(rootfile);
 	float fact;
-  if(systfac == 1)      fact =  1/TMath::Sqrt(somelumi/Lumi);
-  else if(systfac < 0)  fact = -1;
-  else                  fact =  1;
+  if(systfac) fact = 1/TMath::Sqrt(somelumi/Lumi);
+  else        fact = 1;
   cout << "\n  ############################" << endl;
   cout << "  ## (3)  Writing Datacard  ##" << endl;
   cout << "  ############################\n" << endl;

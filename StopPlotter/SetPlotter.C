@@ -33,19 +33,26 @@ using namespace std;
 
 //const TString path = "/nfs/fanae/user/palencia/testHeppy/TOP/TopTrees/dec14/Tree_13TeV_EA_";
 //const TString path = "/mnt_pool/fanae105/user/juanr/StopTOP/13ene/Tree_";
-const TString path = "/mnt_pool/fanae105/user/juanr/StopTOP/feb03/";
+//const TString path = "/mnt_pool/fanae105/user/juanr/StopTOP/feb03/";
 //const TString path = "/mnt_pool/fanae105/user/juanr/temptop/temp/Tree_13TeV_EA_"; 
+//const TString path = "/nfs/fanae/user/juanr/Stop_76X/outputFiles/jun14/";
+//const TString path = "/nfs/fanae/user/juanr/stop80/outputFiles/nov7/";
+const TString path = "/nfs/fanae/user/juanr/stop80/outputFiles/nov14/";
+//const TString path = "/nfs/fanae/user/juanr/stop80/temp/";
 
 const Int_t nVars=23;
 const Int_t nLevels=6;
 const Int_t nChannels = 5;
 const Int_t nSamples = 17;
-const Int_t nProcesses = 5+1;
+const Int_t nProcesses = 6+1;
 const Int_t nSyst = 10; //12;
 const Int_t nTSyst = 6;
 const Int_t nBkgs = 12;
 //const float Lumi = 1264; // pb^-1
-const float Lumi = 2110; // pb^-1
+//const float Lumi = 5865; // 2016B
+const float Lumi = 12850; // ICHEP
+//const float Lumi = 4390; // 2016G
+//const float Lumi = 35000;
 const TString syst[nSyst] = {"BtagUp", "BtagDown", "MisTagUp", "MisTagDown", "LESUp", "LESDown", "PUUp", "PUDown", "JER", "TopPt"}; // "JESUp", "JESDown", 
 const TString sample[nSamples] = {
   "TTJets",
@@ -59,12 +66,12 @@ const TString sample[nSamples] = {
   "T2tt_850_100"
 };
 //const TString bkg[nBkgs] = { "TTJets", "TW","TbarW", "DYJetsToLL_M10to50_aMCatNLO", "DYJetsToLL_M50_aMCatNLO", "WW","WZ","ZZ", "TTWToLNu", "TTWToQQ", "TTZToQQ", "WJetsToLNu_aMCatNLO"};
-const TString bkg[nBkgs] = { "TTJets", "TW","TbarW", "DYJetsToLL_M5to50_MLM", "DYJetsToLL_M50_MLM", "WW","WZ","ZZ", "TTWToLNu", "TTWToQQ", "TTZToQQ", "WJetsToLNu_aMCatNLO"};
+const TString bkg[nBkgs] = { "TTbar", "TW","TbarW", "DYJetsToLL_M5to50_MLM", "DYJetsToLL_M50_MLM", "WW","WZ","ZZ", "TTWToLNu", "TTWToQQ", "TTZToQQ", "WJetsToLNu_aMCatNLO"};
 
-const TString level[nLevels] = {"dilepton","ZVeto","MET","2jets","1btag","DYVeto"};
-const TString process[nProcesses] = {"ttbar", "tW", "DY", "VV", "NonW/Z", "data"};
-const TString chan[nChannels] = { "ElMu", "Elec", "Muon", "All", "sameF"};
-const TString var[nVars] = {
+const TString Level[nLevels] = {"dilepton","ZVeto","MET","2jets","1btag","DYVeto"};
+const TString process[nProcesses] = {"ttbar", "tW", "DY", "VV", "WJets", "ttV", "data"};
+const TString Chan[nChannels] = { "ElMu", "Elec", "Muon", "All", "sameF"};
+const TString Var[nVars] = {
   "DiLepPt", "Lep0Pt", "Jet0Pt", "Jet1Pt",  "Lep1Pt", // 0, 1, 2, 3, 4
   "NJets", "NBtagJets", "NBtagsNJets",                // 5, 6 , 7
   "InvMass", "MT2", "MT2bb", "MT2lblb",               // 8, 9, 10, 11
@@ -104,7 +111,7 @@ TCanvas *SetCanvas(){
   pratio->SetGridy();// pratio->SetGridx();
   pratio->SetTopMargin(0.03); pratio->SetBottomMargin(0.4); pratio->SetRightMargin(0.02);
 
-  texlumi = new TLatex(-20.,50., Form("%4.0f pb^{-1}, #sqrt{s} = 13 TeV", Lumi));  
+  texlumi = new TLatex(-20.,50., Form("%2.1f fb^{-1}, #sqrt{s} = 13 TeV", Lumi/1000));  
   texlumi->SetNDC();
   texlumi->SetTextAlign(12);
   texlumi->SetX(0.72);
@@ -138,12 +145,12 @@ void SetTexChan(TString chan, TString level){
   else if (chan == "Muon") t += "#mu^{+}#mu^{-}";
   else if (chan == "All") t += "#mu^{+}#mu^{-} + e^{+}e^{-} + e^{#pm}#mu^{#mp}";
   else if (chan == "sameF") t += "#mu^{+}#mu^{-} + e^{+}e^{-}";
-  if (level == "MET")   t += ", MET > 80";
-	if (level == "2jets") t += ", MET > 80, #geq 2 jets";
-	if (level == "1btag") t += ", MET > 80, #geq 2 jets, #geq 1 b-jet";
+  if (level == "MET")   t += ", MET > 50";
+	if (level == "2jets") t += ", MET > 50, #geq 2 jets";
+	if (level == "1btag") t += ", MET > 50, #geq 2 jets, #geq 1 b-jet";
 	if (level == "DYVeto"){
     TString tt = TString(t);
-    tt += ", MET > 80, #geq 2 jets, #geq 1 b-jet";
+    tt += ", MET > 50, #geq 2 jets, #geq 1 b-jet";
 		t = "#splitline{" + tt + "}{+ DYVeto}";
 	}
   texchan = new TLatex(-20, 50, t);
@@ -189,39 +196,40 @@ void SetHRatio(TString var){
   } else  if (var == "Yields") {  //change bin labels
     hratio->GetXaxis()->SetBinLabel( 1, "Dilepton");
     hratio->GetXaxis()->SetBinLabel( 2, "Z veto");
-    hratio->GetXaxis()->SetBinLabel( 3, "MET");
+    hratio->GetXaxis()->SetBinLabel( 3, "MET #geq50");
     hratio->GetXaxis()->SetBinLabel( 4, "#geq2 jets");
     hratio->GetXaxis()->SetBinLabel( 5, "#geq1 b tags");
-    hratio->GetXaxis()->SetBinLabel( 6, "=1 b tag");
-    hratio->GetXaxis()->SetBinLabel( 7, "=2 b tags");
+    hratio->GetXaxis()->SetBinLabel( 6, "DYVeto");
+    hratio->GetXaxis()->SetBinLabel( 7, "");
+    hratio->GetXaxis()->SetBinLabel( 8, "");
     hratio->GetXaxis()->SetLabelSize(0.19);
     hratio->GetXaxis()->SetLabelOffset(0.04);
   } 
   TString xvar = "";
-    if(var == "DiLepPt") xvar = "P_{T}^{ll}";
-    else if(var == "Jet0Pt") xvar = "P_{T}^{jet0}"; 
-    else if(var == "Jet1Pt") xvar = "P_{T}^{jet1}"; 
-    else if(var == "Lep0Pt") xvar = "P_{T}^{lep0}"; 
-    else if(var == "Lep1Pt") xvar = "P_{T}^{lep1}"; 
+    if(var == "DiLepPt") xvar = "P_{T}^{ll} [GeV]";
+    else if(var == "Jet0Pt") xvar = "P_{T}^{jet0} [GeV]"; 
+    else if(var == "Jet1Pt") xvar = "P_{T}^{jet1} [GeV]"; 
+    else if(var == "Lep0Pt") xvar = "P_{T}^{lep0} [GeV]"; 
+    else if(var == "Lep1Pt") xvar = "P_{T}^{lep1} [GeV]"; 
     else if(var == "NJets") xvar = "Jet Multiplicity"; 
     else if(var == "NBtagJets") xvar = "b-jet multiplicity"; 
-    else if(var == "InvMass") xvar = "M_{ll}"; 
-    else if(var == "HT") xvar = "HT"; 
+    else if(var == "InvMass") xvar = "M_{ll} [GeV]"; 
+    else if(var == "HT") xvar = "HT [GeV]"; 
     else if(var == "METHT") xvar = "MET/#sqrt{HT}"; 
-    else if(var == "MinDPhiMetJets") xvar = "Min[#Delta#phi_{jet-MET}]"; 
-    else if(var == "MT") xvar = "M_{T}"; 
-    else if(var == "MT2") xvar = "M_{T2}"; 
-    else if(var == "MET") xvar = "E_{T}^{miss}"; 
-    else if(var == "Ptllb") xvar = "P_{T}^{llb}"; 
-    else if(var == "Meff") xvar = "M_{eff}"; 
-    else if(var == "DelLepPhi") xvar = "#Delta#phi_{ll}"; 
-    else if(var == "DelLepPhi") xvar = "#Delta#phi_{ll}"; 
-    else if(var == "DelPhiLepMet") xvar = "#Delta#phi_{l-MET}"; 
-    else if(var == "DelPhiJetMet") xvar = "#Delta#phi_{jet-MET}"; 
-    else if(var == "DelPhiLepJet") xvar = "#Delta#phi_{lep-jet}"; 
-    else if(var == "DelPhiPllbMet") xvar = "#Delta#phi_{P_{T}^{llb}-MET}"; 
+    else if(var == "MinDPhiMetJets") xvar = "Min[#Delta#phi_{jet-MET}] [GeV]"; 
+    else if(var == "MT") xvar = "M_{T} [GeV/c^2]"; 
+    else if(var == "MT2") xvar = "M_{T2} [GeV/c^2]"; 
+    else if(var == "MET") xvar = "E_{T}^{miss} [GeV]"; 
+    else if(var == "Ptllb") xvar = "P_{T}^{llb} [GeV]"; 
+    else if(var == "Meff") xvar = "M_{eff} [GeV]"; 
+    else if(var == "CosDelLepPhi") xvar = "Cos(#Delta#phi_{ll})"; 
+    else if(var == "DelLepPhi") xvar = "#Delta#phi_{ll} [rad]"; 
+    else if(var == "DelPhiLepMet") xvar = "#Delta#phi_{l-MET} [rad]"; 
+    else if(var == "DelPhiJetMet") xvar = "#Delta#phi_{jet-MET} [rad]"; 
+    else if(var == "DelPhiLepJet") xvar = "#Delta#phi_{lep-jet} [rad]"; 
+    else if(var == "DelPhiPllbMet") xvar = "#Delta#phi_{P_{T}^{llb}-MET} [rad]"; 
     else {xvar = var;}
   hratio->GetXaxis()->SetTitle(xvar);
-  hratio->SetMinimum(0.2);
-  hratio->SetMaximum(1.8);
+  hratio->SetMinimum(0.8);
+  hratio->SetMaximum(1.2);
 }
