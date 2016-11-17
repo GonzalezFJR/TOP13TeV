@@ -218,6 +218,7 @@ class StopAnalyzer : public PAFChainItemSelector
 		// Frequantly used variables in the trees
 		Int_t   nLepGood;
 		Int_t   ngenLep;
+    ULong64_t evt;
 		Int_t   nJet;
 		Float_t genWeight;
 		Float_t LepGood_px[30];
@@ -364,6 +365,7 @@ class StopAnalyzer : public PAFChainItemSelector
 		//   bool IsVetoElectron(unsigned int,float ptcut=20.);
 		//   bool IsMVAIDElectron(unsigned int);
 		bool IsTightElectron(unsigned int,float ptcut=20.);
+    void CoutEvent(long unsigned int en = 0, TString t = " ");
 		float getElecIso(int);
 		float getEACorrection(float);
 		bool getMultiIso(unsigned int );
@@ -515,6 +517,8 @@ class StopAnalyzer : public PAFChainItemSelector
 		TH1F* fHPtllb[gNCHANNELS][iNCUTS][gNSYST];
 		TH1F* fHMeff[gNCHANNELS][iNCUTS][gNSYST];
 		TH1F* fHHT[gNCHANNELS][iNCUTS][gNSYST];
+		TH1F* fHMETsqrtHT[gNCHANNELS][iNCUTS][gNSYST];
+
 		TH1F* fHMETHT[gNCHANNELS][iNCUTS][gNSYST];
 
 		TH1F* fHDelPhiLepMet[gNCHANNELS][iNCUTS][gNSYST];
@@ -522,6 +526,7 @@ class StopAnalyzer : public PAFChainItemSelector
 		TH1F* fHDelPhiPllbMet[gNCHANNELS][iNCUTS][gNSYST];
 		TH1F* fHDelPhiLepJet[gNCHANNELS][iNCUTS][gNSYST];
 		TH1F* fHDelLepPhi[gNCHANNELS][iNCUTS][gNSYST];
+		TH1F* fHCosDelLepPhi[gNCHANNELS][iNCUTS][gNSYST];
 		TH1F* fHMinDelPhiMetJets[gNCHANNELS][iNCUTS][gNSYST];
 
 

@@ -29,7 +29,7 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
     PAF_INFO("RunTree_ReReco", "Sequential mode chosen");
     pafmode = new PAFSequentialEnvironment();
   }
-  else if (nSlots <=80) {
+  else if (nSlots <=8) {
     PAF_INFO("RunTree_ReReco", "PROOF Lite mode chosen");
     pafmode = new PAFPROOFLiteEnvironment(nSlots);
   }

@@ -47,6 +47,7 @@ void StopAnalyzer::GetParameters(){
 void StopAnalyzer::GetTreeVariables(){
   nLepGood             = Get<Int_t>("nLepGood");
 	nJet                 = Get<Int_t>("nJet");
+  evt                  = Get<ULong64_t>("evt");
 	if(!gIsData){
 		ngenLep              = Get<Int_t>("ngenLep");
 		genWeight            = Get<Float_t>("genWeight");
@@ -158,6 +159,13 @@ StopAnalyzer::StopAnalyzer() : PAFChainItemSelector() {
 			//  fHSSOrigins[ichan][icut] = 0;
 			//  fHOrigins[ichan][icut] = 0;
 
+/*
+			for(int g = 0; g < 3;  g++)  fMETSR[ichan][icut][g] = 0; //0,1,2
+      for(int g = 0; g < 6;  g++)  fMT2SR[ichan][icut][g] = 0;
+      for(int g = 0; g < 12; g++)  fDPhiSR[ichan][icut][g] = 0;
+                                   fSRs[ichan][icut] = 0;
+*/
+
 			//++ Kinematic  
 			fHLHEweights[ichan][icut] = 0;
 			fHLep0Eta[ichan][icut] = 0;    
@@ -179,6 +187,7 @@ StopAnalyzer::StopAnalyzer() : PAFChainItemSelector() {
 			fHJet0Pt[ichan][icut][0] = 0;    
 			fHJet1Pt[ichan][icut][0] = 0;    
 			fHDelLepPhi[ichan][icut][0] = 0; 
+			fHCosDelLepPhi[ichan][icut][0] = 0; 
 			fHNJets[ichan][icut][0] = 0;     
 			fHHT[ichan][icut][0] = 0;        
 			fHMETHT[ichan][icut][0] = 0;        
@@ -238,6 +247,7 @@ StopAnalyzer::StopAnalyzer() : PAFChainItemSelector() {
 				fHJet0Pt[ichan][icut][isyst] = 0;    
 				fHJet1Pt[ichan][icut][isyst] = 0;    
 				fHDelLepPhi[ichan][icut][isyst] = 0; 
+				fHCosDelLepPhi[ichan][icut][isyst] = 0; 
 				fHNJets[ichan][icut][isyst] = 0;     
 				fHHT[ichan][icut][isyst] = 0;        
 				fHMETHT[ichan][icut][isyst] = 0;        
@@ -479,12 +489,13 @@ void StopAnalyzer::InitialiseKinematicHistos(){
 			fHHT[ch][cut][0]            = CreateH1F("H_HT_"           +gChanLabel[ch]+"_"+sCut[cut],"HT"           , 1200,0,1200);
 			fHMETHT[ch][cut][0]         = CreateH1F("H_METHT_"        +gChanLabel[ch]+"_"+sCut[cut],"METHT" , 60,0,60);
 
-			fHDelPhiJetMet[ch][cut][0]  = CreateH1F("H_DelPhiJetMet_" +gChanLabel[ch]+"_"+sCut[cut],"DelPhiJetMet" , 100,0, 1);
-			fHDelPhiLepMet[ch][cut][0]  = CreateH1F("H_DelPhiLepMet_" +gChanLabel[ch]+"_"+sCut[cut],"DelPhiLepMet" , 100,0, 1);
-			fHDelPhiPllbMet[ch][cut][0] = CreateH1F("H_DelPhiPllbMet_"+gChanLabel[ch]+"_"+sCut[cut],"DelPhiPllbMet", 100,0, 1);
-			fHDelPhiLepJet[ch][cut][0]  = CreateH1F("H_DelPhiLepJet_" +gChanLabel[ch]+"_"+sCut[cut],"DelPhiLepJet" , 100,0, 1);
-			fHDelLepPhi[ch][cut][0]     = CreateH1F("H_DelLepPhi_"    +gChanLabel[ch]+"_"+sCut[cut],"DelLepPhi"    , 100,0, 1);
-      fHMinDelPhiMetJets[ch][cut][0] = CreateH1F("H_MinDPhiMetJets_"+gChanLabel[ch]+"_"+sCut[cut], "MinDelPhiMetJets", 100, 0, 1);
+			fHDelPhiJetMet[ch][cut][0]  = CreateH1F("H_DelPhiJetMet_" +gChanLabel[ch]+"_"+sCut[cut],"DelPhiJetMet" , 100,0, TMath::Pi());
+			fHDelPhiLepMet[ch][cut][0]  = CreateH1F("H_DelPhiLepMet_" +gChanLabel[ch]+"_"+sCut[cut],"DelPhiLepMet" , 100,0, TMath::Pi());
+			fHDelPhiPllbMet[ch][cut][0] = CreateH1F("H_DelPhiPllbMet_"+gChanLabel[ch]+"_"+sCut[cut],"DelPhiPllbMet", 100,0, TMath::Pi());
+			fHDelPhiLepJet[ch][cut][0]  = CreateH1F("H_DelPhiLepJet_" +gChanLabel[ch]+"_"+sCut[cut],"DelPhiLepJet" , 100,0, TMath::Pi());
+			fHDelLepPhi[ch][cut][0]     = CreateH1F("H_DelLepPhi_"    +gChanLabel[ch]+"_"+sCut[cut],"DelLepPhi"    , 100,0, TMath::Pi());
+			fHCosDelLepPhi[ch][cut][0]     = CreateH1F("H_CosDelLepPhi_"    +gChanLabel[ch]+"_"+sCut[cut],"CosDelLepPhi"    , 40,-1, 1);
+      fHMinDelPhiMetJets[ch][cut][0] = CreateH1F("H_MinDPhiMetJets_"+gChanLabel[ch]+"_"+sCut[cut], "MinDelPhiMetJets", 100, 0, TMath::Pi());
 
 			// ---------------------------------------------------------------------------------------
 			// ---------------------------------------------------------------------------------------
@@ -574,12 +585,13 @@ void StopAnalyzer::InitialiseSystematicHistos(){
 				fHHT[ch][cut][sys]            = CreateH1F("H_HT_"           +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"HT"           , 1200,0,1200);
 				fHMETHT[ch][cut][sys]         = CreateH1F("H_METHT_"        +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"METHT"        , 60,0,60);
 
-				fHDelPhiJetMet[ch][cut][sys]  = CreateH1F("H_DelPhiJetMet_" +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelPhiJetMet" , 100,0, 1);
-				fHDelPhiLepMet[ch][cut][sys]  = CreateH1F("H_DelPhiLepMet_" +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelPhiLepMet" , 100,0, 1);
-				fHDelPhiPllbMet[ch][cut][sys] = CreateH1F("H_DelPhiPllbMet_"+gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelPhiPllbMet", 100,0, 1);
-				fHDelPhiLepJet[ch][cut][sys]  = CreateH1F("H_DelPhiLepJet_" +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelPhiLepJet" , 100,0, 1);
-        fHMinDelPhiMetJets[ch][cut][sys] = CreateH1F("H_MinDPhiMetJets_"+gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys], "MinDelPhiMetJets", 100, 0, 1);
-				fHDelLepPhi[ch][cut][sys]     = CreateH1F("H_DelLepPhi_"    +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelLepPhi"    , 100,0, 1);
+				fHDelPhiJetMet[ch][cut][sys]  = CreateH1F("H_DelPhiJetMet_" +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelPhiJetMet" , 100,0, TMath::Pi());
+				fHDelPhiLepMet[ch][cut][sys]  = CreateH1F("H_DelPhiLepMet_" +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelPhiLepMet" , 100,0, TMath::Pi());
+				fHDelPhiPllbMet[ch][cut][sys] = CreateH1F("H_DelPhiPllbMet_"+gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelPhiPllbMet", 100,0, TMath::Pi());
+				fHDelPhiLepJet[ch][cut][sys]  = CreateH1F("H_DelPhiLepJet_" +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelPhiLepJet" , 100,0, TMath::Pi());
+        fHMinDelPhiMetJets[ch][cut][sys] = CreateH1F("H_MinDPhiMetJets_"+gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys], "MinDelPhiMetJets", 100, 0, TMath::Pi());
+				fHDelLepPhi[ch][cut][sys]     = CreateH1F("H_DelLepPhi_"    +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"DelLepPhi"    , 100,0, TMath::Pi());
+				fHCosDelLepPhi[ch][cut][sys]     = CreateH1F("H_CosDelLepPhi_"    +gChanLabel[ch]+"_"+sCut[cut]+"_"+SystName[sys],"CosDelLepPhi"    , 40,-1,1 );
 			}
 		}
 	}
@@ -702,6 +714,14 @@ void StopAnalyzer::ResetHypLeptons(){
   fHypLepton1 = lepton(vec, 0, -1, -1);
   fHypLepton2 = lepton(vec, 0, -1, -1);
 }
+void StopAnalyzer::CoutEvent(long unsigned int en, TString t){
+  //if(en == 1000599168 || en == 1268707665 || en == 157395642 || en == 2726847580 || en == 42879335){
+  //if(en == 1519610198 || en == 1559039433 || en == 998619292 || en == 1206329870 || en == 295644557 || en == 686746673 || en == 99957372 || en == 126485808 || en == 249297855){
+  if(en == 1347253329 || en == 960559657){
+    cout << t << endl;
+  }
+  else return;
+}
 
 void StopAnalyzer::SetTreeVariables(gChannel chan){ 
   TWeight     = EventWeight;
@@ -767,8 +787,9 @@ void StopAnalyzer::InsideLoop() {
     if((Get<Int_t>("GenSusyMStop") != gStopMass) || (Get<Int_t>("GenSusyMNeutralino") != gLspMass)) return;
   }
 	fHDummy->Fill(0.5);
-	//if (METFilter() == false) return;
+	if (!METFilter()) return;
 
+  CoutEvent(evt, Form("Event number = %li", evt));
 	// Calculate PU Weight
 	if (!gIsData) PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); //True       //nTruePU
 
@@ -970,24 +991,71 @@ void StopAnalyzer::Summary(){}
 // TRIGGER INFORMATION
 //------------------------------------------------------------------------------
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopTrigger#Run2015C_D_25_ns_data_with_RunII
+// https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopTrigger#Run2015C_D_25_ns_data_with_RunII
 bool StopAnalyzer::PassTriggerMuMu() {
-  Bool_t pass = true;
-	//Bool_t pass = Get<Float_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
-	return pass;
+   if(!gIsData) return true;
+   //return true;
+   Bool_t pass         = false;
+   Bool_t passDoubleMu = false;
+   Bool_t passSingleMu = false;
+   if (gIsData){
+      passDoubleMu = (Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"  ) ||
+                      Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") );
+      if (gSampleName == "SingleMuon") passSingleMu = ( Get<Int_t>("HLT_BIT_HLT_IsoTkMu24_v") ||
+                                                        Get<Int_t>("HLT_BIT_HLT_IsoMu24_v"  ) );
+      if ( (gSampleName == "DoubleMuon" && passDoubleMu                 ) ||
+           (gSampleName == "SingleMuon" && passSingleMu && !passDoubleMu) )
+         pass = true;
+   }else{
+      pass = false;
+   }
+   return pass;
 }
 
-bool StopAnalyzer::PassTriggerEE(){ 
-  Bool_t pass = true;
-	//Bool_t pass = Get<Float_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-	return pass;
+
+bool StopAnalyzer::PassTriggerEE(){
+   if(!gIsData) return true;
+   //return true;
+   Bool_t pass         = false;
+   Bool_t passDoubleEl = false;
+   Bool_t passSingleEl = false;
+   if (gIsData){
+      passDoubleEl = Get<Int_t>("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+      if (gSampleName == "SingleElectron") passSingleEl = Get<Int_t>("HLT_BIT_HLT_Ele27_WPTight_Gsf_v");
+      if ( (gSampleName == "DoubleEG"  && passDoubleEl                 ) ||
+           (gSampleName == "SingleElectron" && passSingleEl && !passDoubleEl) )
+         pass = true;
+   }else{
+      pass = false;
+   }
+   return pass;
 }
 
-bool StopAnalyzer::PassTriggerEMu(){ 
-  Bool_t pass = true;
-	//Bool_t pass = (Get<Float_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || 
-	//		Get<Float_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v")); 
-	return pass;
+
+bool StopAnalyzer::PassTriggerEMu(){
+   if(!gIsData) return true;
+   //return true;
+   Bool_t pass         = false;
+   Bool_t passElMu     = false;
+   Bool_t passSingleEl = false;
+   Bool_t passSingleMu = false;
+   if (gIsData){
+      passElMu     = (Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+            Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") );
+      if (gSampleName == "SingleElectron" || gSampleName == "SingleMuon") passSingleEl =  Get<Int_t>("HLT_BIT_HLT_Ele27_WPTight_Gsf_v");
+      if (gSampleName == "SingleElectron" || gSampleName == "SingleMuon") passSingleMu = (Get<Int_t>("HLT_BIT_HLT_IsoTkMu24_v") ||
+                                                                                   Get<Int_t>("HLT_BIT_HLT_IsoMu24_v") );
+
+      if ( (gSampleName == "MuonEG"         && passElMu                                  ) ||
+           (gSampleName == "SingleMuon"     && passSingleMu && !passElMu                 ) ||
+           (gSampleName == "SingleElectron" && passSingleEl && !passElMu && !passSingleMu) )
+         pass = true;
+   }else{
+      pass = false;
+   }
+   return pass;
 }
+
 
 //------------------------------------------------------------------------------
 // Get METHODS
@@ -1285,23 +1353,35 @@ float StopAnalyzer::getSF(gChannel chan) {
 	if (gIsData)              return 1.; //Don't scale data
 	float id1(1.),id2(1.), trig(1.);
 	float err1(0.), err2(0.), err_trg(0.);
+  float SF = 0; float FSSF = 0;
+  float FS1 = 0; float FS2 = 0;
 	if (chan == Muon){
 		id1  = fLeptonSF->GetTightMuonSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
 		id2  = fLeptonSF->GetTightMuonSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
-		trig = fLeptonSF->GetDoubleMuSF (fHypLepton1.p.Eta(),fHypLepton2.p.Eta());
+		trig = fLeptonSF->GetDoubleMuSF (fHypLepton1.p.Pt(),fHypLepton1.p.Eta());
+    FS1  = fLeptonSF->GetFastSimMuonSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
+    FS2  = fLeptonSF->GetFastSimMuonSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
   } 
   else if (chan == Elec){
     id1  = fLeptonSF->GetTightElectronSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
     id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta()); 
-    trig = fLeptonSF->GetDoubleElSF     (fHypLepton1.p.Eta(),fHypLepton2.p.Eta()); 
+    trig = fLeptonSF->GetDoubleElSF     (fHypLepton1.p.Pt(),fHypLepton1.p.Eta()); 
+    FS1  = fLeptonSF->GetFastSimElectronSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
+    FS2  = fLeptonSF->GetFastSimElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
   }
   else if (chan == ElMu){
+    float leadingPt  = fHypLepton1.p.Pt() > fHypLepton2.p.Pt()? fHypLepton1.p.Pt() : fHypLepton2.p.Pt();
+    float leadingEta = fHypLepton1.p.Pt() > fHypLepton2.p.Pt()? fHypLepton1.p.Eta() : fHypLepton2.p.Eta();
     id1  = fLeptonSF->GetTightMuonSF    (fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
     id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
-    trig = fLeptonSF->GetMuEGSF         (fHypLepton2.p.Eta(),fHypLepton1.p.Eta());
-  }
-  trig = 1;
-  return (PUSF*id1*id2*trig);
+    trig = fLeptonSF->GetMuEGSF         (leadingPt,leadingEta);
+    FS1  = fLeptonSF->GetFastSimMuonSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
+    FS2  = fLeptonSF->GetFastSimElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
+	}
+  SF = PUSF*id1*id2*trig;
+  FSSF = FS1*FS2;
+	if(gSampleName.BeginsWith("T2tt")) SF*= FSSF;
+  return (SF);
 }
 
 float StopAnalyzer::getTopPtSF(){
@@ -1367,7 +1447,7 @@ void StopAnalyzer::FillDYHistograms(){
 						fHDY_InvMassVsNjets [ElMu][i1btag]->Fill(getNJets() , Mll, EventWeight);
 						fHDY_InvMassVsNbtags[ElMu][i1btag]->Fill(getNBTags(), Mll, EventWeight);
 						fHDY_InvMass        [ElMu][i1btag]->Fill(             Mll, EventWeight);
-						if(PassesDYVetoCut()){
+						if(1){
 							fHDY_InvMassVsNPV   [ElMu][iDYVeto]->Fill(nGoodVertex, Mll, EventWeight);
 							fHDY_InvMassVsMET   [ElMu][iDYVeto]->Fill(getMET()   , Mll, EventWeight);
 							fHDY_InvMassVsNjets [ElMu][iDYVeto]->Fill(getNJets() , Mll, EventWeight);
@@ -1528,6 +1608,8 @@ void StopAnalyzer::FillKinematicHistos(gChannel chan, iCut cut){
 		}
 	}
 
+// if(chan==2 && cut==iDilepton) cout << evt << endl; //CCC
+
 	//++ jet info		  
 	int njets = getNJets(); 
 	if(getHT()>0){
@@ -1567,8 +1649,8 @@ void StopAnalyzer::FillKinematicHistos(gChannel chan, iCut cut){
 		fHDPhiLep0Jet[chan][cut]  ->Fill(getDPhiClosestJet(fHypLepton1.p), EventWeight);
 		fHDPhiLep1Jet[chan][cut]  ->Fill(getDPhiClosestJet(fHypLepton2.p), EventWeight);
 	}
-	//Float_t nVert =  Get<Float_t>("nVert");
-	//fHvertices[chan][cut]     ->Fill(nVert, EventWeight); // for now, using the same
+	Float_t nVert =  Get<Int_t>("nVert");
+	fHvertices[chan][cut]     ->Fill(nVert, EventWeight); // for now, using the same
 	//fHgoodvertices[chan][cut] ->Fill(nVert, EventWeight); // for now, using the same
 
 #ifdef DEBUG
@@ -1613,6 +1695,14 @@ void StopAnalyzer::FillYieldsHistograms(gChannel chan, iCut cut, gSystFlag sys){
 	}
 	else {
 		fHInvMass[chan][cut][sys]->Fill((fHypLepton1.p+fHypLepton2.p).M(), EventWeight);
+	fHMET[chan][cut][sys]           ->Fill(getMET(),                                EventWeight);
+			fHDiLepPt[chan][cut][sys]         ->Fill((fHypLepton1.p+fHypLepton2.p).Pt(),      EventWeight);
+			fHLep0Pt[chan][cut][sys]          ->Fill(fHypLepton1.p.Pt(),                      EventWeight);
+			fHLep1Pt[chan][cut][sys]          ->Fill(fHypLepton2.p.Pt(),                      EventWeight);
+			fHNJets[chan][cut][sys]         ->Fill(njets,                                   EventWeight);
+			fHNBtagJets[chan][cut][sys]     ->Fill(getNBTags(),                             EventWeight);
+			fHMT2[chan][cut][sys]           ->Fill(getMT2ll(chan),                          EventWeight);
+
 		fHInvMass2[chan][cut][sys]->Fill((fHypLepton1.p+fHypLepton2.p).M(), EventWeight);
 		if (njets == 0) fHNBtagsNJets[chan][cut][sys]->Fill(nbtags,        EventWeight);
 		if (njets == 1) fHNBtagsNJets[chan][cut][sys]->Fill(nbtags+1,      EventWeight);
@@ -1632,18 +1722,9 @@ void StopAnalyzer::FillYieldsHistograms(gChannel chan, iCut cut, gSystFlag sys){
 			}
 			fHminDelRJetsLeps[chan][cut][sys]->Fill(TMath::Min(deltaR_temp1, deltaR_temp2), EventWeight);
 
-			fHDiLepPt[chan][cut][sys]         ->Fill((fHypLepton1.p+fHypLepton2.p).Pt(),      EventWeight);
-			fHLep0Pt[chan][cut][sys]          ->Fill(fHypLepton1.p.Pt(),                      EventWeight);
-			fHLep1Pt[chan][cut][sys]          ->Fill(fHypLepton2.p.Pt(),                      EventWeight);
 			fHJet0Pt[chan][cut][sys]          ->Fill(getJetPtIndex(0),                        EventWeight);
 			fHJet1Pt[chan][cut][sys]          ->Fill(getJetPtIndex(1),                        EventWeight);
 
-			fHNJets[chan][cut][sys]         ->Fill(njets,                                   EventWeight);
-			fHNBtagJets[chan][cut][sys]     ->Fill(getNBTags(),                             EventWeight);
-			fHInvMass[chan][cut][sys]       ->Fill((fHypLepton1.p+fHypLepton2.p).M(),       EventWeight);
-			fHMET[chan][cut][sys]           ->Fill(getMET(),                                EventWeight);
-			fHMT2[chan][cut][sys]           ->Fill(getMT2ll(chan),                          EventWeight);
-			if(getNJets()>1){
 				fHMT2b[chan][cut][sys]          ->Fill(getMT2b(chan),                           EventWeight);
 				fHMT2lb[chan][cut][sys]         ->Fill(getMT2lb(chan),                          EventWeight);
 				if(sys==Norm){
@@ -1671,16 +1752,17 @@ void StopAnalyzer::FillYieldsHistograms(gChannel chan, iCut cut, gSystFlag sys){
 				fHHT[chan][cut][sys]            ->Fill(getHT(),                                 EventWeight);
 				fHMETHT[chan][cut][sys]         ->Fill(getMET()/TMath::Sqrt(getHT()),          EventWeight);
 			}
-			fHDelPhiJetMet[chan][cut][sys]  ->Fill(TMath::Abs(getDPhiJetMet())/pi, EventWeight);
-			fHDelPhiLepMet[chan][cut][sys]  ->Fill(TMath::Abs(getDPhiLepMet())/pi, EventWeight);
-			fHDelPhiPllbMet[chan][cut][sys] ->Fill(TMath::Abs(getDPhibMet()  )/pi, EventWeight);
-			fHDelPhiLepJet[chan][cut][sys]  ->Fill(TMath::Abs(getDPhiLepJet())/pi, EventWeight);
-			fHMinDelPhiMetJets[chan][cut][sys]  ->Fill(TMath::Abs(getMinDPhiMetJets())/pi, EventWeight);
-			fHDelLepPhi[chan][cut][sys]     ->Fill(TMath::Abs(fHypLepton1.p.DeltaPhi((fHypLepton2.p)))/pi, EventWeight);
-
-			fHLep0Eta[chan][cut]    ->Fill(TMath::Abs(fHypLepton1.p.Eta()),         EventWeight);
-			fHLep1Eta[chan][cut]    ->Fill(TMath::Abs(fHypLepton2.p.Eta()),         EventWeight);
-		}
+			fHDelPhiJetMet[chan][cut][sys]  ->Fill(TMath::Abs(getDPhiJetMet()), EventWeight);
+			fHDelPhiLepMet[chan][cut][sys]  ->Fill(TMath::Abs(getDPhiLepMet()), EventWeight);
+			fHDelPhiPllbMet[chan][cut][sys] ->Fill(TMath::Abs(getDPhibMet()  ), EventWeight);
+			fHDelPhiLepJet[chan][cut][sys]  ->Fill(TMath::Abs(getDPhiLepJet()), EventWeight);
+			fHMinDelPhiMetJets[chan][cut][sys]  ->Fill(TMath::Abs(getMinDPhiMetJets()), EventWeight);
+			fHDelLepPhi[chan][cut][sys]     ->Fill(TMath::Abs(fHypLepton1.p.DeltaPhi((fHypLepton2.p))), EventWeight);
+			fHCosDelLepPhi[chan][cut][sys]   ->Fill(TMath::Cos(fHypLepton1.p.DeltaPhi(fHypLepton2.p)), EventWeight);
+      if(sys == Norm){
+				fHLep0Eta[chan][cut]    ->Fill(TMath::Abs(fHypLepton1.p.Eta()),         EventWeight);
+				fHLep1Eta[chan][cut]    ->Fill(TMath::Abs(fHypLepton2.p.Eta()),         EventWeight);
+      }
 	}
 
 	if (!gIsData){
@@ -1703,6 +1785,7 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 		<< IsMuMuEvent() << endl;
 #endif
 
+  CoutEvent(evt, Form(" PassTrigEmu: %i", PassTriggerEMu()));
 	if (PassTriggerEMu()  && IsElMuEvent()){
 		// Define Hypothesis Leptons...
 		EventWeight = gWeight * getSF(ElMu);// * getTopPtSF();
@@ -1722,16 +1805,17 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 			fTree->Fill();
 		}
 
-		if (PassesMllVeto()){
 #ifdef DEBUG
 			cout << " pass mll, ";
 #endif
 
+		if (PassesMllVeto()){
 			FillYieldsHistograms(ElMu, iDilepton, sys);
 			if(sys==Norm) FillKinematicHistos(ElMu,iDilepton);
 
 			FillYieldsHistograms(ElMu, iZVeto, sys);      
 			if(sys==Norm) FillKinematicHistos(ElMu, iZVeto);
+
 			if(PassesMETCut()){
 				FillYieldsHistograms(ElMu, iMET, sys);      
 				if(sys==Norm) FillKinematicHistos(ElMu,iMET);
@@ -1749,7 +1833,7 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 						//if (sys == LESUp) cout << evt<< endl;  //LESup    8 //EventNumber
 						FillYieldsHistograms(ElMu, i1btag, sys);
 						if(sys==Norm) FillKinematicHistos(ElMu,i1btag);
-						if(PassesDYVetoCut()){
+						if(1){ // No DY Veto in emu
 							FillYieldsHistograms(ElMu,iDYVeto, sys);
 							if(sys==Norm) FillKinematicHistos(ElMu,iDYVeto);
 						}
@@ -1935,7 +2019,6 @@ bool StopAnalyzer::Passes3rdLeptonVeto(){
 
 bool StopAnalyzer::PassesMllVeto(){
 	// Check consistency.
-	return true;
 	if (fHypLepton1.index == -1) return false;
 	if (fHypLepton2.index == -1) return false;
 	float InvMass = (fHypLepton1.p+fHypLepton2.p).M();
@@ -1962,8 +2045,6 @@ bool StopAnalyzer::PassesTopDCut(){
 
 bool StopAnalyzer::PassesNJetsCut(){
 	if (getNJets() <= 1) return false;
-  if (getBtagJetPtIndex(0) < 50) return false; // aaa
-	if (getMeff() < 300.) return false;
 	return true;
 }
 
@@ -2003,8 +2084,8 @@ int StopAnalyzer::IsDileptonEvent(){
 #ifdef DEBUG
 	cout << "IsDileptonEvent(): NLeptons =" << Lepton.size()<< endl;
 #endif
-	//if(Lepton.size() < 2) return 0; // xxx
 	if(Lepton.size() != 2) return 0; // xxx
+  if(Lepton[0].p.Pt()<25) return 0;
 	int select = Lepton[0].charge*Lepton[1].charge;
 	int result = 0;
 	if      (Lepton[0].type == 0 && Lepton[1].type == 0) result = 1; // mu/mu
@@ -2045,32 +2126,71 @@ int StopAnalyzer::getSelectedLeptons(){
   nMuon = 0;
   TLorentzVector lep;
   Int_t thetype = 0;
-  for (Int_t i=0; i<nLepGood;i++){
-    if(IsTightMuon(i)){
-      thetype = 0;
-      nMuon ++; 
+	for (Int_t i=0; i<nLepGood;i++){
+		CoutEvent(evt, Form("---- Lepton %i", i));
+		CoutEvent(evt, Form("   pdgId = %i ", LepGood_pdgId[i]));
+		CoutEvent(evt, Form("   pT    = %f ", LepGood_pt[i]));
+		CoutEvent(evt, Form("   Eta   = %f ", LepGood_eta[i]));
+		CoutEvent(evt, Form("   Sip3D = %f ", Get<Float_t>("LepGood_sip3d", i)));
+		CoutEvent(evt, Form("     dxy = %f ", LepGood_dxy[i]));
+		CoutEvent(evt, Form("      dz = %f ", LepGood_dz[i]));
+		CoutEvent(evt, Form("   LHits = %i ", Get<Int_t>("LepGood_lostHits", i)));
+		CoutEvent(evt, Form("   mediumMuonId ---> %i", Get<Int_t>("LepGood_mediumMuonId",i))); 
+		CoutEvent(evt, Form("   tightElecId  ---> %i", Get<Int_t>("LepGood_tightId", i))); 
+		CoutEvent(evt, Form("   MULTIISO VT"));
+		CoutEvent(evt, Form("   miniRelIso (<0.09) : %f", Get<Float_t>("LepGood_miniRelIso", i)));
+		CoutEvent(evt, Form("      ptRatio (>0.84) : %f", Get<Float_t>("LepGood_jetPtRatiov2", i)));
+		CoutEvent(evt, Form("        ptRel (>7.2 ) : %f", Get<Float_t>("LepGood_jetPtRelv2", i)));
+    if(Get<Int_t>("LepGood_tightId", i) <3 && fabs(LepGood_pdgId[i]) == 11){
+      CoutEvent(evt, Form("etaSC = %f", Get<Float_t>("LepGood_etaSc", i)));
+      CoutEvent(evt, Form("sigmaIEtaIEta = %f", Get<Float_t>("LepGood_sigmaIEtaIEta", i)));
+      CoutEvent(evt, Form("dEtaScTrkIn = %f", Get<Float_t>("LepGood_dEtaScTrkIn", i)));
+      CoutEvent(evt, Form("dPhiScTrkIn = %f", Get<Float_t>("LepGood_dPhiScTrkIn", i)));
+      CoutEvent(evt, Form("hadronicOverEm = %f", Get<Float_t>("LepGood_hadronicOverEm", i)));
+      CoutEvent(evt, Form("eInvMinusPInv = %f", Get<Float_t>("LepGood_eInvMinusPInv", i)));
+      CoutEvent(evt, Form("eInvMinusPInv_tkMom = %f", Get<Float_t>("LepGood_eInvMinusPInv_tkMom", i)));
+	  }
+
+		if(IsTightMuon(i)){
+			CoutEvent(evt, "   Is Muon!!");
+			thetype = 0;
+			nMuon ++; 
     }
     else if(IsTightElectron(i)){
+			CoutEvent(evt, "   Is Electron!!");
       thetype = 1;
       nElec++;
     }
-    else continue;
+    else  continue;
+
+ 
     lep.SetPxPyPzE(LepGood_px[i], LepGood_py[i], LepGood_pz[i], LepGood_energy[i]); 
     lepton tmpLepton(lep, LepGood_charge[i], thetype, i); 
     tmp_lepton.push_back(tmpLepton);
   }
   Lepton = SortLeptonsByPt(tmp_lepton);
+  CoutEvent(evt, Form("  ---> nselLeps = %i", Lepton.size()));
+  if(Lepton.size() == 2) CoutEvent(evt, Form("  --->      Mll = %f", (Lepton[0].p+Lepton[1].p).M()));
   return Lepton.size();
 }
 
 bool StopAnalyzer::METFilter(){
-  if (Get<Float_t>("Flag_HBHENoiseFilter") && 
-      Get<Float_t>("Flag_HBHENoiseIsoFilter") && 
-      Get<Float_t>("Flag_CSCTightHaloFilter") && 
-      Get<Float_t>("Flag_goodVertices") && 
-      Get<Float_t>("Flag_eeBadScFilter")) 
+  if(gSampleName.BeginsWith("T2tt")) return true;
+  if (Get<Int_t>("Flag_HBHENoiseFilter") && 
+      Get<Int_t>("Flag_HBHENoiseIsoFilter") && 
+      Get<Int_t>("Flag_EcalDeadCellTriggerPrimitiveFilter") && 
+      Get<Int_t>("Flag_goodVertices") && 
+      Get<Int_t>("Flag_eeBadScFilter")){ 
+      //Get<Int_t>("Flag_BadMuon")) 
+      //Get<Int_t>("Flag_badChargedHadron")) 
+      //Get<Int_t>("Flag_globalTightHalo2016Filter")) 
+    CoutEvent(evt, "   Passes MET filters!!");
     return true;
-  return false;
+  }
+  else{
+    CoutEvent(evt, "----->Does not pass MET filters!!");
+    return false;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -2082,13 +2202,13 @@ bool StopAnalyzer::IsTightMuon(unsigned int iMuon,float ptcut){
    if ((TMath::Abs(LepGood_pdgId[iMuon])) != 13) return false;
    if (LepGood_pt[iMuon]              < ptcut) return false;
    if (TMath::Abs(LepGood_eta[iMuon]) > 2.4)   return false;
-  // if (LepGood_relIso04[iMuon]        > 0.15)  return false; 
+   //if (LepGood_relIso04[iMuon]        > 0.15)  return false; 
 	 if (!getMultiIso(iMuon)) return false;
    if (TMath::Abs(LepGood_dxy[iMuon]) >= 0.05)  return false; 
    if (TMath::Abs(LepGood_dz[iMuon])  >= 0.1)  return false;
-   if (Get<Float_t>("LepGood_sip3d", iMuon) > 4.0) return false;
+   if (Get<Float_t>("LepGood_sip3d", iMuon) > 4.0) return false; 
    //if (Get<Int_t>("LepGood_tightId",iMuon)           < 1   )  return false;
-   if (Get<Int_t>("LepGood_mediumMuonId",iMuon)    < 1   )  return false;
+   if (Get<Int_t>("LepGood_mediumMuonId",iMuon)    < 1   )  return false; // medium ID?
    return true;
 }
 
@@ -2107,13 +2227,31 @@ bool StopAnalyzer::IsTightElectron(unsigned int iElec, float ptcut){
 	if (LepGood_pt[iElec] < ptcut) return false;
 	if (TMath::Abs(LepGood_eta[iElec]) > 2.4) return false;
   if (!getMultiIso(iElec)) return false;
+  //if (getElecIso(iElec) > 0.0766) return false;
 	if (TMath::Abs(LepGood_dxy[iElec]) >= 0.05) return false; 
 	if (TMath::Abs(LepGood_dz[ iElec]) >= 0.1 ) return false;
 	if (Get<Int_t>("LepGood_lostHits", iElec)         > 0      ) return false; 
 	if (TMath::Abs(LepGood_etaSc[iElec]) > 1.4442 && 
 			TMath::Abs(LepGood_etaSc[iElec]) < 1.566) return false;
-	if (Get<Float_t>("LepGood_sip3d", iElec) > 4.0) return false;
-	if(TMath::Abs(Get<Int_t>("LepGood_tightId", iElec)) < 1) return false;
+	if (Get<Float_t>("LepGood_sip3d", iElec) > 4.0) return false; 
+	//if(TMath::Abs(Get<Int_t>("LepGood_tightId", iElec)) != 3) return false; // bin 3: tight ID electrons
+  //'POG_SPRING15_25ns_v1_Tight' : [('dEtaIn', [0.00926, 0.00724]), ('dPhiIn', [0.0336, 0.0918]), ('sigmaIEtaIEta', [0.0101, 0.0279]), ('H/E', [0.0597, 0.0615]), ('1/E-1/p', [0.0120, 0.00999])],
+  // Tight Electron Id:
+  if(TMath::Abs(Get<Float_t>("LepGood_etaSc", iElec)) < 1.479){ // central
+    if(TMath::Abs(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec)) > 0.0101) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_dEtaScTrkIn", iElec)) > 0.00926 ) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_dPhiScTrkIn", iElec)) > 0.0336) return false;
+    if(Get<Float_t>("LepGood_hadronicOverEm", iElec) > 0.0597) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_eInvMinusPInv", iElec)) > 0.012) return false;
+	}
+  else{ // forward
+    if(TMath::Abs(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec)) > 0.0279) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_dEtaScTrkIn", iElec)) > 0.00724) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_dPhiScTrkIn", iElec)) > 0.0918) return false;
+    if(Get<Float_t>("LepGood_hadronicOverEm", iElec) > 0.0615) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_eInvMinusPInv", iElec)) >  	0.00999) return false;
+  }
+
 	return true;
 }
 
@@ -2124,15 +2262,15 @@ float StopAnalyzer::getElecIso(int iElec){
 }
 
 bool StopAnalyzer::getMultiIso(unsigned int index){
-  float max_mRelIso;  
+  //https://www.dropbox.com/s/fsfw0gummwsc61v/lepawareJECv2_bkg_wp_300915.pdf?dl=0
+  float max_mRelIso = 0.09;  
+  float min_ptRatio = 0.84; // Very tight
+  float min_ptRel   = 7.2 ; // Tight
 	//if      ((TMath::Abs(LepGood_pdgId[index])) == 11) max_mRelIso = 0.13;  // Tight for electrons
 	//else if ((TMath::Abs(LepGood_pdgId[index])) == 13) max_mRelIso = 0.2;   // Medium for muons
-	max_mRelIso = 0.088; // Very Tight
   float mRelIso = Get<Float_t>("LepGood_miniRelIso", index);
   float ptRatio = Get<Float_t>("LepGood_jetPtRatiov2", index);
   float ptRel   = Get<Float_t>("LepGood_jetPtRelv2", index);
-  float min_ptRatio = 0.84; // Very tight
-  float min_ptRel   = 7.2 ; // Tight
   // min_ptRatio = 0; min_ptRel = 0; // No MultiIso
   return (mRelIso < max_mRelIso && (ptRatio > min_ptRatio || ptRel > min_ptRel));
 }
@@ -2493,3 +2631,4 @@ void StopAnalyzer::ScaleMET(int flag){
 	setMET(tmp.Pt());
 	return;
 }
+
