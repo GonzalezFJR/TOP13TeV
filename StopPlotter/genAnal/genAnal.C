@@ -222,8 +222,8 @@ void loop(Int_t iprocess = 0){
 		fChain->GetEntry(k);
 
     if(iprocess > 0){
-      if(iprocess == 1 && (GenSusyMStop != 200 || GenSusyMNeutralino != 25)) continue;
-      if(iprocess == 2 && (GenSusyMStop != 250 || GenSusyMNeutralino != 75)) continue;
+      if(iprocess == 2 && (GenSusyMStop != 200 || GenSusyMNeutralino != 25)) continue;
+      if(iprocess == 3 && (GenSusyMStop != 250 || GenSusyMNeutralino != 75)) continue;
     }
 
 		if(ngenLep < 2) continue;
@@ -297,7 +297,7 @@ void genAnal(){
 		loop(iprocess);
 	}
 	outputfile = new TFile(outputpath + "genVars.root", "recreate");
-	for(int iprocess = 1; iprocess < 2; iprocess++){
+	for(int iprocess = 0; iprocess < nprocess; iprocess++){
 		njets[iprocess]  ->Write();
 		nbjets[iprocess] ->Write();
 		lep0pt[iprocess] ->Write();

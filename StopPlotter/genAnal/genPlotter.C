@@ -1,4 +1,11 @@
+#include "TString.h"
+#include "TH1F.h"
+#include "TCanvas.h"
+#include "TFile.h"
+#include "TLegend.h"
+
 const TString path = "/nfs/fanae/user/juanr/stop80/genAnal/genVars.root";
+const TString outputfolder = "genPlots/";
 const TString process[]     = {"ttbar", "stop_200_25", "stop_250_75"};
 const int nVars = 19;
 const TString vars[nVars] = {"NJets","NBJets","Lep0Pt","Lep1Pt","Jet0Pt","Jet1Pt","HT","MET","Meff", "Mll", "DilepPt", "DeltaPhill", "DeltaPhijj", "DeltaPhilj", "DeltaPhilm", "DeltaPhijm","MT2", "MT2lblb", "MT2bb"};
@@ -51,8 +58,9 @@ void plotvar(TString var){
   hstop1->Draw("same");
   hstop2->Draw("same");
   leg->Draw("same");
-
-  c->Print(var + ".png", "png");
+ 
+  gSystem->mkdir(outputfolder, kTRUE); 
+  c->Print(outputfolder + var + ".png", "png");
   //file->Close();
   delete c; 
 }

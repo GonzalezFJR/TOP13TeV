@@ -29,7 +29,7 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
     PAF_INFO("RunTree_ReReco", "Sequential mode chosen");
     pafmode = new PAFSequentialEnvironment();
   }
-  else if (nSlots <=8) {
+  else if (nSlots <=80) {
     PAF_INFO("RunTree_ReReco", "PROOF Lite mode chosen");
     pafmode = new PAFPROOFLiteEnvironment(nSlots);
   }
@@ -42,33 +42,38 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
   //----------------------------------------------------------------------------
   PAFProject* myProject = new PAFProject(pafmode);
 
+  // Base path to input files
+  //----------------------------------------------------------------------------
+  TString dataPath = "/pool/ciencias/MC_Summer12_53X/Legacy/";
+
   // INPUT DATA SAMPLE
   //----------------------------------------------------------------------------
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
   DatasetManager* dm = DatasetManager::GetInstance();
-  //dm->SetTab("DR74X25nsMiniAODv2");
   dm->SetTab("DR80XasymptoticMiniAODv2");
+  //dm->SetTab("DR80XasymptoticMiniAODv2");
+  //dm->SetTab("DR80XasymptoticMiniAODv2");
+  //dm->SetTab("DR80XasymptoticMiniAODv2");
   //dm->RedownloadFiles();
 
   // Deal with data samples
   if ((sampleName == "DoubleEG"   ||
        sampleName == "DoubleMuon" ||
        sampleName == "MuonEG"     ||
-       sampleName == "SingleEle"  ||
-       sampleName == "SingleMu")) {
+       sampleName.BeginsWith("Single")  )) {
     cout << "   + Data..." << endl;
     
     TString datasuffix[] = { // 17.24
       "Run2016B_PromptReco_v2", // 5.86
-      "Run2016C_PromptReco_v2", // 2.64
-      "Run2016D_PromptReco_v2", // 4.35
-      "Run2016G_PromptReco_v1", // 4.39
+      //"Run2016C_PromptReco_v2", // 2.64
+      //"Run2016D_PromptReco_v2", // 4.35
+      //"Run2016G_PromptReco_v1", // 4.39
       //"Run2015D_16Dec"
       //"Run2015C_05Oct",
       //"C_7016",
       //"D_7360"
     };
-    const unsigned int nDataSamples = 4;
+    const unsigned int nDataSamples = 1;
     for(unsigned int i = 0; i < nDataSamples; i++) {
       TString asample = Form("Tree_%s_%s",sampleName.Data(), datasuffix[i].Data());
       cout << "   + Looking for " << asample << " trees..." << endl;
@@ -139,9 +144,11 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
 
 	TString LumiString = oss.str();
   TString outputFile = outputDir;
-  outputFile += "/Tree_" + sampleName + ".root";
-  if(outputFile.Contains("_ext2")) outputFile.ReplaceAll("_ext2","");
-  if(outputFile.Contains("_ext"))  outputFile.ReplaceAll("_ext","");
+  //if(sampleName == "TTbar_Powheg") outputFile += "/Tree_TTJets.root";
+  //else 
+                            outputFile += "/Tree_" + sampleName + ".root";
+  if(outputFile.Contains("_ext2")) outputFile.ReplaceAll("_ext2",""); 
+  if(outputFile.Contains("_ext"))  outputFile.ReplaceAll("_ext",""); 
 
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
