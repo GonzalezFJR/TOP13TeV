@@ -68,15 +68,9 @@ class SusyLeptonSF {
   //----------------------------------------------------------------------  
   //--- Get Trigger SFs               (binned eta1, eta2)
   //----------------------------------------------------------------------  
-  float GetDoubleMuSF(float pt, float eta) const {
-    if(pt > 200) pt = 199.9;
- return fDoubleMuSF->GetBinContent(fDoubleMuSF->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
-  float GetDoubleElSF(float pt, float eta) const { 
-    if(pt > 200) pt = 199.9;
-return fDoubleElSF->GetBinContent(fDoubleElSF->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
-  float GetMuEGSF    (float pt, float eta) const { 
-    if(pt > 200) pt = 199.9;
-return fMuEGSF    ->GetBinContent(fMuEGSF    ->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
+  float GetDoubleMuSF(float pt, float eta) const { return fDoubleMuSF->GetBinContent(fDoubleMuSF->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
+  float GetDoubleElSF(float pt, float eta) const { return fDoubleElSF->GetBinContent(fDoubleElSF->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
+  float GetMuEGSF    (float pt, float eta) const { return fMuEGSF    ->GetBinContent(fMuEGSF    ->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
   // Trigger SF Errors (binned eta1, eta2)
   float GetDoubleMuSF_err(float pt, float eta) const { return fDoubleMuSF->GetBinError(fDoubleMuSF->FindBin(TMath::Abs(pt),TMath::Abs(eta)));}
   float GetDoubleElSF_err(float pt, float eta) const { return fDoubleElSF->GetBinError(fDoubleElSF->FindBin(TMath::Abs(pt),TMath::Abs(eta)));}
@@ -117,7 +111,7 @@ return fMuEGSF    ->GetBinContent(fMuEGSF    ->FindBin(TMath::Abs(pt), TMath::Ab
   TH2D* GetHistogramFromFileD(const char* file, const char* histo, const char* hname);
   TH2F* GetHistogramFromFileF(const char* file, const char* histo, const char* hname) const;
   
- private:
+ //private:
   // Muon SFs
   TH2D*  fTightMuonIDSF;     //Muon ID Scale Factors
   TGraphAsymmErrors*  fTrackerMuonSF;     //Muon ID Scale Factors

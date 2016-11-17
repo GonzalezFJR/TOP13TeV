@@ -76,10 +76,10 @@ TH2D* SusyLeptonSF::LoadFastSimElectronSF(const char* file, const char* histo) {
 
 TH2D* SusyLeptonSF::LoadFastSimMuonSF(const char* file, const char* histo) {
   fFastSimMuonSF = GetHistogramFromFileD(file, histo, "fFastSimMuonSF");
-  return fFastSimMuonSF;
+  return fFastSimElectronSF;
 }
-TH2D* SusyLeptonSF::LoadTightMuonIsoSF(const char* file, 
 
+TH2D* SusyLeptonSF::LoadTightMuonIsoSF(const char* file, 
 				   const char* histo) {
   fTightMuonIsoSF = GetHistogramFromFileD(file, histo, "fTightMuonISOSF");
   return fTightMuonIsoSF;
