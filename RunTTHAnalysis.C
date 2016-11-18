@@ -7,17 +7,12 @@ R__LOAD_LIBRARY(DatasetManager/DatasetManager.C+)
  ********************************************************/
 void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
 			Int_t    nSlots         =  1,
-			Int_t    Selection      = 0,
 			Bool_t   DoSystStudies  =  false,
-			Long64_t nEvents        = 0) {
-
-  // Selection:
-  // 0: dilepton
-  // 1: ngenLep < 2
-  // 2: emu
-  // 3: ee + mumu
-  // 4: emu + fiducial
-  // 5: particle level
+			Long64_t nEvents        = 0,
+			Bool_t G_CreateTree   = true,
+			Int_t stopMass       = 0,
+			Int_t lspMass        = 0,
+      Float_t  SusyWeight     = 0.0) {
   
   // VARIABLES TO BE USED AS PARAMETERS...
   Float_t G_Total_Lumi    = 19664.225;   
@@ -51,6 +46,7 @@ void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
   //----------------------------------------------------------------------------
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
   DatasetManager* dm = DatasetManager::GetInstance();
+  //dm->SetTab("DR74X25nsMiniAODv2");
   dm->SetTab("DR80XasymptoticMiniAODv2");
   //dm->RedownloadFiles();
 
@@ -62,15 +58,17 @@ void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
        sampleName == "SingleMu")) {
     cout << "   + Data..." << endl;
     
-    TString datasuffix[] = {
-      "Run2016B_PromptReco_v2",
-      "Run2016C_PromptReco_v2",
-      "Run2016D_PromptReco_v2"
+    TString datasuffix[] = { // 17.24
+      "Run2016B_PromptReco_v2", // 5.86
+      "Run2016C_PromptReco_v2", // 2.64
+      "Run2016D_PromptReco_v2", // 4.35
+      "Run2016G_PromptReco_v1", // 4.39
+      //"Run2015D_16Dec"
       //"Run2015C_05Oct",
       //"C_7016",
       //"D_7360"
     };
-    const unsigned int nDataSamples = 3;
+    const unsigned int nDataSamples = 4;
     for(unsigned int i = 0; i < nDataSamples; i++) {
       TString asample = Form("Tree_%s_%s",sampleName.Data(), datasuffix[i].Data());
       cout << "   + Looking for " << asample << " trees..." << endl;
@@ -82,11 +80,8 @@ void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
   else{ // Deal with MC samples
     G_IsData = false; //true;  // only for pseudodata
     dm->LoadDataset(sampleName);
-    if(sampleName != "TestHeppy")   myProject->AddDataFiles(dm->GetFiles());
-    if(sampleName == "WJetsToLNu_aMCatNLO" || 
-	    sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || 
-	    sampleName == "DYJetsToLL_M50_aMCatNLO" || 
-	    sampleName == "TTJets_amcatnlo" ||
+    if(sampleName != "TestHeppy" && !sampleName.Contains("T2tt"))   myProject->AddDataFiles(dm->GetFiles());
+    if(
 	    sampleName == "TTWToLNu"  || 
 	    sampleName == "TTWToQQ" || 
 	    sampleName == "TTZToQQ" || 
@@ -99,6 +94,13 @@ void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
 
 			cout << endl;
       cout << " weightSum(MC@NLO) = " << dm->GetSumWeights()     << endl;
+    }
+    else if(sampleName.BeginsWith("T2tt")){
+      TString lp = "/pool/ciencias/HeppyTreesDR80X/v1/";
+      cout << "Analyzing Stop sample" << endl;
+      G_Event_Weight = SusyWeight;
+      myProject->AddDataFile(lp + "Tree_" + sampleName + "_0.root");
+      sampleName = Form("T2tt_mStop%i_mLsp%i",stopMass, lspMass);
     }
     else if(sampleName == "TestHeppy"){
 			TString localpath="/pool/ciencias/users/user/palencia/";
@@ -136,19 +138,18 @@ void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
 	oss << G_Total_Lumi;
 
 	TString LumiString = oss.str();
-	TString outputFile = outputDir;
-	if     (Selection == 0)  outputFile += "/Tree_" + sampleName          + ".root";
-  else if(Selection == 1)  outputFile += "/Tree_" + sampleName + "Semi" + ".root";
-  else if(Selection == 4)  outputFile += "/Tree_" + sampleName + "Fidu" + ".root";
-  else                     outputFile += "/Tree_" + sampleName          + ".root";
+  TString outputFile = outputDir;
+  outputFile += "/Tree_" + sampleName + ".root";
   if(outputFile.Contains("_ext2")) outputFile.ReplaceAll("_ext2","");
   if(outputFile.Contains("_ext"))  outputFile.ReplaceAll("_ext","");
 
   PAF_INFO("RunTTHAnalysis", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
 
-  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || sampleName == "DYJetsToLL_M50_aMCatNLO" || sampleName == "TTJets_amcatnlo" || sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo")){ //||
-        //     sampleName == "TTWToLNu"  || sampleName == "TTWToQQ" || sampleName == "TTZToQQ" || sampleName == "WWZ" || sampleName == "WZZ" || sampleName == "ZZZ"){
+  if(sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo") ||
+     sampleName == "TTWToLNu"       || sampleName == "TTWToQQ"          || 
+     sampleName == "TTZToQQ"        || sampleName == "WWZ"              || 
+     sampleName == "WZZ"            || sampleName == "ZZZ"           ){
     PAF_INFO("RunTTHAnalysis", "This is a MC@NLO sample!");
     G_IsMCatNLO = true;
   }
@@ -162,8 +163,10 @@ void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
   myProject->SetInputParam("LumiForPU",     G_LumiForPUData  );
   myProject->SetInputParam("TotalLumi",     G_Total_Lumi     );
   myProject->SetInputParam("DoSystStudies", DoSystStudies    );
-  myProject->SetInputParam("Selection"    , Selection        );
+  myProject->SetInputParam("stopMass"     , stopMass         );
+  myProject->SetInputParam("lspMass"      , lspMass          );
   myProject->SetInputParam("IsMCatNLO"    , G_IsMCatNLO      );  
+  myProject->SetInputParam("CreateTree"   , G_CreateTree     );
 
  
   if(nEvents != 0) myProject->SetNEvents(nEvents);
@@ -177,9 +180,8 @@ void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
   myProject->AddPackage("mt2");
   myProject->AddPackage("PUWeight");
   myProject->AddPackage("BTagSFUtil");
-  myProject->AddPackage("LeptonSF");
-
-
+  myProject->AddPackage("SusyLeptonSF");
+  
   // Let's rock!
   //----------------------------------------------------------------------------
   myProject->Run();
