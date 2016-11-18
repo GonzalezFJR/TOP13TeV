@@ -170,9 +170,7 @@ void RunTTHAnalysis(TString  sampleName     = "TTbar_Madgraph",
 
   // Name of analysis class
   //----------------------------------------------------------------------------
-  myProject->AddSelectorPackage("TreeAnalysisTop");
-  //myProject->AddSelectorPackage("StopAnalyzer");
-  //myProject->AddSelectorPackage("WZ13TeV");
+  myProject->AddSelectorPackage("TTHAnalyzer");
 
   // Additional packages
   //----------------------------------------------------------------------------
