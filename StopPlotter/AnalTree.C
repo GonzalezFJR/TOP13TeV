@@ -56,12 +56,12 @@ void InitHistos(){
   }
 }
 
-void AnalTree(int isample, TString chan, float metcut, int nbs){
-  if( (chan == "Elec") && ((isample == 13) || (isample == 14)) ) return;
+void AnalTree(TString sample, TString plot){
+  /*if( (chan == "Elec") && ((isample == 13) || (isample == 14)) ) return;
   if( (chan == "ElMu") && ((isample == 12) || (isample == 14)) ) return;
   if( (chan == "Muon") && ((isample == 12) || (isample == 13)) ) return;
   if( ((chan == "sameF") || (chan == "SF")) && (isample == 13) ) return;
-  // 12, 13, 14  "DoubleEG", "MuonEG", "DoubleMuon",
+  */// 12, 13, 14  "DoubleEG", "MuonEG", "DoubleMuon",
   float metCut = metcut; int nBtags = nbs; int ischan = 0;
   float mt2llcut = 0; float mt2bbcut = 0; float mt2lblbcut = 0;
   float ptllbcut = 0; float mindphimetjetscut = 0; float methtcut = 0;
@@ -101,12 +101,12 @@ void AnalTree(int isample, TString chan, float metcut, int nbs){
   metht = met/TMath::Sqrt(ht);
   for(int k = 0; k<t->GetEntries(); k++){
     t->GetEntry(k);
-    if      (chan == "ElMu") ischan = iselmu;
+     if( ischan         if      (chan == "ElMu") ischan = iselmu;
     else if (chan == "Elec") ischan = iselel;
     else if (chan == "Muon") ischan = ismumu;
     else if ((chan == "SF") || (chan == "sameF"))  ischan = (iselel + ismumu);
     else if (chan == "All") ischan = 3;
-    if( ischan                &&  
+          &&  
         njets >= 2            &&
         met >= metCut          &&
         nbtags >= nBtags       &&
@@ -134,14 +134,6 @@ if(var[ind] == "DelPhiJetMet" )  histo[isample][ind] -> Fill(dphijetmet, weight)
 if(var[ind] == "DelPhiLepJet" )  histo[isample][ind] -> Fill(dphilepjet, weight);
 if(var[ind] == "DelPhiPllbMet")  histo[isample][ind] -> Fill(dphiptllbmet, weight);
 
-/*
-if(var[ind] == "NBtagNJets"   )  histo[isample][ind] -> Fill(x, weight);
-if(var[ind] == "DilepPt"      )  histo[isample][ind] -> Fill(x, weight);
-if(var[ind] == "Lep0Pt"       )  histo[isample][ind] -> Fill(x, weight);
-if(var[ind] == "Lep1Pt"       )  histo[isample][ind] -> Fill(x, weight);
-if(var[ind] == "Jet0Pt"       )  histo[isample][ind] -> Fill(x, weight);
-if(var[ind] == "Jet1Pt"       )  histo[isample][ind] -> Fill(x, weight);
-*/
        }
     }
   }

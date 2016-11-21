@@ -1798,7 +1798,6 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 
 		if(
 				(gCreateTree) && (sys==Norm)        && !(fChargeSwitch) &&
-				PassesZVeto()      &&
 				PassesMllVeto()    &&
 				PassesNJetsCut()){
 			SetTreeVariables(ElMu);
