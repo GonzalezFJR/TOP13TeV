@@ -1,3 +1,16 @@
+"""
+ @ Author; Juan R Gonzalez Fernandez
+   # Run all samples: 
+      >> python RunT2ttSamples
+   # Run all mases in one signle sample: 
+      >> python RunT2ttSamples "T2tt_150to250"
+   # Run all samples sending jobs:
+      >> python RunT2ttSamples 0 0 0 0 0 0 
+   # Run one single point
+      >> python RunT2ttSamples 800 50
+
+"""
+
 from ROOT import *
 import os
 import sys
@@ -84,11 +97,11 @@ def getxsec(StopMass):
     x  = float(StopMass%25)/25
     return v0 + (vf-v0)*x
 
-def Analyze(sample = "All", sendjobs = False):
+def Analyze(sample = "All", sendjobs = False, mstopo = 0, mlsp = 0):
 	if (sample == "All"):
 		for k in range(len(samplename)):
 			print ">>> Progress: sample ", k+1, "/", len(samplename)
-			Analyze(samplename[k])
+			Analyze(samplename[k], False, mstopo, mlsp)
 	elif (sample == "jobs"):
 		for k in range(len(samplename)):
 			print ">>> Sending jobs for processing sample ", k+1, "/", len(samplename)
@@ -134,10 +147,13 @@ def Analyze(sample = "All", sendjobs = False):
 			print ">>> Getting masses of Stop and Neutralino... "
 			del NeutralinoMass[:]; del StopMass[:]; del Events[:];
 			GetValues(sample)
-			PrintInfo()
+			#PrintInfo()
 			print ">>> Done! \n"
 			for m in range(len(StopMass)):
-				if(StopMass[m] != 600 or NeutralinoMass[m] != 1): continue;
+				#if(StopMass[m] != 600 or NeutralinoMass[m] != 1): continue;
+				print "xxxxxxxxxxxxx Checking sample, mstopo = ", mstopo, " mlsp = ", mlsp
+				if(mstopo != 0 and StopMass[m] != mstopo): continue;
+				if(mlsp != 0 and NeutralinoMass[m] != mlsp): continue;
 				xsec = getxsec(StopMass[m])
 				print ">>> Analyzing sample: ", sample 
 				print ">>> MStop   = ", StopMass[m]
@@ -151,9 +167,17 @@ def Analyze(sample = "All", sendjobs = False):
 
 if __name__ == "__main__":
   if   len(sys.argv) == 1:
+    print " ___ Analyzing all samples ___"
     Analyze()
   elif len(sys.argv) == 2:
-    Analyze(str(sys.argv[1]))
+    sample = str(sys.argv[1])
+    print " ___ Analyzing one sample: ", sample, " ___"
+    Analyze(sample)
+  elif len(sys.argv) == 3:
+    mstopo = float(sys.argv[1]); mlsp = float(sys.argv[2]);
+    print " ___ Analyzing one point [", mstopo, ", ", mlsp,"]  ___"
+    Analyze("All", False, mstopo, mlsp)  
   else:
+    print " ___ Analyzing all samples, sending jobs ___"
     Analyze(str(sys.argv[1]), True)
 

@@ -16,7 +16,7 @@
 //# Definition of constants
 //############################################################################
 
-const TString path = "/mnt_pool/fanae105/user/juanr/stop/TOP13TeV/outputFiles/nov14/";
+const TString path = "/mnt_pool/fanae105/user/juanr/stop/TOP13TeV/outputFiles/nov21/";
 const TString prefix = "Tree_"; const TString sufix = ".root";
 const TString treeName = "sTopTree";
 
