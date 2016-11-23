@@ -42,6 +42,7 @@ public:
   void SetParams(Int_t tipo = 0, Int_t color = 1, Float_t s = 0.25, TString t = "", TString x = "", TString c = "");
 
   void AddToLegend(TLegend* leg, Bool_t doyi = 1);
+  TH1F* GetVarHistoStatBin(Int_t bin = 0, TString dir = "Up");
 };
 
 Histo::Histo(const char *name, const char *title, Int_t nbins, Double_t xlow, Double_t xup)

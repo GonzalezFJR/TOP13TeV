@@ -147,7 +147,7 @@ def Analyze(sample = "All", sendjobs = False, mstopo = 0, mlsp = 0):
 			print ">>> Getting masses of Stop and Neutralino... "
 			del NeutralinoMass[:]; del StopMass[:]; del Events[:];
 			GetValues(sample)
-			#PrintInfo()
+			PrintInfo()
 			print ">>> Done! \n"
 			for m in range(len(StopMass)):
 				#if(StopMass[m] != 600 or NeutralinoMass[m] != 1): continue;

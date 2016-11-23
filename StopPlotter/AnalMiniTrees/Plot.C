@@ -44,7 +44,7 @@ void Plot::SetTTbar(){
   httbar->SetTag("ttbar");
   httbar->SetColor(kRed+1);
   httbar->SetStyle();
-  httbar->SetSyst(0.25);
+  httbar->SetSyst(0.15);
 }
 void Plot::SetDY(){
   Histo* h1 = GetH("DYJetsToLL_M10to50_aMCatNLO");
@@ -122,10 +122,14 @@ void Plot::SetData(){
 
 void Plot::SetSignal(){
   hSignal = GetH(signal);
-  hSignal->SetTag("signal");
-  hSignal->SetColor(kGreen);
+  hSignal->SetTag("175-1");
+  hSignal->SetColor(kCyan);
   hSignal->SetSyst(0.20);
+  Histo* sig2 = GetH("T2tt_mStop250_mLsp75");
+  sig2->SetTag("250-75");
+  sig2->SetColor(kGreen+4);
   VSignals.push_back(hSignal);
+  VSignals.push_back(sig2);
 }
 
 void Plot::AddToHistos(Histo* p){
@@ -136,14 +140,11 @@ void Plot::AddToHistos(Histo* p){
 
 void Plot::SetAllBkg(){
   SetTTbar(); SetDY(); SetWJets(); SetVV(); SettW(); SetttV();
-  //AllBkg = (Histo*) httbar->Clone(); AllBkg->Add(hDY);
-  //AllBkg->Add(hWJets); AllBkg->Add(hVV); AllBkg->Add(htW); AllBkg->Add(httV); 
-  //AllBkg->SetTag("SumBkgs");
-  //AllBkg->SetStyle();
   AddToHistos(httV); AddToHistos(hVV); AddToHistos(hWJets);
   AddToHistos(hDY); AddToHistos(htW); AddToHistos(httbar);
 	hStack = new THStack(var, "");
-  for(int i = 0; i < VBkgs.size(); i++){
+  int nVBkgs = VBkgs.size();
+  for(int i = 0; i < nVBkgs; i++){
     hStack->Add((TH1F*) VBkgs.at(i));
   }
   AllBkg = new Histo(*(TH1F*) hStack->GetStack()->Last(), 3);
@@ -155,13 +156,14 @@ void Plot::SetLegend(bool doyi = 1){
   leg->SetBorderSize(0);
   leg->SetFillColor(10);
   Float_t MinYield = AllBkg->yield/5000;
-  for(int i = VBkgs.size()-1; i >= 0; i--){
+  int nVBkgs = VBkgs.size();
+  for(int i = nVBkgs-1; i >= 0; i--){
     if(VBkgs.at(i)->yield < MinYield) continue;
-    VBkgs.at(i)->AddToLegend(leg,doyi);
+    else VBkgs.at(i)->AddToLegend(leg,doyi);
   }
 	if(doSignal){
   for(int i = VSignals.size()-1; i >= 0; i--){
-			VSignals.at(i)->AddToLegend(leg, doyi);
+			VSignals[i]->AddToLegend(leg, doyi);
 		}
 	}
   hData->AddToLegend(leg,doyi);
@@ -276,7 +278,7 @@ TCanvas* Plot::SetCanvas(){
   return c;
 }
 
-void Plot::DrawStack(bool sav = save){
+void Plot::DrawStack(TString tag = "0", bool sav = save){
   TCanvas* c = SetCanvas();
   plot->cd(); 
   if(!doData) hData = AllBkg;
@@ -301,7 +303,9 @@ void Plot::DrawStack(bool sav = save){
   //if(doData) hData->Draw("pesame");
   hData->Draw("pesame");
   if(doSignal){
-    hSignal->Draw("lsame");
+    for(unsigned int  i = 0; i < VSignals.size(); i++){
+      VSignals.at(i)->Draw("lsame");
+    }
   }
   SetLegend(doYields);
   leg->Draw("same");
@@ -318,7 +322,7 @@ void Plot::DrawStack(bool sav = save){
 	//if(doSys) hratioerror->Draw("same,e2");
 	if(sav){
 		TString dir = plotfolder + "StopPlots/";
-		TString plotname = var + "_" + chan;
+		TString plotname = var + "_" + chan + "_" + tag;
 		gSystem->mkdir(dir, kTRUE);
 		c->Print( dir + plotname + ".pdf", "pdf");
 		c->Print( dir + plotname + ".png", "png");
@@ -329,7 +333,7 @@ void Plot::DrawStack(bool sav = save){
 void Plot::SaveHistograms(TString tag = "0"){
   if(!doSignal){ std::cout << "No datacards without signal!" << std::endl; return;}
   TFile *f;
-  f = new TFile(LimitFolder + var + tag + ".root", "recreate");
+  f = new TFile(LimitFolder + var + "_" + chan + "_" + tag + ".root", "recreate");
   httbar->Write(); hDY->Write(); hWJets->Write(); hVV->Write(); htW->Write(); httV->Write();
   hData->Write(); hSignal->Write(); 
   hStack->Write();  
@@ -342,7 +346,7 @@ void Plot::MakeDatacard(TString tag = "0"){
  // if(!doData){ hData = hAllBkg;}
 	SaveHistograms(tag); 
   ofstream outputfile;
-  TString filename = "datacard_" + var + tag + ".txt";
+  TString filename = "datacard_" + var + "_" + tag + ".txt";
   outputfile.open(LimitFolder + filename);
 
   Int_t nChan = 1;
@@ -353,7 +357,7 @@ void Plot::MakeDatacard(TString tag = "0"){
 	outputfile << Form("jmax %i\n", nBkgs);
 	outputfile << Form("kmax %i\n", nSyst);
 	outputfile << "##-----------\n";
-  outputfile << TString("shapes * ") + chan + " " + LimitFolder + var + tag + TString(".root") + " $PROCESS $PROCESS_$SYSTEMATIC \n";
+  outputfile << TString("shapes * ") + chan + " " + LimitFolder + var + "_" + chan + "_" + tag + TString(".root") + " $PROCESS $PROCESS_$SYSTEMATIC \n";
 	outputfile << "##-----------\n";
   outputfile << TString("bin ") + chan + "\n";
   outputfile << Form("observation %1.0f \n",hData->yield);

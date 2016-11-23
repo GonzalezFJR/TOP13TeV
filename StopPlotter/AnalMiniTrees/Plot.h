@@ -78,7 +78,7 @@ public:
   void SetSignal();
   void SetPlotStyle();
 
-	void DrawStack(bool sav);
+	void DrawStack(TString tag, bool sav);
   void SaveHistograms(TString tag);
   void MakeDatacard(TString tag);
 

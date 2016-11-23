@@ -70,3 +70,13 @@ void Histo::AddToLegend(TLegend* leg, Bool_t doyi){
   if(doyi) leg->AddEntry(h, Form(process + ": %1.0f", yield), op);
   else leg->AddEntry(h, process, op);
 }
+
+TH1F* Histo::GetVarHistoStatBin(Int_t bin, TString dir){
+  Float_t var = GetBinContent(bin);
+  Float_t stat = GetBinError(bin);
+  TH1F* h = (TH1F*) Clone();
+  if      (dir == "up" || dir == "Up" || dir == "UP")  h->SetBinContent(bin, var + stat);
+  else if (dir == "down" || dir == "Down" || dir == "DOWN")  h->SetBinContent(bin, var + stat);
+  else    cout << " ---> ERROR!!!! No valid direction: " << dir << endl;
+  return h;
+}

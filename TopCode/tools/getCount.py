@@ -3,7 +3,7 @@ import sys
 import os
 
 pathistos = '/mnt_pool/fanae105/user/juanr/TOP13TeV/fiducial'
-patheppy = '/pool/ciencias/heppyTreesDR76X/v2/' #2/noSkim/'
+patheppy = '/pool/ciencias/HeppyTreesDR80X/v1/' #2/noSkim/'
 
 def get(sample):
   s = 0.; s1 = 0.; s2 = 0.;
@@ -29,6 +29,7 @@ def get(sample):
   print 'SumGenWeights = ', s2
   print ''
 
-get('TTbar_Powheg')
-get('TTJets_aMCatNLO')
-get('TTbar_Powheg_Herwig')
+#get('TTbar_Powheg')
+#get('TTJets_aMCatNLO')
+#get('TTbar_Powheg_Herwig')
+get('T2tt_150to250')
