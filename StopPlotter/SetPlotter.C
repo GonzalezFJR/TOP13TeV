@@ -37,7 +37,7 @@ using namespace std;
 //const TString path = "/mnt_pool/fanae105/user/juanr/temptop/temp/Tree_13TeV_EA_"; 
 //const TString path = "/nfs/fanae/user/juanr/Stop_76X/outputFiles/jun14/";
 //const TString path = "/nfs/fanae/user/juanr/stop80/outputFiles/nov7/";
-const TString path = "/nfs/fanae/user/juanr/stop80/outputFiles/nov14/";
+const TString path = "/nfs/fanae/user/juanr/stop/TOP13TeV/outputFiles/nov21/";
 //const TString path = "/nfs/fanae/user/juanr/stop80/temp/";
 
 const Int_t nVars=23;
@@ -50,8 +50,8 @@ const Int_t nTSyst = 6;
 const Int_t nBkgs = 12;
 //const float Lumi = 1264; // pb^-1
 //const float Lumi = 5865; // 2016B
-const float Lumi = 12850; // ICHEP
-//const float Lumi = 4390; // 2016G
+//const float Lumi = 12850; // ICHEP
+const float Lumi = 4390; // 2016G
 //const float Lumi = 35000;
 const TString syst[nSyst] = {"BtagUp", "BtagDown", "MisTagUp", "MisTagDown", "LESUp", "LESDown", "PUUp", "PUDown", "JER", "TopPt"}; // "JESUp", "JESDown", 
 const TString sample[nSamples] = {
