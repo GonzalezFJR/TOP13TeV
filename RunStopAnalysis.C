@@ -64,10 +64,10 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
     cout << "   + Data..." << endl;
     
     TString datasuffix[] = { // 17.24
-      //"Run2016B_PromptReco_v2", // 5.86
+      "Run2016B_PromptReco_v2", // 5.86
       //"Run2016C_PromptReco_v2", // 2.64
       //"Run2016D_PromptReco_v2", // 4.35
-      "Run2016G_PromptReco_v1", // 4.39
+      //"Run2016G_PromptReco_v1", // 4.39
       //"Run2015D_16Dec"
       //"Run2015C_05Oct",
       //"C_7016",
@@ -105,7 +105,6 @@ void RunStopAnalysis(TString  sampleName     = "TTbar_Madgraph",
       cout << "Analyzing Stop sample" << endl;
       G_Event_Weight = SusyWeight;
       myProject->AddDataFile(lp + "Tree_" + sampleName + "_0.root");
-      myProject->AddDataFile(lp + "Tree_" + sampleName + "_1.root");
       sampleName = Form("T2tt_mStop%i_mLsp%i",stopMass, lspMass);
     }
     else if(sampleName == "TestHeppy"){

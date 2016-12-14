@@ -122,15 +122,11 @@ void Plot::SetData(){
 
 void Plot::SetSignal(){
   hSignal = GetH(signal);
-  TString t = signal;
-  t.ReplaceAll("T2tt_mStop", ""); t.ReplaceAll("mLsp", "");
-  hSignal->SetTag(t);
+  hSignal->SetTag("175-1");
   hSignal->SetColor(kCyan);
   hSignal->SetSyst(0.20);
-  TString signal2 = "T2tt_mStop250_mLsp75"; TString t2 = signal2;
-  t2.ReplaceAll("T2tt_mStop", ""); t2.ReplaceAll("mLsp", ""); 
-  Histo* sig2 = GetH(signal2);
-  sig2->SetTag(t2);
+  Histo* sig2 = GetH("T2tt_mStop250_mLsp75");
+  sig2->SetTag("250-75");
   sig2->SetColor(kGreen+4);
   VSignals.push_back(hSignal);
   VSignals.push_back(sig2);
@@ -317,10 +313,12 @@ void Plot::DrawStack(TString tag = "0", bool sav = save){
 	texlumi->Draw("same");
 
 	pratio->cd();
-	hratio = (TH1F*)hData->Clone();
-	hratio->Divide(AllBkg);
-	SetHRatio();
-	hratio->Draw("same");
+//	if(doData){
+		hratio = (TH1F*)hData->Clone();
+		hratio->Divide(AllBkg);
+		SetHRatio();
+		hratio->Draw("same");
+//	}
 	//if(doSys) hratioerror->Draw("same,e2");
 	if(sav){
 		TString dir = plotfolder + "StopPlots/";
@@ -333,206 +331,81 @@ void Plot::DrawStack(TString tag = "0", bool sav = save){
 }
 
 void Plot::SaveHistograms(TString tag = "0"){
-	if(!doSignal){ std::cout << "No datacards without signal!" << std::endl; return;}
-	TFile *f;
-	f = new TFile(LimitFolder + var + "_" + chan + "_" + tag + ".root", "recreate");
-
-  TH1F* statup; TH1F* statdown; Histo* nom;
-  int nVBkgs = VBkgs.size(); 
-  int nSig   = VSignals.size();
-  int nbins;
-  for(int i = 0; i < nVBkgs; i++){
-    nom = VBkgs.at(i);
-    nbins = nom->GetNbinsX();
-		nom->Write();
-		for(int j = 1; j <= nbins; j++){
-			statup   = nom->GetVarHistoStatBin(j, "up");
-			statdown = nom->GetVarHistoStatBin(j, "down");
-			statup  ->SetName(nom->process + "_" + nom->process + "_" + chan + Form("_statbin%i", j) + "Up");
-			statdown->SetName(nom->process + "_" + nom->process + "_" + chan + Form("_statbin%i", j) + "Down");
-      statup  ->Write(); statdown->Write();
-			//delete statup; delete statdown;
-		}
-		//delete nom;
-	}
-	for(int i = 0; i < nSig; i++){
-		nom = VSignals.at(i);
-		nbins = nom->GetNbinsX();
-		nom->Write();
-		for(int j = 1; j <= nbins; j++){
-			statup   = nom->GetVarHistoStatBin(j, "up");
-			statdown = nom->GetVarHistoStatBin(j, "down");
-			statup  ->SetName(nom->process + "_" + nom->process + "_" + chan + Form("_statbin%i", j) + "Up");
-			statdown->SetName(nom->process + "_" + nom->process + "_" + chan + Form("_statbin%i", j) + "Down");
-			statup  ->Write(); statdown->Write();
-			//delete statup; delete statdown;
-		}
-		//delete nom;
-	}
-	hData->Write();
-	hStack->Write();  
-	f->Close(); delete f;
-}
-
-TString Plot::GetStatUncDatacard(){
-  hSignal->SetTag("Signal");
-	Histo* nom;
-	int nVBkgs = VBkgs.size();
-	int nbins = 0;
-	TString lin = TString("");
-	for(int i = 0; i <= nVBkgs; i++){
-		if(i<nVBkgs) nom = VBkgs.at(i);
-		else         nom = hSignal;
-		nbins = nom->GetNbinsX();
-		for(int j = 1; j <= nbins; j++){
-			lin += nom->process + "_" + chan + Form("_statbin%i shape ", j);
-			for(int k = 0; k < nVBkgs+1; k++){
-				if(i==k) lin += TString(" 1 ");
-				else lin += TString(" - ");
-			}
-			lin += TString("\n");
-		}
-	}
-  return lin;
-}
-
-void Plot::MakeDatacardBin(Int_t bin, TString tag = "b"){
   if(!doSignal){ std::cout << "No datacards without signal!" << std::endl; return;}
-  hSignal->SetTag("Signal");
-	hData->SetTag("data_obs");
-
-	ofstream outputfile;
-	TString filename = TString("datacard_") + var + TString("_") + chan + "_" + tag + Form("%i",bin) + TString(".txt");
-	outputfile.open(LimitFolder + filename);
-
-	Int_t nChan = 1;
-	Int_t nBkgs = VBkgs.size();
-	Int_t nSyst = nBkgs + 1;
-
-  outputfile << Form("imax %i\n", nChan);
-	outputfile << "jmax *\n";
-	outputfile << "kmax *\n";
-  //outputfile << Form("jmax *", nBkgs);
-	//outputfile << Form("kmax %i\n", nSyst);
-	outputfile << "##-----------\n";
-  outputfile << TString("bin ") + chan + "\n";
-  outputfile << Form("observation %1.0f \n",hData->GetBinContent(bin));
-	outputfile << "##-----------\n";
-  TString bint     = TString("bin ");
-  TString process1 = TString("process ");
-  TString process2 = TString("process ");
-  TString rate     = TString("rate    ");
-	for(int i = 0; i < nBkgs+1; i++){ 
-		if(i<nBkgs){
-      bint += chan + TString(" ");
-			process1 += VBkgs[i]->process + TString(" ");
-			process2 += Form(" %i ", i+1);
-			rate += Form(" %1.2f ", VBkgs[i]->GetBinContent(bin));
-		}
-		else{ 
-      bint += chan + TString(" ");
-			process1 += hSignal->process + TString(" ");
-			process2 += Form(" %i ", -1);
-			rate += Form(" %1.2f ", hSignal->GetBinContent(bin));
-		}
-	}
-	outputfile << bint      + TString("\n");
-	outputfile << process1 + TString("\n");
-	outputfile << process2 + TString("\n");
-	outputfile << rate     + TString("\n");
-		outputfile << "##-----------\n";
-	TString out = TString("Lumi  lnN  ");
-	for(int i = 0; i < nBkgs+1; i++){ out += Form(" %1.2f ", 1+sys_lumi);}
-
-	for(int i = 0; i < nBkgs+1; i++){
-		if(i<nBkgs) 	out = VBkgs[i]->process + " lnN ";
-		else	out = hSignal ->process + " lnN ";
-		for(int j = 0; j < nBkgs+1; j++){
-			if(j != i) out += TString(" - ");
-			else{
-				if(i<nBkgs) out += Form(" %1.2f ", 1+VBkgs[i]->syst);
-				else        out += Form(" %1.2f ", 1+hSignal->syst); 
-			}
-		}
-		out += TString("\n");
-		outputfile << out;
-	}
-	outputfile.close();
-  cout << "-------> Datacard created: " << LimitFolder + filename << endl;
-}
-
-void Plot::MakeDatacardAllBins(TString tag = "b"){
-  Int_t nbins = hSignal->GetNbinsX();
-  for(int i = 1; i <= nbins; i++){
-    MakeDatacardBin(i, tag);
-  } 
+  TFile *f;
+  f = new TFile(LimitFolder + var + "_" + chan + "_" + tag + ".root", "recreate");
+  httbar->Write(); hDY->Write(); hWJets->Write(); hVV->Write(); htW->Write(); httV->Write();
+  hData->Write(); hSignal->Write(); 
+  hStack->Write();  
+  f->Close(); delete f;
 }
 
 void Plot::MakeDatacard(TString tag = "0"){
-	if(!doSignal){ std::cout << "No datacards without signal!" << std::endl; return;}
-  hSignal->SetTag("Signal");
-	hData->SetTag("data_obs");
-	// if(!doData){ hData = hAllBkg;}
+  if(!doSignal){ std::cout << "No datacards without signal!" << std::endl; return;}
+  hData->SetTag("data_obs");
+ // if(!doData){ hData = hAllBkg;}
 	SaveHistograms(tag); 
-	ofstream outputfile;
-	TString filename = TString("datacard_") + var + TString("_") + chan + "_" + tag + TString(".txt");
-	outputfile.open(LimitFolder + filename);
+  ofstream outputfile;
+  TString filename = "datacard_" + var + "_" + tag + ".txt";
+  outputfile.open(LimitFolder + filename);
 
-	Int_t nChan = 1;
-	Int_t nBkgs = VBkgs.size();
-	Int_t nSyst = nBkgs + 1;
+  Int_t nChan = 1;
+  Int_t nBkgs = VBkgs.size();
+  Int_t nSyst = nBkgs + 1;
 
   outputfile << Form("imax %i\n", nChan);
 	outputfile << Form("jmax %i\n", nBkgs);
-	//outputfile << Form("kmax %i\n", nSyst);
-	outputfile << "kmax *\n";
+	outputfile << Form("kmax %i\n", nSyst);
 	outputfile << "##-----------\n";
-  outputfile << TString("shapes * ") + chan + " " + LimitFolder + var + "_" + chan + "_" + tag + TString(".root") + TString(" $PROCESS $PROCESS_$SYSTEMATIC \n");
+  outputfile << TString("shapes * ") + chan + " " + LimitFolder + var + "_" + chan + "_" + tag + TString(".root") + " $PROCESS $PROCESS_$SYSTEMATIC \n";
 	outputfile << "##-----------\n";
   outputfile << TString("bin ") + chan + "\n";
   outputfile << Form("observation %1.0f \n",hData->yield);
 	outputfile << "##-----------\n";
-  TString bin      = TString("bin ");
-  TString process1 = TString("process ");
-  TString process2 = TString("process ");
-  TString rate     = TString("rate    ");
+  TString bin      = "bin ";
+  TString process1 = "process ";
+  TString process2 = "process ";
+  TString rate     = "rate    ";
 	for(int i = 0; i < nBkgs+1; i++){ 
 		if(i<nBkgs){
-      bin += chan + TString(" ");
-			process1 += VBkgs[i]->process + TString(" ");
+      bin += chan + " ";
+			process1 += VBkgs[i]->process + " ";
 			process2 += Form(" %i ", i+1);
 			rate += Form(" %1.2f ", VBkgs[i]->yield);
 		}
 		else{ 
-      bin += chan + TString(" ");
-			process1 += hSignal->process + TString(" ");
+      bin += chan + " ";
+			process1 += hSignal->process + " ";
 			process2 += Form(" %i ", -1);
 			rate += Form(" %1.2f ", hSignal->yield);
-		}
+		}    
 	}
-	outputfile << bin      + TString("\n");
-	outputfile << process1 + TString("\n");
-	outputfile << process2 + TString("\n");
-	outputfile << rate     + TString("\n");
+	outputfile << bin      + "\n";
+	outputfile << process1 + "\n";
+	outputfile << process2 + "\n";
+	outputfile << rate     + "\n";
+
 		outputfile << "##-----------\n";
-	TString out = TString("Lumi  lnN  ");
+	TString out = "";
+
+	out = "Lumi  lnN  ";
 	for(int i = 0; i < nBkgs+1; i++){ out += Form(" %1.2f ", 1+sys_lumi);}
 
 	for(int i = 0; i < nBkgs+1; i++){
-		if(i<nBkgs) 	out = VBkgs[i]->process + " lnN ";
-		else	out = hSignal ->process + " lnN ";
+		if(i<nBkgs) out = VBkgs[i]->process + " lnN ";
+		else        out = hSignal ->process + " lnN ";
 		for(int j = 0; j < nBkgs+1; j++){
-			if(j != i) out += TString(" - ");
+			if(j != i) out += " - ";
 			else{
 				if(i<nBkgs) out += Form(" %1.2f ", 1+VBkgs[i]->syst);
 				else        out += Form(" %1.2f ", 1+hSignal->syst); 
 			}
 		}
-		out += TString("\n");
+		out += "\n";
 		outputfile << out;
 	}
-  TString stat = GetStatUncDatacard();
-  outputfile << stat;
 	outputfile.close();
-  cout << "-------> Datacard created: " << LimitFolder + filename << endl;
 }
+
+
+

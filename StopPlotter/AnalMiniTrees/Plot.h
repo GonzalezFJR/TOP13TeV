@@ -80,10 +80,7 @@ public:
 
 	void DrawStack(TString tag, bool sav);
   void SaveHistograms(TString tag);
-  TString GetStatUncDatacard();
   void MakeDatacard(TString tag);
-  void MakeDatacardAllBins(TString tag);
-  void MakeDatacardBin(Int_t bin, TString tag);
 
   TString getVar();
   TString getChan();

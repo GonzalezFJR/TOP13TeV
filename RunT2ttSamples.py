@@ -16,9 +16,8 @@ import os
 import sys
 
 inputpath = "/pool/ciencias/HeppyTreesDR80X/v1/";
-nSamples = 1;
+nSamples = 4;
 samplename = [
-#"T2tt_150to250noSkim",
 "T2tt_150to250", 
 "T2tt_250to350", 
 "T2tt_350to400",
@@ -46,35 +45,14 @@ def GetValues(sample):
 				NeutralinoMass.append(mchi);
 				StopMass.append(mstop);
 				Events.append(nEvents); 
-	for tree in os.listdir(inputpath):
-		if(sample not in tree): continue
-		if("noSkim" in tree and "noSkim" not in sample): continue
-		if("_0" in tree): continue
-		print " ----> Found sample!!!", tree
-		inputfile = TFile.Open(inputpath + tree);
-		inputfile.GetObject("CountSMS", Counts);
-		val = 0;
-		for i in range(Counts.GetNbinsX()):
-			for j in range(Counts.GetNbinsY()):
-				val = Counts.GetBinContent(i,j,1);
-				if (val != 0):
-					mstop = Counts.GetXaxis().GetBinCenter(i);
-					mchi  = Counts.GetYaxis().GetBinCenter(j); 
-					nEvents = Counts.GetBinContent(Counts.FindBin(mstop, mchi, 0));
-					for i in range(len(StopMass)):
-						if(mstop == StopMass[i] and mchi == NeutralinoMass[i]):
-							Events[i] += nEvents
 
 def GetAllValues():
 	for k in range(len(samplename)):
 		GetValues(samplename[k])
 
 def PrintInfo():
-	ntotal = 0;
 	for i in range(len(StopMass)):
 		print "Mstop = ", StopMass[i], ", Mchi = ", NeutralinoMass[i], ", nEvents = ", Events[i]
-		ntotal += Events[i]
-	print "----------------------> Total events = ", ntotal
 
 def getxsec(StopMass):
   if StopMass == 125: return 574.981;
@@ -182,7 +160,7 @@ def Analyze(sample = "All", sendjobs = False, mstopo = 0, mlsp = 0):
 				print ">>> MLSP    = ", NeutralinoMass[m]		
 				print ">>> nEvents = ", Events[m]
 				print ">>> xsec    = ", xsec
-				print ">>><<< Progress: point", m+1, "/", len(StopMass), "..."
+				print ">>> Progress: point", m+1, "/", len(StopMass), "..."
 				print " "
 				weight = xsec/Events[m]
 				os.system("root -l -q -b 'RunStopAnalysis.C(\"" + sample + "\", 1, true, 0, true, " + str(StopMass[m]) + ", " + str(NeutralinoMass[m]) + ", " + str(weight) + ")'")

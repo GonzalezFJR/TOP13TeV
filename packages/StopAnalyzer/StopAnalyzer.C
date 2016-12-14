@@ -130,7 +130,6 @@ const double *getEtaBins (gChannel chan){
 //------------------------------------------------------------------------------------
 StopAnalyzer::StopAnalyzer() : PAFChainItemSelector() {
 	fHDummy = 0;
-	fHDummy2 = 0;
 	hWeight = 0;
 	fHTopPtWeight = 0;
 	fHnGenEle = 0;
@@ -280,7 +279,6 @@ void StopAnalyzer::Initialise() {
 	//PAF_INFO("StopAnalyzer", "+ Sumw2 set for all histograms...");
 	TH1::SetDefaultSumw2();
 	fHDummy = CreateH1F("fHDummy","",1,0,1);
-	fHDummy2= CreateH1F("fHDummy2","",1,0,1);
 	//PAF_INFO("StopAnalyzer", "+ Initialise Yield histograms...");
 	InitialiseTree();
 	InitialiseYieldsHistos();
@@ -784,10 +782,9 @@ void StopAnalyzer::SetTreeVariables(gChannel chan){
 // InsideLoop
 //-----------------------------------------------------------------------
 void StopAnalyzer::InsideLoop() {
-	fHDummy2->Fill(0.5);
   if(gIsT2tt){
  //   cout << "GenSusyMStop = " << Get<Int_t>("GenSusyMStop") << ", gStopMass = " << gStopMass << ", GenSusyMNeutralino = " << Get<Int_t>("GenSusyMNeutralino") << ", gLspMass = " << gLspMass << endl;
-    if(fabs(fabs((Get<Int_t>("GenSusyMStop"))- gStopMass)) > 1 || fabs((fabs(Get<Int_t>("GenSusyMNeutralino")) - gLspMass)) > 1) return;
+    if((Get<Int_t>("GenSusyMStop") != gStopMass) || (Get<Int_t>("GenSusyMNeutralino") != gLspMass)) return;
   }
 	fHDummy->Fill(0.5);
 	if (!METFilter()) return;
@@ -1356,21 +1353,21 @@ float StopAnalyzer::getSF(gChannel chan) {
 	if (gIsData)              return 1.; //Don't scale data
 	float id1(1.),id2(1.), trig(1.);
 	float err1(0.), err2(0.), err_trg(0.);
-  float SF = 1; float FSSF = 1;
-  float FS1 = 1; float FS2 = 1;
+  float SF = 0; float FSSF = 0;
+  float FS1 = 0; float FS2 = 0;
 	if (chan == Muon){
 		id1  = fLeptonSF->GetTightMuonSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
 		id2  = fLeptonSF->GetTightMuonSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
 		trig = fLeptonSF->GetDoubleMuSF (fHypLepton1.p.Pt(),fHypLepton1.p.Eta());
-    FS1  = fLeptonSF->GetFastSimMuonSF(fHypLepton1.p.Pt(), TMath::Abs(fHypLepton1.p.Eta()));
-    FS2  = fLeptonSF->GetFastSimMuonSF(fHypLepton2.p.Pt(), TMath::Abs(fHypLepton2.p.Eta()));
+    FS1  = fLeptonSF->GetFastSimMuonSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
+    FS2  = fLeptonSF->GetFastSimMuonSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
   } 
   else if (chan == Elec){
     id1  = fLeptonSF->GetTightElectronSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
     id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta()); 
     trig = fLeptonSF->GetDoubleElSF     (fHypLepton1.p.Pt(),fHypLepton1.p.Eta()); 
-    FS1  = fLeptonSF->GetFastSimElectronSF(fHypLepton1.p.Pt(), TMath::Abs(fHypLepton1.p.Eta()));
-    FS2  = fLeptonSF->GetFastSimElectronSF(fHypLepton2.p.Pt(), TMath::Abs(fHypLepton2.p.Eta()));
+    FS1  = fLeptonSF->GetFastSimElectronSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
+    FS2  = fLeptonSF->GetFastSimElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
   }
   else if (chan == ElMu){
     float leadingPt  = fHypLepton1.p.Pt() > fHypLepton2.p.Pt()? fHypLepton1.p.Pt() : fHypLepton2.p.Pt();
@@ -1378,13 +1375,12 @@ float StopAnalyzer::getSF(gChannel chan) {
     id1  = fLeptonSF->GetTightMuonSF    (fHypLepton1.p.Pt(), fHypLepton1.p.Eta()); 
     id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
     trig = fLeptonSF->GetMuEGSF         (leadingPt,leadingEta);
-    FS1  = fLeptonSF->GetFastSimMuonSF(fHypLepton1.p.Pt(),TMath::Abs(fHypLepton1.p.Eta()));
-    FS2  = fLeptonSF->GetFastSimElectronSF(fHypLepton2.p.Pt(), TMath::Abs(fHypLepton2.p.Eta()));
+    FS1  = fLeptonSF->GetFastSimMuonSF(fHypLepton1.p.Pt(), fHypLepton1.p.Eta());
+    FS2  = fLeptonSF->GetFastSimElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
 	}
   SF = PUSF*id1*id2*trig;
   FSSF = FS1*FS2;
-	if(gIsT2tt) SF*= FSSF;
-  //cout << "FS1  FS2 = " << FS1 << "  " << FS2 << endl;
+	if(gSampleName.BeginsWith("T2tt")) SF*= FSSF;
   return (SF);
 }
 

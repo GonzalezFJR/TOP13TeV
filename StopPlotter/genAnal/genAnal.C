@@ -40,7 +40,6 @@ TH1F* mt2ll[nprocess];
 TH1F* mt2lb[nprocess];
 TH1F* mt2bb[nprocess];
 TH1F* dphill[nprocess];
-TH1F* detall[nprocess];
 TH1F* dphijj[nprocess];
 TH1F* dphilepjet[nprocess];
 TH1F* dphilepmet[nprocess];
@@ -136,25 +135,24 @@ void Init(){
 	for(int i = 0; i < nprocess; i++){
 		njets[i]  = new TH1F("NJets_"  + process[i], "NJets_"   + process[i], 9, -0.5, 8.5);
 		nbjets[i] = new TH1F("NBJets_" + process[i], "NJets_"   + process[i], 9, -0.5, 8.5);
-		lep0pt[i] = new TH1F("Lep0Pt_" + process[i], "Lep0Pt_"  + process[i], 30, 0, 300);
-		lep1pt[i] = new TH1F("Lep1Pt_" + process[i], "Lep1Pt_"  + process[i], 30, 0, 300);
-		jet0pt[i] = new TH1F("Jet0Pt_" + process[i], "Jet0Pt_"  + process[i], 40, 0, 500);
-		jet1pt[i] = new TH1F("Jet1Pt_" + process[i], "Jet1Pt_"  + process[i], 40, 0, 400);
-		ht[i]     = new TH1F("HT_"     + process[i], "HT_"      + process[i], 40, 0, 1200);
-		met[i]    = new TH1F("MET_"    + process[i], "MET_"     + process[i], 30, 0, 400);
-		meff[i]   = new TH1F("Meff_"   + process[i], "Meff_"    + process[i], 40, 0, 1400);
+		lep0pt[i] = new TH1F("Lep0Pt_" + process[i], "Lep0Pt_"  + process[i], 30, 0, 600);
+		lep1pt[i] = new TH1F("Lep1Pt_" + process[i], "Lep1Pt_"  + process[i], 30, 0, 600);
+		jet0pt[i] = new TH1F("Jet0Pt_" + process[i], "Jet0Pt_"  + process[i], 40, 0, 800);
+		jet1pt[i] = new TH1F("Jet1Pt_" + process[i], "Jet1Pt_"  + process[i], 40, 0, 800);
+		ht[i]     = new TH1F("HT_"     + process[i], "HT_"      + process[i], 40, 0, 1600);
+		met[i]    = new TH1F("MET_"    + process[i], "MET_"     + process[i], 30, 0, 600);
+		meff[i]   = new TH1F("Meff_"   + process[i], "Meff_"    + process[i], 40, 0, 1600);
 
 		mll[i]    = new TH1F("Mll_"   + process[i], "Mll_"    + process[i], 20, 0, 400);
 		dileppt[i] = new TH1F("DilepPt_" + process[i], "DilepPt_" + process[i], 15, 0, 300);
-		mt2ll[i]   = new TH1F("MT2_" + process[i], "MT2_" + process[i], 20, 0, 180);
-		mt2lb[i] = new TH1F("MT2lblb_" + process[i], "MT2lblb_" + process[i], 20, 0, 300);
-		mt2bb[i] = new TH1F("MT2bb_" + process[i], "MT2bb_" + process[i], 20, 0, 400);
-		dphill[i] = new TH1F("DeltaPhill_" + process[i], "DeltaPhill_" + process[i], 20, 0, 3.2);
-		detall[i] = new TH1F("DeltaEtall_" + process[i], "DeltaEtall_" + process[i], 20, 0,  3.2);
-		dphijj[i] = new TH1F("DeltaPhijj_" + process[i], "DeltaPhijj_" + process[i], 20, 0, 3.2);
-		dphilepjet[i] = new TH1F("DeltaPhilj_" + process[i], "DeltaPhilj_" + process[i], 20, 0, 3.2);
-		dphilepmet[i] = new TH1F("DeltaPhilm_" + process[i], "DeltaPhilm_" + process[i], 20, 0, 3.2);
-		dphijetmet[i] = new TH1F("DeltaPhijm_" + process[i], "DeltaPhijm_" + process[i], 20, 0, 3.2);
+		mt2ll[i]   = new TH1F("MT2_" + process[i], "MT2_" + process[i], 20, 0, 400);
+		mt2lb[i] = new TH1F("MT2lblb_" + process[i], "MT2lblb_" + process[i], 20, 0, 800);
+		mt2bb[i] = new TH1F("MT2bb_" + process[i], "MT2bb_" + process[i], 20, 0, 800);
+		dphill[i] = new TH1F("DeltaPhill_" + process[i], "DeltaPhill_" + process[i], 20, -3.2, 3.2);
+		dphijj[i] = new TH1F("DeltaPhijj_" + process[i], "DeltaPhijj_" + process[i], 20, -3.2, 3.2);
+		dphilepjet[i] = new TH1F("DeltaPhilj_" + process[i], "DeltaPhilj_" + process[i], 20, -3.2, 3.2);
+		dphilepmet[i] = new TH1F("DeltaPhilm_" + process[i], "DeltaPhilm_" + process[i], 20, -3.2, 3.2);
+		dphijetmet[i] = new TH1F("DeltaPhijm_" + process[i], "DeltaPhijm_" + process[i], 20, -3.2, 3.2);
 	}
 }
 
@@ -212,7 +210,7 @@ void loop(Int_t iprocess = 0){
   int nJets = 0; int nBJets = 0;
   float ht_ = 0; float meff_ = 0;
 
-  float dphill_; float dphilepjet_; float dileppt_; float mll_; float detall_;
+  float dphill_; float dphilepjet_; float dileppt_; float mll_;
   float dphilepmet_; float dphijetmet_; float dphijj_;
   float mt2ll_; float mt2lb_; float mt2bb_;
 
@@ -258,13 +256,12 @@ void loop(Int_t iprocess = 0){
 
     meff_ = jet0.Pt() + jet1.Pt() + lep0.Pt() + lep1.Pt() + met_pt;
     mll_ = (lep0+lep1).M();
-    detall_ = (TMath::Abs(lep0.Eta() - lep1.Eta()));
-    dileppt_ = TMath::Abs((lep0+lep1).Pt());
-    dphill_ = TMath::Abs(lep0.DeltaPhi(lep1));
-    dphijj_ = TMath::Abs(jet0.DeltaPhi(jet1));
-    dphilepjet_ = TMath::Abs(lep0.DeltaPhi(jet0));
-    dphilepmet_ = TMath::Abs(lep0.DeltaPhi(mett));
-    dphijetmet_ = TMath::Abs(jet0.DeltaPhi(mett));
+    dileppt_ = (lep0+lep1).Pt();
+    dphill_ = lep0.DeltaPhi(lep1);
+    dphijj_ = jet0.DeltaPhi(jet1);
+    dphilepjet_ = lep0.DeltaPhi(jet0);
+    dphilepmet_ = lep0.DeltaPhi(mett);
+    dphijetmet_ = jet0.DeltaPhi(mett);
 		mt2ll_ = getMT2ll(); mt2bb_ = getMT2b(); mt2lb_ = getMT2lb();
 
 			njets[iprocess]  ->Fill(nJets);
@@ -282,7 +279,6 @@ void loop(Int_t iprocess = 0){
 			mt2lb[iprocess] ->Fill(mt2lb_); 
 			mt2bb[iprocess] ->Fill(mt2bb_); 
 			dphill[iprocess] ->Fill(dphill_); 
-			detall[iprocess] ->Fill(detall_); 
 			dphijj[iprocess] ->Fill(dphijj_); 
 			dphilepjet[iprocess] ->Fill(dphilepjet_); 
 			dphilepmet[iprocess] ->Fill(dphilepmet_); 
@@ -317,7 +313,6 @@ void genAnal(){
 		mt2lb[iprocess] ->Write();
 		mt2bb[iprocess] ->Write();
 		dphill[iprocess] ->Write();
-		detall[iprocess] ->Write();
 		dphijj[iprocess] ->Write();
 		dphilepjet[iprocess]->Write();
 		dphilepmet[iprocess]->Write();

@@ -46,7 +46,7 @@ void DrawPlots();
 
 
 // Constants:
-const TString plotfolder = "/mnt_pool/fanae105/user/juanr/stop/TOP13TeV/StopPlotter/plots/";
+const TString plotfolder = "/mnt_pool/fanae105/user/juanr/stop80/StopPlotter/plots/";
 bool doSys       = false;
 bool doSetLogy   = true;
 bool dodata      = true;
@@ -392,11 +392,10 @@ void RebinHist(TH1F* hist, TString var){
   if(var == "Meff") hist->Rebin(100);
 //  if( (var == "DiLepPt") || (var == "Lep0Pt") || (var == "Lep1Pt") || (var == "Jet0Pt") || (var == "Jet1Pt") ) hist -> Rebin(40);
   if(var == "CosDelLepPhi") hist->Rebin(2);
-  if(var.Contains("Eta")) hist->Rebin(4);
 }
 
 TH1F* RebinVar(TH1F* hist, TString var){
-	TH1F* h; Double_t xbins13[13]; Double_t xbins10 [10]; Double_t xbins11[11]; Double_t xbinsim[18];  Double_t xbinsjetpt[18]; Double_t xbinscdp[17]; Double_t xbinsmet[17];
+	TH1F* h; Double_t xbins13[13]; Double_t xbins10 [10]; Double_t xbins11[11]; Double_t xbinsim[18]; Double_t xbinslept[18]; Double_t xbinsjetpt[18]; Double_t xbinscdp[17]; Double_t xbinsmet[17];
 
   /*if(var == "Yields"){
     Double_t xbinsy[9] ={0,1,2,3,4,5,6,7,8};
@@ -411,13 +410,9 @@ TH1F* RebinVar(TH1F* hist, TString var){
     xbinsjetpt[0] = 0; xbinsjetpt[1] = 30; xbinsjetpt[2] = 60; xbinsjetpt[3] = 100; xbinsjetpt[4] = 150; xbinsjetpt[5] = 200; xbinsjetpt[6] = 250; xbinsjetpt[7] = 300; xbinsjetpt[8] = 350; xbinsjetpt[9] = 400; xbinsjetpt[10] = 450; xbinsjetpt[11] = 500; xbinsjetpt[12] = 550; xbinsjetpt[13] = 600; xbinsjetpt[14] = 650; xbinsjetpt[15] = 700; xbinsjetpt[16] = 750; xbinsjetpt[17] = 800; h = (TH1F*) hist->Rebin(17, var + "_rebin", xbinsjetpt);
   }
 
-	else if( (var == "Lep0Pt") || (var == "DiLepPt") || (var == "Lep1Pt")){
-		Double_t xbinslept[18];
-		xbinslept[0] = 0; xbinslept[1] = 20; xbinslept[2] = 50; xbinslept[3] = 80; xbinslept[4] = 110; 
-		xbinslept[5] = 140; xbinslept[6] = 170; xbinslept[7] = 200; xbinslept[8] = 230; xbinslept[9] = 260; 
-		xbinslept[10] = 290; xbinslept[11] = 320; xbinslept[12] = 350; xbinslept[13] = 400;  
-		h = (TH1F*) hist->Rebin(13, var + "_rebin", xbinslept);
-	}
+  else if( (var == "Lep0Pt") || (var == "DiLepPt") || (var == "Lep1Pt")){
+    xbinslept[0] = 0; xbinslept[1] = 20; xbinslept[2] = 60; xbinslept[3] = 100; xbinslept[4] = 150; xbinslept[5] = 200; xbinslept[6] = 250; xbinslept[7] = 300; xbinslept[8] = 350; xbinslept[9] = 400; xbinslept[10] = 450; xbinslept[11] = 500; xbinslept[12] = 550; xbinslept[13] = 600; xbinslept[14] = 650; xbinslept[15] = 700; xbinslept[16] = 750; xbinslept[17] = 800; h = (TH1F*) hist->Rebin(17, var + "_rebin", xbinslept);
+  }
 
 	else if(var == "InvMass"){xbinsim[0] = 0; xbinsim[1] = 20; xbinsim[2] = 60; xbinsim[3] = 100; xbinsim[4] = 150; xbinsim[5] = 200; xbinsim[6] = 250; xbinsim[7] = 300; xbinsim[8] = 350; xbinsim[9] = 400; xbinsim[10] = 450; xbinsim[11] = 500; xbinsim[12] = 550; xbinsim[13] = 600; xbinsim[14] = 700; xbinsim[15] = 800; xbinsim[16] = 900; xbinsim[17] = 1000; h = (TH1F*) hist->Rebin(17, var + "_rebin", xbinsim);}
 
@@ -506,9 +501,9 @@ void DrawPlots(){
 	for(int k = 0; k<4; k++){
 		for(int i = 0; i < 26; i++){ //26
 			for(int j = 0; j<5; j++){
-        if(!Vars[i].Contains("Eta") && !Vars[i].Contains("Pt")) continue;
+        //if(Vars[i] != "MET") continue;
 				T2ttStackPlots(Vars[i], Channels[j], levels[k], 183, 1, 250, 75);
-        //if(levels[k] == "dilepton" && (i == 0))  T2ttStackPlots("Yields", Channels[j], levels[k]);
+        if(levels[k] == "dilepton" && (i == 0))  T2ttStackPlots("Yields", Channels[j], levels[k]);
 			}
 		}
 	}

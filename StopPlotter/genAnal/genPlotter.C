@@ -7,8 +7,8 @@
 const TString path = "/nfs/fanae/user/juanr/stop80/genAnal/genVars.root";
 const TString outputfolder = "genPlots/";
 const TString process[]     = {"ttbar", "stop_200_25", "stop_250_75"};
-const int nVars = 20;
-const TString vars[nVars] = {"DeltaEtall", "NJets","NBJets","Lep0Pt","Lep1Pt","Jet0Pt","Jet1Pt","HT","MET","Meff", "Mll", "DilepPt", "DeltaPhill", "DeltaPhijj", "DeltaPhilj", "DeltaPhilm", "DeltaPhijm","MT2", "MT2lblb", "MT2bb"};
+const int nVars = 19;
+const TString vars[nVars] = {"NJets","NBJets","Lep0Pt","Lep1Pt","Jet0Pt","Jet1Pt","HT","MET","Meff", "Mll", "DilepPt", "DeltaPhill", "DeltaPhijj", "DeltaPhilj", "DeltaPhilm", "DeltaPhijm","MT2", "MT2lblb", "MT2bb"};
 
 
 
