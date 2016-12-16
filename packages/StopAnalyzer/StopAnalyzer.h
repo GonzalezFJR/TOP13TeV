@@ -456,6 +456,7 @@ class StopAnalyzer : public PAFChainItemSelector
 		//++ Yields
 		TTree* fTree;
 		TH1F* fHDummy;
+		TH1F* fHDummy2;
 		TH1F* hWeight;
 		TH1F* fHyields     [gNCHANNELS][gNSYST];
 		TH1F* fHWeightyield[gNCHANNELS][gNWEIGHT];
