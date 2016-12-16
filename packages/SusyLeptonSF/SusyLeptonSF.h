@@ -52,8 +52,14 @@ class SusyLeptonSF {
 
   float GetTightElectronIDSF  (float pt, float eta) const{ return fTightElectronIDSF->GetBinContent(fTightElectronIDSF->FindBin(TMath::Abs(eta), pt)); }
   float GetTrackerElectronSF(float eta){ return fTrackerElectronSF->GetBinContent(fTrackerElectronSF->FindBin(eta, 50.));	}
-	float GetFastSimElectronSF(float pt, float eta){return fFastSimElectronSF->GetBinContent(fFastSimElectronSF->FindBin(pt, eta));}
-	float GetFastSimMuonSF(float pt, float eta){return fFastSimMuonSF->GetBinContent(fFastSimMuonSF->FindBin(pt, eta));	}
+	float GetFastSimElectronSF(float pt, float eta){
+		if(pt > 200) pt == 199.9;
+		return fFastSimElectronSF->GetBinContent(fFastSimElectronSF->FindBin(pt, eta));
+	}
+	float GetFastSimMuonSF(float pt, float eta){
+		if(pt > 200) pt == 199.9;
+		return fFastSimMuonSF->GetBinContent(fFastSimMuonSF->FindBin(pt, eta));	
+	}
 
   float GetTightElectronSF  (float pt, float eta) { // binned in eta, pt
     if(pt > 200) pt = 199.9;
@@ -100,7 +106,7 @@ return fMuEGSF    ->GetBinContent(fMuEGSF    ->FindBin(TMath::Abs(pt), TMath::Ab
   TH2D* LoadTightElectronIDSF (const char* file = "http://www.hep.uniovi.es/iglez/CMS/WZ/ElectronMVAIDIsoSF.root",                 const char* histo = "electronsDATAMCratio_FO_ID_ISO");
   TH2D* LoadTrackerElectronSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons/trakingElectronSF.root",             const char* histo = "EGamma_SF2D");
   TH2D* LoadFastSimElectronSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons_FastSim/sf_el_tightCB_MultiVT.root", const char* histo = "histo2D");
-  TH2D* LoadFastSimMuonSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Muons_FastSim/GlobalMuonSFs_FastSim.root",         const char* histo = "GlobalSFFS");
+  TH2D* LoadFastSimMuonSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Muons_FastSim/sf_mu_mediumID_multiVT.root",         const char* histo = "histo2D");
   TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons/GlobalElectronSFs_T.root",            const char* histo = "GlobalSF_T");
   //"/nfs/fanae/user/palencia/sfs13TeV/25ns/elec_tight_sf2D_13TeV_RunD.root",
   //"/nfs/fanae/user/palencia/sfs13TeV/2016/egammaEffiMedium.txt_SF2D_runBCD_12p9fb.root"
