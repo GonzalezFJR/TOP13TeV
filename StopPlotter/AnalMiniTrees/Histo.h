@@ -14,7 +14,7 @@ class Histo : public TH1F{
 public:
   Int_t type; // Type = 0: background, Type =1: signal, Type = 2: data. 
   Int_t color;
-  TString tag; TString process; TString cuts; TString xlabel;
+  TString tag = "0"; TString process="0"; TString cuts="0"; TString xlabel="0";
   Float_t syst;
   Double_t yield;
   Double_t max;

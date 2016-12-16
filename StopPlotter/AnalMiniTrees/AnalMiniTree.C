@@ -15,11 +15,29 @@ void AnalMiniTree::Loop(TString plot){
     histo = new Histo(theSample + "_" + htitle, theSample + "_" + htitle, 27, -0.5, 27-0.5);
     histo->SetTag(theSample, "SRs", "SR (MT2 3D)", "");
   }
-  if(plot == "SR"){
+  else if(plot == "SR"){
     htitle = "SR";
     nbins = 37;
     histo = new Histo(theSample + "_" + htitle, theSample + "_" + htitle, 37, -0.5, 37-0.5);
     histo->SetTag(theSample, "SRs", "SR", "");
+  }
+  else if(plot == "SR12"){
+    htitle = "SR12";
+    nbins = 12;
+    histo = new Histo(theSample + "_" + htitle, theSample + "_" + htitle, 12, 0.5, 12+0.5);
+    histo->SetTag(theSample, "SRs", "SR", "");
+  }
+  else if(plot == "cutandcount"){
+    htitle = "CutAndCount";
+    nbins = 1;
+    histo = new Histo(theSample + "_" + htitle, theSample + "_" + htitle, 1, 0.5, 1.5);
+    histo->SetTag(theSample, "CutAndCount", "CutAndCount", "");
+  }
+  else if(plot == "ghent"){
+    htitle = "Ghent_Analysis";
+    nbins = 1;
+    histo = new Histo(theSample + "_" + htitle, theSample + "_" + htitle, 1, 0.5, 1.5);
+    histo->SetTag(theSample, "Ghent", "Ghent", "");
   }
   //############ Variables ############
  else if (plot == "MET"){
@@ -39,8 +57,8 @@ void AnalMiniTree::Loop(TString plot){
   }
 	else if(plot == "MT2"){ 
     htitle = "MT2";
-    nbins = 9;
-    float xbins[] = {0, 20, 40, 50, 100, 140, 200, 300, 400}; 
+    nbins = 18;
+    float xbins[] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 170, 200, 250, 300, 400}; 
     histo = new Histo(theSample + "_" + htitle, theSample + "_" + htitle, nbins-1, xbins);
   }
 	else if(plot == "METSR"){ 
@@ -51,6 +69,11 @@ void AnalMiniTree::Loop(TString plot){
   }
   else if(plot == "DeltaPhi"){
     htitle = "DeltaPhi";
+    nbins = 20;
+    histo = new Histo(theSample + "_" + htitle, theSample + "_" + htitle, 20, -3.2, 3.2);
+  }
+  else if(plot == "DeltaPhiLepMet"){
+    htitle = "DeltaPhiLepMet";
     nbins = 20;
     histo = new Histo(theSample + "_" + htitle, theSample + "_" + htitle, 20, -3.2, 3.2);
   }
@@ -67,7 +90,7 @@ void AnalMiniTree::Loop(TString plot){
   TLorentzVector l1;
   TLorentzVector jet0;
   TLorentzVector jet1;
-
+  TLorentzVector met;
 
 	Long64_t nbytes = 0, nb = 0;
 	for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -81,13 +104,14 @@ void AnalMiniTree::Loop(TString plot){
     l1.SetPxPyPzE(TLep2_Px, TLep2_Py, TLep2_Pz, TLep2_E);
     jet0.SetPxPyPzE(TJet_Px[0], TJet_Py[0], TJet_Pz[0], TJet_E[0]);
     jet1.SetPxPyPzE(TJet_Px[1], TJet_Py[1], TJet_Pz[1], TJet_E[1]);
+    met.SetPtEtaPhiM(TMET, 0., TMET_Phi, 0);
     Float_t dEta = TMath::Abs(l0.Eta() - l1.Eta());
     Float_t dPhi = TMath::Abs(l0.DeltaPhi(l1));
 
 		if(chan == "ElMu" && !TIsElMu) continue;
 		if(chan == "Elec" && !TIsDoubleElec) continue;
 		if(chan == "Muon" && !TIsDoubleMuon) continue;
-		if( (chan == "SF" || chan == "sameF" || chan == "SameF") && (!TIsDoubleMuon || !TIsDoubleElec)) continue;
+		if( (chan == "SF" || chan == "sameF" || chan == "SameF") && (!TIsDoubleMuon && !TIsDoubleElec)) continue;
 
 		//############ SRs ############
 		if     (plot == "SRMT23D"){
@@ -176,6 +200,32 @@ void AnalMiniTree::Loop(TString plot){
 				else if(dEta > 1 && dEta<2 && dPhi > 2.5 && TMET > 100) histo->Fill(36,TWeight); 
 				else if(dEta > 2) histo->Fill(37,TWeight); 
 			}
+    }
+		else if(plot == "SR12"){ 
+			if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) )){
+
+
+				if     (dEta < 0.5 && dPhi < 2 && TMET < 150)               histo->Fill(1,TWeight); 
+        else if(dEta < 0.5 && dPhi < 2 && TMET > 150 && TMET < 300) histo->Fill(2,TWeight); 
+				else if(dEta < 0.5 && dPhi < 2 && TMET > 300)               histo->Fill(3,TWeight); 
+				else if(dEta < 0.5 && dPhi > 2 && TMET < 150)               histo->Fill(4,TWeight); 
+        else if(dEta < 0.5 && dPhi > 2 && TMET > 150 && TMET < 300) histo->Fill(5,TWeight); 
+				else if(dEta < 0.5 && dPhi > 2 && TMET > 300)               histo->Fill(6,TWeight); 
+				else if(dEta > 0.5 && dPhi < 2 && TMET < 150)               histo->Fill(7,TWeight); 
+        else if(dEta > 0.5 && dPhi < 2 && TMET > 150 && TMET < 300) histo->Fill(8,TWeight); 
+				else if(dEta > 0.5 && dPhi < 2 && TMET > 300)               histo->Fill(9,TWeight); 
+				else if(dEta > 0.5 && dPhi > 2 && TMET < 150)               histo->Fill(10,TWeight); 
+        else if(dEta > 0.5 && dPhi > 2 && TMET > 150 && TMET < 300) histo->Fill(11,TWeight); 
+				else if(dEta > 0.5 && dPhi > 2 && TMET > 300)               histo->Fill(12,TWeight); 
+			}
+		}
+		else if(plot == "cutandcount"){
+			if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+				histo->Fill(1, TWeight);
+		}
+		else if(plot == "ghent"){
+			if(TMET > 80 && TNJetsBtag > 0 && (TMET/TMath::Sqrt(THT)) > 5 ) 
+				histo->Fill(1, TWeight);
 		}
 
 
@@ -191,6 +241,10 @@ void AnalMiniTree::Loop(TString plot){
     else if(plot == "DeltaPhi"){
       if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
         histo->Fill(l0.DeltaPhi(l1), TWeight);
+    }
+    else if(plot == "DeltaPhiLepMet"){
+      if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+        histo->Fill(l0.DeltaPhi(met), TWeight);
     }
     else if(plot == "DeltaEta"){
       if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
