@@ -27,6 +27,7 @@ TH1F* loadDYHisto(TString lab, TString ch, TString lev){
 }
 
 double GetDYDD(TString ch, TString lev, bool IsErr, bool docout){
+//  ch = Chan; lev = Level;
   double Re     = 0; double N_ine  = 0; double N_oute = 0; double k_lle = 0; double SFel = 0;
 	double R_erre = 0; double N_in_erre = 0; double N_out_erre = 0; double k_ll_erre = 0; double SFel_err = 0;
 
@@ -47,10 +48,24 @@ double GetDYDD(TString ch, TString lev, bool IsErr, bool docout){
   Int_t low_in = DYmm->FindBin(76. );
   Int_t  up_in = DYmm->FindBin(106.);
 
-  nin_mm = DYmm->Integral(low_in, up_in); nin_err_mm = TMath::Sqrt(nin_mm);
-  nin_ee = DYee->Integral(low_in, up_in); nin_err_ee = TMath::Sqrt(nin_ee);
-  nout_mm = DYmm->Integral(0,200)-nin_mm; nout_err_mm = TMath::Sqrt(nout_err_mm);
-  nout_ee = DYee->Integral(0,200)-nin_ee; nout_err_ee = TMath::Sqrt(nout_err_ee);
+  Double_t t1(0.),t2(0.);
+
+  nin_mm = DYmm->IntegralAndError(low_in, up_in, nin_err_mm); 
+  nin_ee = DYee->IntegralAndError(low_in, up_in, nin_err_ee); 
+  nout_mm = DYmm->IntegralAndError(0,low_in-1,nout_err_mm) + DYmm->IntegralAndError(up_in+1,201,t1);
+  nout_ee = DYee->IntegralAndError(0,low_in-1,nout_err_ee) + DYee->IntegralAndError(up_in+1,201,t2);
+  
+	nout_err_mm += t1;
+	nout_err_ee += t2;
+
+/*
+//-------------------------
+	nin_err_mm = TMath::Sqrt(nin_mm);
+	nin_err_ee = TMath::Sqrt(nin_ee);
+	nout_err_mm = TMath::Sqrt(nout_mm);
+	nout_err_ee = TMath::Sqrt(nout_ee);
+//-------------------------
+*/
 
   Rm     = nout_mm/nin_mm;
   R_errm = (nout_err_mm/nout_mm + nin_err_mm/nin_mm)*Rm;
@@ -64,11 +79,29 @@ double GetDYDD(TString ch, TString lev, bool IsErr, bool docout){
   k_llm = TMath::Sqrt(nin_mm / nin_ee  );
   k_lle = TMath::Sqrt(nin_ee / nin_mm  );
 
-	k_ll_errm = 0.5*(nin_err_mm/nin_mm + nin_err_ee/nin_ee);
-	k_ll_erre = 0.5*(nin_err_ee/nin_ee + nin_err_mm/nin_mm);
+	k_ll_errm = 0.5*(nin_err_mm/nin_mm + nin_err_ee/nin_ee)*k_llm;
+	k_ll_erre = 0.5*(nin_err_ee/nin_ee + nin_err_mm/nin_mm)*k_lle;
 
 	N_outm = Rm * (N_inm - 0.5 * N_inem * k_llm);
 	N_oute = Re * (N_ine - 0.5 * N_inem * k_lle);
+
+	Double_t dA(0.),dB(0.),dC(0.),dD(0.);
+
+/*
+//-------------------------
+  dA = N_outm*R_errm/Rm;
+  dB = Rm*N_in_errm;
+  dC = Rm/2*k_llm*N_in_errem;
+  dD = Rm/2*k_ll_errm*N_inem;
+  N_out_errm = dA + dB + dC + dD;
+
+  dA = N_oute*R_erre/Re;
+  dB = Re*N_in_erre;
+  dC = Re/2*k_lle*N_in_errem;
+  dD = Re/2*k_ll_erre*N_inem;
+  N_out_erre = dA + dB + dC + dD;
+//-------------------------
+*/
 
   double tmperr1; double tmperr2;
 	tmperr1 =  N_in_erre/N_ine;
@@ -92,8 +125,8 @@ double GetDYDD(TString ch, TString lev, bool IsErr, bool docout){
    cout << "=============================================================================" << endl;
    cout << "                  |       El/El      |       Mu/Mu      |       El/Mu      ||" << endl;
 	 cout << "-----------------------------------------------------------------------------" << endl;
-	 cout<< Form(" n_in (MC)        | %7.1f +/- %4.1f | %7.1f +/- %4.1f |                  ||", nin_ee, N_in_erre, nin_mm, N_in_errm) << endl;
-	 cout<< Form(" n_out (MC)       | %7.1f +/- %4.1f | %7.1f +/- %4.1f |                  ||", nout_ee, N_out_erre, nout_mm, N_out_errm) << endl;
+	 cout<< Form(" n_in (MC)        | %7.1f +/- %4.1f | %7.1f +/- %4.1f |                  ||", nin_ee, nin_err_ee, nin_mm, nin_err_mm) << endl;
+	 cout<< Form(" n_out (MC)       | %7.1f +/- %4.1f | %7.1f +/- %4.1f |                  ||", nout_ee, nout_err_ee, nout_mm, nout_err_mm) << endl;
 	 cout<< Form(" R(Nout/Nin)(MC)  | %6.3f +/- %4.3f | %6.3f +/- %4.3f |                  ||", Re, R_erre, Rm, R_errm) << endl;
 	 cout<< Form(" k_ll             | %6.3f +/- %4.3f | %6.3f +/- %4.3f |                  ||", k_lle, k_ll_erre, k_llm, k_ll_errm) << endl;
 	 cout<< Form(" N_in (D)         | %7.1f +/- %4.1f | %7.1f +/- %4.1f | %5.1f +/- %4.1f   ||",	N_ine, N_in_erre, N_inm, N_in_errm, N_inem, N_in_errem) << endl;
@@ -112,6 +145,7 @@ double GetDYDD(TString ch, TString lev, bool IsErr, bool docout){
     if     (ch == "ElMu") return SFem_err;
     else if(ch == "Elec") return SFel_err;
     else if(ch == "Muon") return SFmu_err;
+    //else if(ch == "Muon") return 0.96;
   }
   else{
     if     (ch == "ElMu") return SFem;
@@ -123,12 +157,20 @@ double GetDYDD(TString ch, TString lev, bool IsErr, bool docout){
 }
 
 double GetNonWDD(TString ch, TString lev, bool IsErr, bool docout){
+//  ch = Chan;
+//  lev = Level;
 	double fake   = yield("fake", ch, lev, "0", 0);
+	double efake   = getStatError("fake", ch, lev, "0", 0);
+
+	if(ch == "Muon"){
+		if(IsErr) return efake;
+		else      return  fake;
+  }
+
 	double fakeSS = yield("fake", ch, lev, "0", 1);
 	double dataSS = yield("data", ch, lev, "0", 1);
 	double bkgSS  = yield("bkg",  ch, lev, "0", 1) - fakeSS;  // prompt MC in SS
   
-	double efake   = getStatError("fake", ch, lev, "0", 0);
 	double efakeSS = getStatError("fake", ch, lev, "0", 1);
 	double edataSS = getStatError("data", ch, lev, "0", 1);
 	double ebkgSS  = getStatError("bkg",  ch, lev, "0", 1) - efakeSS;
@@ -143,37 +185,39 @@ double GetNonWDD(TString ch, TString lev, bool IsErr, bool docout){
   double eSF = SF*(eDDfake/DDfake + efake/fake);
 
 	if(docout){
-   cout <<      " NonW leptons DD estimation for " << lev << endl;
+   cout <<      " NonW leptons DD estimate for " << lev << endl;
    cout <<      "==================================================================" << endl;
-	 cout << Form(" MC fake estimation (OS WJets + ttbar semilep)   = %2.2f ± %0.2f", fake, efake) << endl;
+	 cout << Form(" MC fake estimate    (OS WJets + ttbar semilep)   = %2.2f ± %0.2f", fake, efake) << endl;
 	 cout <<      "------------------------------------------------------------------" << endl;
 	 cout << Form(" MC fake SS (WJets + ttbar semilep)   = %2.2f ± %0.2f", fakeSS, efakeSS)  << endl;
    cout << Form(" R = fakeOS/fakeSS                    = %2.2f ± %0.2f", R, eR)            << endl;
 	 cout << Form(" MC prompt SS (other sources)         = %2.2f ± %0.2f", bkgSS , ebkgSS )  << endl;
 	 cout << Form(" Data SS events                       = %2.2f ± %0.2f", dataSS , edataSS )  << endl;
 	 cout <<      "------------------------------------------------------------------" << endl;
-   cout << Form(" DD fake estimation                   = %2.2f ± %0.2f", DDfake , eDDfake )  << endl;
-   cout << Form(" Scake Factor (DD/MC)                 = %2.2f ± %0.2f", SF , eSF )  << endl;
+   cout << Form(" DD fake estimate = R(DataSS-bkgSS)   = %2.2f ± %0.2f", DDfake , eDDfake )  << endl;
+ //  cout << Form(" Scake Factor (DD/MC)                 = %2.2f ± %0.2f", SF , eSF )  << endl;
    cout <<      "==================================================================" << endl;
 	}
 
-	if(IsErr) return eSF;
-	else      return SF;
+	if(IsErr) return eDDfake;
+	else      return DDfake;
 }
 
 void GetDataDriven(){
-  cout << " ###### Drell-Yan DD (R out/in) #####" << endl;
+  cout << " ------ Drell-Yan DD (R out/in) ------" << endl;
 	cout << endl;
-	GetDYDD("ElMu", "dilepton", 0, 1);
+	GetDYDD(Chan, "dilepton", 0, 1);
 	cout << endl;
-	GetDYDD("ElMu", "2jets", 0, 1);
+	GetDYDD(Chan, "MET", 0, 1);
+	cout << endl;
+	GetDYDD(Chan, "2jets", 0, 1);
 	cout << endl;
 	cout << endl;
-  cout << " ###### NonW leptons estimation #####" << endl;
+  cout << " ------ NonW leptons estimate ------" << endl;
 	cout << endl;
-  GetNonWDD("ElMu", "dilepton", 0, 1);
+  GetNonWDD(Chan, "dilepton", 0, 1);
 	cout << endl;
-  GetNonWDD("ElMu", "2jets", 0, 1);
+  GetNonWDD(Chan, "2jets", 0, 1);
 	cout << endl;
 }
 
