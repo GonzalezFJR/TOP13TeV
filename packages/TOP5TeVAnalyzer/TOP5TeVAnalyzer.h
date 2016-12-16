@@ -7,7 +7,7 @@
 //#include "GlobalVariables.h"
 //#include "PUWeight.h"
 //#include "BTagSFUtil.h"
-//#include "LeptonSF.h"
+#include "LeptonSF.h"
 
 // + ROOT
 #include "TH1F.h"
@@ -17,6 +17,7 @@
 #include "TString.h"
 #include "TRandom3.h"
 
+#include "/mnt_pool/fanae105/user/juanr/TOP13TeV/packages/L2L3ResidualWFits/L2L3ResidualWFits.h"
 // + C++
 #include <vector>
 
@@ -201,6 +202,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
 
   // Frequantly used variables in the trees
   
+		bool passGenZVetoCut = false;
   Int_t nElec;
 
   Float_t ElecPt[maxdim];
@@ -227,9 +229,9 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   Float_t MuonDz[maxdim];
   Float_t MuonChi2NDF[maxdim];
   Int_t MuonPixelHits[maxdim];
+  Int_t MuonHits[maxdim];
   Int_t MuonStations[maxdim];
   Int_t MuonTrkLayers[maxdim];
-  Int_t MuonTrkQuality[maxdim];
 
   Int_t ngenLep;
   Int_t genLep_pdgId[maxdim];
@@ -250,13 +252,25 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   Float_t Jet_btagCSV[maxdim];
   Int_t Jet_mcFlavour[maxdim];
 
-  Float_t  JetPfCHF[maxdim];
-  Float_t  JetPfNHF[maxdim];
-  Float_t  JetPfCEF[maxdim];
-  Float_t  JetPfNEF[maxdim];
-  Float_t  JetPfMUF[maxdim];
+  Float_t  rawpt[maxdim];
+  Float_t  neutralSum[maxdim];      
+  Float_t  eSum[maxdim];  
+  Float_t  chargedHardSum[maxdim]; 
+  Float_t  chargedSum[maxdim];   
   Int_t    chargedMult[maxdim];
   Int_t    totalMult[maxdim];
+
+  Float_t CHF[maxdim]; 
+  Float_t NHF[maxdim]; 
+  Float_t CEF[maxdim]; 
+  Float_t NEF[maxdim]; 
+  Float_t MUF[maxdim]; 
+  Int_t CHM[maxdim];
+  Int_t NHM[maxdim];
+  Int_t CEM[maxdim];
+  Int_t NEM[maxdim];
+  Int_t MUM[maxdim]; 
+
 
   Int_t   ngenJet;
   Float_t genJet_pt[maxdim];
@@ -270,6 +284,12 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   Int_t lum;
   Float_t met_pt;
   Float_t met_phi;
+  Float_t met_trk;
+  Float_t met_phi_trk;
+  Float_t TrueMet_pt;
+  Float_t TrueMet_phi;
+  Float_t TrueMet_pt_noHF;
+  Float_t TrueMet_phi_noHF;
   Float_t genWeight;
   Int_t HLT_HIL2Mu15_v1;
   Int_t HLT_HIDoublePhoton15_Eta2p5_Mass50_1000_R9SigmaHECut_v1;
@@ -296,6 +316,8 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   bool PassesZVeto();
   bool PassesNJetsCut();
   bool PassesNGenJetsCut();
+  bool PassesGenMetCut();
+  bool PassesGenZVetoCut();
   bool PassesMETCut();
   bool PassesNBtagCut();
   bool PassesMllVeto();
@@ -311,7 +333,12 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   //  int   getNBTagsMed();
   void  setMET(float);
   float getMET();
+  float getMET_noHF();
   float getMETPhi();
+  float getTrueMET();
+  float getTrueMETPhi();
+  float getTrueMET_noHF();
+  float getTrueMETPhi_noHF();
   //float getMT(int, gChannel);
   float getHT();
   float getJetPtIndex(unsigned int);
@@ -412,7 +439,8 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   //BTagSFUtil *fBTagSFbDo ;
   //BTagSFUtil *fBTagSFlUp ;
   //BTagSFUtil *fBTagSFlDo ;
-  //LeptonSF *fLeptonSF;
+  LeptonSF *fLeptonSF;
+  L2L3Residual *L2L3 = new L2L3Residual(4, 3, 0);
   TRandom3 *fRand3;
 
   // EventWeight
@@ -420,7 +448,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   float EventWeight;
   float PUSF;
   bool  fChargeSwitch;
-
+  bool  PassesGenZVeto;
 
   //////////////////////////////////////////////////////////////////////////////
   //               Data members
@@ -430,6 +458,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   //++ Yields
   TH1F* fHDummy;
   TH1F* fHFidu;
+	TH1F* fHBR;
 	TH1F* fHWeightsFidu;
   TH1F* fHyields     [gNCHANNELS][gNSYST];
   TH1F* fHWeightyield[gNCHANNELS][gNWEIGHT];
@@ -443,6 +472,14 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   TH1F* fHGenElePt;
   TH1F* fHGenMuoPt;
   TH1F* fHnGenLeptons;
+  TH1F* fHMuonPtnoIso;
+  TH1F* fHMuonPtIso;
+  TH1F* fHMuonEtanoIso;
+  TH1F* fHMuonEtaIso;
+  TH1F* fJetDataPt    ;
+  TH1F* fJetDataL2L3Pt;
+  TH1F* hmeteff;
+  TH1F* trkhmeteff;
 
   TH2F* fHDY_InvMassVsNPV   [gNCHANNELS][iNCUTS];
   TH2F* fHDY_InvMassVsMET   [gNCHANNELS][iNCUTS];
@@ -457,6 +494,13 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   //++ Kinematic  
   TH1F* fHWeights[gNCHANNELS][iNCUTS];
   TH1F* fHMET[gNCHANNELS][iNCUTS];       
+  TH1F* fHtrkMET[gNCHANNELS][iNCUTS];
+  TH1F* fHMET_noHF[gNCHANNELS][iNCUTS];       
+  TH1F* fHMETPhi[gNCHANNELS][iNCUTS];       
+  TH1F* fHTrueMET[gNCHANNELS][iNCUTS];       
+  TH1F* fHTrueMETPhi[gNCHANNELS][iNCUTS];       
+  TH1F* fHTrueMET_noHF[gNCHANNELS][iNCUTS];       
+  TH1F* fHTrueMETPhi_noHF[gNCHANNELS][iNCUTS];       
   TH1F* fHLep0Eta[gNCHANNELS][iNCUTS];    
   TH1F* fHLep1Eta[gNCHANNELS][iNCUTS];    
   TH1F* fHDelLepPhi[gNCHANNELS][iNCUTS]; 
@@ -493,6 +537,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
 	TH1F* fMuonIsoPhotons[gNCHANNELS][iNCUTS];
 	TH1F* fMuonIsoPU[gNCHANNELS][iNCUTS];       
 	TH1F* fMuonIso[gNCHANNELS][iNCUTS];          
+	TH1F* fSSMuonIso[gNCHANNELS][iNCUTS];          
 
 	TH1F* fHDRLep[gNCHANNELS][iNCUTS];
 	TH1F* fHDRLep0Jet[gNCHANNELS][iNCUTS];
@@ -540,6 +585,7 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   Int_t nTauMuon;
   Int_t nSGenMuon;
   Int_t nSGenElec;
+  Int_t isEMu;
   
   Int_t nGoodVertex;
   Int_t nVertex;
@@ -566,7 +612,12 @@ class TOP5TeVAnalyzer : public PAFChainItemSelector
   std::vector<float> ElPz;
   std::vector<float> ElEnergy;
   float MET;
+  float MET_noHF;
   float MET_Phi;
+  float TrueMET;
+  float TrueMET_Phi;
+  float TrueMET_noHF;
+  float TrueMET_Phi_noHF;
   
   ClassDef(TOP5TeVAnalyzer,0);
 };
