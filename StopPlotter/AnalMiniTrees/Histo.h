@@ -12,13 +12,19 @@
 
 class Histo : public TH1F{
 public:
-  Int_t type; // Type = 0: background, Type =1: signal, Type = 2: data. 
+  Int_t type; // Type = 0: background, Type =1: signal, Type = 2: data
+  // -1: Bkg sys up 
+  // -2: Bkg sys down 
+  // -3: Sig sys up 
+  // -4: Sig sys down
   Int_t color;
   TString tag = "0"; TString process="0"; TString cuts="0"; TString xlabel="0";
   Float_t syst;
   Double_t yield;
   Double_t max;
   Bool_t IsStackOverflow = true;
+  Float_t *vsysu;
+  Float_t *vsysd;
 
   Histo(const char *name, const char *title, Int_t nbins, Double_t xlow, Double_t xup);
   Histo(const char *name, const char *title, Int_t nbins, const Float_t* xbins);
@@ -43,6 +49,7 @@ public:
 
   void AddToLegend(TLegend* leg, Bool_t doyi = 1);
   TH1F* GetVarHistoStatBin(Int_t bin = 0, TString dir = "Up");
+	void AddToSystematics(Histo* hsys);
 };
 
 Histo::Histo(const char *name, const char *title, Int_t nbins, Double_t xlow, Double_t xup)

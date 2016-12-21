@@ -36,6 +36,7 @@ public:
 	Histo* hData; Histo* hElMu; Histo* hMuon; Histo* hElec; Histo* hSignal; Histo* AllBkg;
   Bool_t  doSetLogy   = true;
   THStack* hStack;
+  Int_t nBkgs = 0;
 	TPad* plot; TPad* pratio;
 	TLegend* leg;
 	TLatex* texlumi;
@@ -44,6 +45,11 @@ public:
 	TH1F* hratio;
   std::vector<Histo*> VBkgs;
   std::vector<Histo*> VSignals;
+  std::vector<Histo*> VSyst;
+  std::vector<TString> VSystLabel;
+  TString sys = "0";
+  Float_t* TotalSysUp;
+  Float_t* TotalSysDown;
 
   Float_t sys_lumi = 0.10;
 
@@ -53,9 +59,12 @@ public:
 		var = v; 
 		chan = ch;
 		signal = sig;
+		SetAllProcesses();
 		SetAllBkg();
 		SetData();
 		SetSignal();
+    //SetOtherSignal();
+	  //AddAllSystematics();
 	}
 
 
@@ -73,6 +82,7 @@ public:
 	void SettW();
 	void SetttV();
 	void SetData();
+	void SetAllProcesses();
 	void SetAllBkg();
 	void SetStack();
   void SetSignal();
@@ -81,6 +91,7 @@ public:
 	void DrawStack(TString tag, bool sav);
   void SaveHistograms(TString tag);
   TString GetStatUncDatacard();
+	TString GetShapeUncDatacard();
   void MakeDatacard(TString tag);
   void MakeDatacardAllBins(TString tag);
   void MakeDatacardBin(Int_t bin, TString tag);
@@ -91,8 +102,11 @@ public:
   void setVar(TString v);
   void setChan(TString c);
   void setSignal(TString s);
+	void SetOtherSignal(TString signal2 = "T2tt_mStop250_mLsp75", Int_t ccol = kGreen+4);
 
   void AddToHistos(Histo* p);
+	void AddSystematic(TString s);
+	void AddAllSystematics();
 
 protected: 
 	TString var;

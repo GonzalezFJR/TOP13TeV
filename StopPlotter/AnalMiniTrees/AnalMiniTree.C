@@ -90,7 +90,8 @@ void AnalMiniTree::Loop(TString plot){
   TLorentzVector l1;
   TLorentzVector jet0;
   TLorentzVector jet1;
-  TLorentzVector met;
+  TLorentzVector vmet;
+
 
 	Long64_t nbytes = 0, nb = 0;
 	for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -99,12 +100,57 @@ void AnalMiniTree::Loop(TString plot){
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 		// if (Cut(ientry) < 0) continue;
 
+		Float_t met = TMET; Float_t ht = THT; 
+	Float_t weight = TWeight; 
+    Int_t njets = TNJets; Int_t nbjets = TNJetsBtag; // + JetPt...
+
+		if     (sys == "0" || sys == "nom") weight = TWeight;
+    else if(sys == "LepEffUp")          weight = TWeight_LepEffUp;
+    else if(sys == "LepÈffDown")         weight = TWeight_LepEffDown;
+    else if(sys == "TrigUp")            weight = TWeight_TrigUp;
+    else if(sys == "TrigDown")          weight = TWeight_TrigDown;
+    else if(sys == "FSUp")              weight = TWeight_FSUp;
+    else if(sys == "FSDown")            weight = TWeight_FSDown;
+    else if(sys == "PUUp")              weight = TWeight_PUUp;
+    else if(sys == "PUDown")            weight = TWeight_PUDown;
+
+    else if(sys == "BtagUp")         nbjets = TNJetsBtagUp;
+    else if(sys == "BtagDown")       nbjets = TNJetsBtagDown;
+    else if(sys == "MisTagUp")       nbjets = TNJetsBtagMisTagUp;
+    else if(sys == "MisTagDown")     nbjets = TNJetsBtagMisTagDown;
+
+		else if(sys == "JESUp"){
+			njets = TNJetsJESUp;
+			met = TMETJESUp;
+			ht = 0;
+			for(int k = 0; k<njets; k++) ht += TJetJESUp_Pt[k];
+		}
+    else if(sys == "JESDown"){
+			met = TMETJESDown;
+      njets = TNJetsJESDown;
+			ht = 0;
+			for(int k = 0; k<njets; k++) ht += TJetJESUp_Pt[k];
+    }
+    else if(sys == "JER" || sys == "JERUp"){
+      njets = TNJetsJER;
+    }
+
+
+    else{
+      weight = TWeight;
+      njets = TNJets;
+      nbjets = TNJetsBtag;
+    }
+
+    if(njets < 2) continue;
+
     Float_t lb = TMT2lblb; Float_t bb = TMT2bb; Float_t ll = TMT2ll;
     l0.SetPxPyPzE(TLep1_Px, TLep1_Py, TLep1_Pz, TLep1_E);
     l1.SetPxPyPzE(TLep2_Px, TLep2_Py, TLep2_Pz, TLep2_E);
     jet0.SetPxPyPzE(TJet_Px[0], TJet_Py[0], TJet_Pz[0], TJet_E[0]);
     jet1.SetPxPyPzE(TJet_Px[1], TJet_Py[1], TJet_Pz[1], TJet_E[1]);
-    met.SetPtEtaPhiM(TMET, 0., TMET_Phi, 0);
+
+    vmet.SetPtEtaPhiM(met, 0., TMET_Phi, 0);
     Float_t dEta = TMath::Abs(l0.Eta() - l1.Eta());
     Float_t dPhi = TMath::Abs(l0.DeltaPhi(l1));
 
@@ -116,147 +162,147 @@ void AnalMiniTree::Loop(TString plot){
 		//############ SRs ############
 		if     (plot == "SRMT23D"){
 			if(ll < 100){
-          if     (lb<100 && bb<170)               histo->Fill(1, TWeight);
-          else if(lb<100 && bb>170 && bb<270)     histo->Fill(2, TWeight);
-          else if(lb<100 && bb>270)               histo->Fill(3, TWeight);
-          else if(lb<200 && lb>100 && bb<170)     histo->Fill(4, TWeight);
-					else if(lb<200 && lb>100 && bb<270)     histo->Fill(5, TWeight);
-					else if(lb<200 && lb>100 && bb>270)     histo->Fill(6, TWeight);
-					else if(lb>200 && bb<170)               histo->Fill(7, TWeight);
-					else if(lb>200 && bb>170 && bb<270)     histo->Fill(8, TWeight);
-					else if(lb>200 && bb>270)               histo->Fill(9, TWeight);
+          if     (lb<100 && bb<170)               histo->Fill(1, weight);
+          else if(lb<100 && bb>170 && bb<270)     histo->Fill(2, weight);
+          else if(lb<100 && bb>270)               histo->Fill(3, weight);
+          else if(lb<200 && lb>100 && bb<170)     histo->Fill(4, weight);
+					else if(lb<200 && lb>100 && bb<270)     histo->Fill(5, weight);
+					else if(lb<200 && lb>100 && bb>270)     histo->Fill(6, weight);
+					else if(lb>200 && bb<170)               histo->Fill(7, weight);
+					else if(lb>200 && bb>170 && bb<270)     histo->Fill(8, weight);
+					else if(lb>200 && bb>270)               histo->Fill(9, weight);
 			}
 
 			else if(ll > 100 && ll < 200){ 
-          if     (lb<100 && bb<170)               histo->Fill(10, TWeight);
-          else if(lb<100 && bb>170 && bb<270)     histo->Fill(11, TWeight);
-          else if(lb<100 && bb>270)               histo->Fill(12, TWeight);
-          else if(lb<200 && lb>100 && bb<170)     histo->Fill(13, TWeight);
-					else if(lb<200 && lb>100 && bb<270)     histo->Fill(14, TWeight);
-					else if(lb<200 && lb>100 && bb>270)     histo->Fill(15, TWeight);
-					else if(lb>200 && bb<170)               histo->Fill(16, TWeight);
-					else if(lb>200 && bb>170 && bb<270)     histo->Fill(17, TWeight);
-					else if(lb>200 && bb>270)               histo->Fill(18, TWeight);
+          if     (lb<100 && bb<170)               histo->Fill(10, weight);
+          else if(lb<100 && bb>170 && bb<270)     histo->Fill(11, weight);
+          else if(lb<100 && bb>270)               histo->Fill(12, weight);
+          else if(lb<200 && lb>100 && bb<170)     histo->Fill(13, weight);
+					else if(lb<200 && lb>100 && bb<270)     histo->Fill(14, weight);
+					else if(lb<200 && lb>100 && bb>270)     histo->Fill(15, weight);
+					else if(lb>200 && bb<170)               histo->Fill(16, weight);
+					else if(lb>200 && bb>170 && bb<270)     histo->Fill(17, weight);
+					else if(lb>200 && bb>270)               histo->Fill(18, weight);
 			}
 			else if(ll  > 200){ 
-          if     (lb<100 && bb<170)               histo->Fill(19, TWeight);
-          else if(lb<100 && bb>170 && bb<270)     histo->Fill(20, TWeight);
-          else if(lb<100 && bb>270)               histo->Fill(21, TWeight);
-          else if(lb<200 && lb>100 && bb<170)     histo->Fill(22, TWeight);
-					else if(lb<200 && lb>100 && bb<270)     histo->Fill(23, TWeight);
-					else if(lb<200 && lb>100 && bb>270)     histo->Fill(24, TWeight);
-					else if(lb>200 && bb<170)               histo->Fill(25, TWeight);
-					else if(lb>200 && bb>170 && bb<270)     histo->Fill(26, TWeight);
-					else if(lb>200 && bb>270)               histo->Fill(27, TWeight);
+          if     (lb<100 && bb<170)               histo->Fill(19, weight);
+          else if(lb<100 && bb>170 && bb<270)     histo->Fill(20, weight);
+          else if(lb<100 && bb>270)               histo->Fill(21, weight);
+          else if(lb<200 && lb>100 && bb<170)     histo->Fill(22, weight);
+					else if(lb<200 && lb>100 && bb<270)     histo->Fill(23, weight);
+					else if(lb<200 && lb>100 && bb>270)     histo->Fill(24, weight);
+					else if(lb>200 && bb<170)               histo->Fill(25, weight);
+					else if(lb>200 && bb>170 && bb<270)     histo->Fill(26, weight);
+					else if(lb>200 && bb>270)               histo->Fill(27, weight);
 			}
 		}
 
 		else if(plot == "SR"){ 
-			if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) )){
+			if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) )){
 
 
-				if     (dEta < 0.5 && dPhi < 1 && TMET < 100) histo->Fill(1,TWeight);
-				if     (dEta < 0.5 && dPhi < 1 && TMET > 100 && TMET < 150) histo->Fill(2,TWeight); 
-				if     (dEta < 0.5 && dPhi < 1 && TMET > 150 && TMET < 200) histo->Fill(3,TWeight); 
-				if     (dEta < 0.5 && dPhi < 1 && TMET > 200 && TMET < 300) histo->Fill(4,TWeight); 
-				if     (dEta < 0.5 && dPhi < 1 && TMET > 300) histo->Fill(5,TWeight); 
+				if     (dEta < 0.5 && dPhi < 1 && met< 100) histo->Fill(1,weight);
+				if     (dEta < 0.5 && dPhi < 1 && met> 100 && met< 150) histo->Fill(2,weight); 
+				if     (dEta < 0.5 && dPhi < 1 && met> 150 && met< 200) histo->Fill(3,weight); 
+				if     (dEta < 0.5 && dPhi < 1 && met> 200 && met< 300) histo->Fill(4,weight); 
+				if     (dEta < 0.5 && dPhi < 1 && met> 300) histo->Fill(5,weight); 
 
-				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && TMET < 100) histo->Fill(6,TWeight); 
-				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && TMET > 100 && TMET < 150) histo->Fill(7,TWeight); 
-				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && TMET > 150 && TMET < 200) histo->Fill(8,TWeight); 
-				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && TMET > 200 && TMET < 300) histo->Fill(9,TWeight); 
-				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && TMET > 300) histo->Fill(10,TWeight); 
+				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && met< 100) histo->Fill(6,weight); 
+				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && met> 100 && met< 150) histo->Fill(7,weight); 
+				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && met> 150 && met< 200) histo->Fill(8,weight); 
+				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && met> 200 && met< 300) histo->Fill(9,weight); 
+				else if(dEta < 0.5 && dPhi > 1 && dPhi < 2.5 && met> 300) histo->Fill(10,weight); 
 
-				else if(dEta < 0.5 && dPhi > 2.5 && TMET < 100) histo->Fill(11,TWeight); 
-				else if(dEta < 0.5 && dPhi > 2.5 && TMET > 100 && TMET < 150) histo->Fill(12,TWeight); 
-				else if(dEta < 0.5 && dPhi > 2.5 && TMET > 150 && TMET < 200) histo->Fill(13,TWeight); 
-				else if(dEta < 0.5 && dPhi > 2.5 && TMET > 200 && TMET < 300) histo->Fill(14,TWeight); 
-				else if(dEta < 0.5 && dPhi > 2.5 && TMET > 300) histo->Fill(15,TWeight); 
+				else if(dEta < 0.5 && dPhi > 2.5 && met< 100) histo->Fill(11,weight); 
+				else if(dEta < 0.5 && dPhi > 2.5 && met> 100 && met< 150) histo->Fill(12,weight); 
+				else if(dEta < 0.5 && dPhi > 2.5 && met> 150 && met< 200) histo->Fill(13,weight); 
+				else if(dEta < 0.5 && dPhi > 2.5 && met> 200 && met< 300) histo->Fill(14,weight); 
+				else if(dEta < 0.5 && dPhi > 2.5 && met> 300) histo->Fill(15,weight); 
 
-				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && TMET < 100) histo->Fill(16,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && TMET > 100 && TMET < 150) histo->Fill(17,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && TMET > 150 && TMET < 200) histo->Fill(18,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && TMET > 200 && TMET < 300) histo->Fill(19,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && TMET > 300) histo->Fill(20,TWeight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && met< 100) histo->Fill(16,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && met> 100 && met< 150) histo->Fill(17,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && met> 150 && met< 200) histo->Fill(18,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && met> 200 && met< 300) histo->Fill(19,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi < 1 && met> 300) histo->Fill(20,weight); 
 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && TMET < 100) histo->Fill(21,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && TMET > 100 && TMET < 150) histo->Fill(22,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && TMET > 150 && TMET < 200) histo->Fill(23,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && TMET > 200 && TMET < 300) histo->Fill(24,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && TMET > 300) histo->Fill(25,TWeight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && met< 100) histo->Fill(21,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && met> 100 && met< 150) histo->Fill(22,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && met> 150 && met< 200) histo->Fill(23,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && met> 200 && met< 300) histo->Fill(24,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 1 && dPhi < 2.5 && met> 300) histo->Fill(25,weight); 
 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && TMET < 100) histo->Fill(26,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && TMET > 100 && TMET < 150) histo->Fill(27,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && TMET > 150 && TMET < 200) histo->Fill(28,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && TMET > 200 && TMET < 300) histo->Fill(29,TWeight); 
-				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && TMET > 300) histo->Fill(30,TWeight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && met< 100) histo->Fill(26,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && met> 100 && met< 150) histo->Fill(27,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && met> 150 && met< 200) histo->Fill(28,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && met> 200 && met< 300) histo->Fill(29,weight); 
+				else if(dEta > 0.5 && dEta<1 && dPhi > 2.5 && met> 300) histo->Fill(30,weight); 
 
         // MET > 100, MET < 100
-				else if(dEta > 1 && dEta<2 && dPhi < 1 && TMET < 100)  histo->Fill(31,TWeight); 
-				else if(dEta > 1 && dEta<2 && dPhi < 1 && TMET > 100)  histo->Fill(32,TWeight); 
-				else if(dEta > 1 && dEta<2 && dPhi > 1 && dPhi < 2.5 && TMET < 100)  histo->Fill(33,TWeight); 
-				else if(dEta > 1 && dEta<2 && dPhi > 1 && dPhi > 2.5 && TMET > 100)  histo->Fill(34,TWeight); 
-				else if(dEta > 1 && dEta<2 && dPhi > 2.5 && TMET < 100) histo->Fill(35,TWeight); 
-				else if(dEta > 1 && dEta<2 && dPhi > 2.5 && TMET > 100) histo->Fill(36,TWeight); 
-				else if(dEta > 2) histo->Fill(37,TWeight); 
+				else if(dEta > 1 && dEta<2 && dPhi < 1 && met< 100)  histo->Fill(31,weight); 
+				else if(dEta > 1 && dEta<2 && dPhi < 1 && met> 100)  histo->Fill(32,weight); 
+				else if(dEta > 1 && dEta<2 && dPhi > 1 && dPhi < 2.5 && met< 100)  histo->Fill(33,weight); 
+				else if(dEta > 1 && dEta<2 && dPhi > 1 && dPhi > 2.5 && met> 100)  histo->Fill(34,weight); 
+				else if(dEta > 1 && dEta<2 && dPhi > 2.5 && met< 100) histo->Fill(35,weight); 
+				else if(dEta > 1 && dEta<2 && dPhi > 2.5 && met> 100) histo->Fill(36,weight); 
+				else if(dEta > 2) histo->Fill(37,weight); 
 			}
     }
 		else if(plot == "SR12"){ 
-			if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) )){
+			if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) )){
 
 
-				if     (dEta < 0.5 && dPhi < 2 && TMET < 150)               histo->Fill(1,TWeight); 
-        else if(dEta < 0.5 && dPhi < 2 && TMET > 150 && TMET < 300) histo->Fill(2,TWeight); 
-				else if(dEta < 0.5 && dPhi < 2 && TMET > 300)               histo->Fill(3,TWeight); 
-				else if(dEta < 0.5 && dPhi > 2 && TMET < 150)               histo->Fill(4,TWeight); 
-        else if(dEta < 0.5 && dPhi > 2 && TMET > 150 && TMET < 300) histo->Fill(5,TWeight); 
-				else if(dEta < 0.5 && dPhi > 2 && TMET > 300)               histo->Fill(6,TWeight); 
-				else if(dEta > 0.5 && dPhi < 2 && TMET < 150)               histo->Fill(7,TWeight); 
-        else if(dEta > 0.5 && dPhi < 2 && TMET > 150 && TMET < 300) histo->Fill(8,TWeight); 
-				else if(dEta > 0.5 && dPhi < 2 && TMET > 300)               histo->Fill(9,TWeight); 
-				else if(dEta > 0.5 && dPhi > 2 && TMET < 150)               histo->Fill(10,TWeight); 
-        else if(dEta > 0.5 && dPhi > 2 && TMET > 150 && TMET < 300) histo->Fill(11,TWeight); 
-				else if(dEta > 0.5 && dPhi > 2 && TMET > 300)               histo->Fill(12,TWeight); 
+				if     (dEta < 0.5 && dPhi < 2 && met< 150)               histo->Fill(1,weight); 
+        else if(dEta < 0.5 && dPhi < 2 && met> 150 && met< 300) histo->Fill(2,weight); 
+				else if(dEta < 0.5 && dPhi < 2 && met> 300)               histo->Fill(3,weight); 
+				else if(dEta < 0.5 && dPhi > 2 && met< 150)               histo->Fill(4,weight); 
+        else if(dEta < 0.5 && dPhi > 2 && met> 150 && met< 300) histo->Fill(5,weight); 
+				else if(dEta < 0.5 && dPhi > 2 && met> 300)               histo->Fill(6,weight); 
+				else if(dEta > 0.5 && dPhi < 2 && met< 150)               histo->Fill(7,weight); 
+        else if(dEta > 0.5 && dPhi < 2 && met> 150 && met< 300) histo->Fill(8,weight); 
+				else if(dEta > 0.5 && dPhi < 2 && met> 300)               histo->Fill(9,weight); 
+				else if(dEta > 0.5 && dPhi > 2 && met< 150)               histo->Fill(10,weight); 
+        else if(dEta > 0.5 && dPhi > 2 && met> 150 && met< 300) histo->Fill(11,weight); 
+				else if(dEta > 0.5 && dPhi > 2 && met> 300)               histo->Fill(12,weight); 
 			}
 		}
 		else if(plot == "cutandcount"){
-			if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
-				histo->Fill(1, TWeight);
+			if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+				histo->Fill(1, weight);
 		}
 		else if(plot == "ghent"){
-			if(TMET > 80 && TNJetsBtag > 0 && (TMET/TMath::Sqrt(THT)) > 5 ) 
-				histo->Fill(1, TWeight);
+			if(met> 80 && nbjets> 0 && (met/TMath::Sqrt(ht)) > 5 ) 
+				histo->Fill(1, weight);
 		}
 
 
 		//############ Variables ############
 		else if(plot == "MET"){
-			if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
-				histo->Fill(TMET, TWeight);
+			if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+				histo->Fill(met, weight);
 		}
 		else if(plot == "MT2"){
-      if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
-				histo->Fill(TMT2ll, TWeight);
+      if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+				histo->Fill(TMT2ll, weight);
 		}
     else if(plot == "DeltaPhi"){
-      if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
-        histo->Fill(l0.DeltaPhi(l1), TWeight);
+      if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+        histo->Fill(l0.DeltaPhi(l1), weight);
     }
     else if(plot == "DeltaPhiLepMet"){
-      if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
-        histo->Fill(l0.DeltaPhi(met), TWeight);
+      if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+        histo->Fill(l0.DeltaPhi(vmet), weight);
     }
     else if(plot == "DeltaEta"){
-      if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
-        histo->Fill(TMath::Abs(l0.Eta() - l1.Eta()), TWeight);
+      if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+        histo->Fill(TMath::Abs(l0.Eta() - l1.Eta()), weight);
     }
     else if(plot == "DeltaR"){
-      if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
-        histo->Fill(l0.DeltaR(l1), TWeight);
+      if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+        histo->Fill(l0.DeltaR(l1), weight);
     }
     else if(plot == "HT"){
-      if(TMET > 50 && TNJetsBtag > 0 && ((chan == "ElMu") || ( (TMET/TMath::Sqrt(THT)) > 5 && TMinDPhiMetJets > 0.25 ) ))
-        histo->Fill(THT, TWeight);
+      if(met> 50 && nbjets> 0 && ((chan == "ElMu") || ( (met/TMath::Sqrt(ht)) > 5 && TMinDPhiMetJets > 0.25 ) ))
+        histo->Fill(ht, weight);
     }
 	}
   histo->SetStyle();

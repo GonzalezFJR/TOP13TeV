@@ -38,6 +38,14 @@ void Histo::SetStyle(){
 	StackOverflow();
 	yield = Integral();
   max = GetMaximum();
+  Int_t nbins = GetNbinsX();
+  vsysu = new Float_t[nbins];
+  vsysd = new Float_t[nbins];
+  Float_t err2 = 1;
+  for(int i = 0; i < nbins; i++){ 
+    err2 = GetBinError(i); err2 = err2*err2;
+    vsysu[i] = err2; vsysd[i] = err2;
+  }
   GetXaxis()->SetTitle(xlabel);
 }
 
@@ -79,4 +87,22 @@ TH1F* Histo::GetVarHistoStatBin(Int_t bin, TString dir){
   else if (dir == "down" || dir == "Down" || dir == "DOWN")  h->SetBinContent(bin, var - stat);
   else    cout << " ---> ERROR!!!! No valid direction: " << dir << endl;
   return h;
+}
+
+void Histo::AddToSystematics(Histo* hsys){
+  Int_t nbins = hsys->GetNbinsX();
+  Float_t diff = 0;
+  if(GetNbinsX() != nbins)  std::cout << " [Histo] WARNING: cannot add to systematics" << std::endl; 
+  if(yield > hsys->yield){ // It's a "down" systematic
+    for(Int_t k = 0; k < nbins; k++){
+      diff = TMath::Abs(GetBinContent(k+1) - hsys->GetBinContent(k+1));
+      vsysd[k] += diff*diff;
+    }
+  }
+  else{ // It's an "up" systematic
+    for(Int_t k = 0; k < nbins; k++){
+      diff = TMath::Abs(GetBinContent(k+1) - hsys->GetBinContent(k+1));
+      vsysu[k] += diff*diff;
+    }
+  }
 }
