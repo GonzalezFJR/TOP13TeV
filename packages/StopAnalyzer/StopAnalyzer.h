@@ -263,12 +263,21 @@ class StopAnalyzer : public PAFChainItemSelector
 		void SetTreeVariables(gChannel);
 		// Branches
 		int TNJets;
+		int TNJetsJESUp;
+		int TNJetsJESDown;
+		int TNJetsJER;
 		int TNJetsBtag;
+		int TNJetsBtagUp;
+		int TNJetsBtagDown;
+		int TNJetsBtagMisTagUp;
+		int TNJetsBtagMisTagDown;
 		int TIsDoubleMuon;
 		int TIsDoubleElec;
 		int TIsElMu;
 		float TWeight;
 		float TMET;
+		float TMETJESUp;
+		float TMETJESDown;
 		float TMET_Phi;
 		float THT;
 		float TMT2ll;
@@ -297,7 +306,19 @@ class StopAnalyzer : public PAFChainItemSelector
 		Float_t TJet_Py[40];
 		Float_t TJet_Pz[40];
 		Float_t TJet_E[40];
+		Float_t TJetJESUp_Pt[40];
+		Float_t TJetJESDown_Pt[40];
+		Float_t TJetJER_Pt[40];
 		Int_t TJet_isBJet[40];
+
+		Float_t TWeight_LepEffUp;
+		Float_t  TWeight_LepEffDown;
+		Float_t  TWeight_TrigUp;
+		Float_t  TWeight_TrigDown;
+		Float_t  TWeight_FSUp;
+		Float_t  TWeight_PUDown;
+		Float_t  TWeight_PUUp;
+		Float_t  TWeight_FSDown;
 
 		void  GetParameters();
 		void  GetTreeVariables();
@@ -335,6 +356,7 @@ class StopAnalyzer : public PAFChainItemSelector
 		float getJERScale(int);
 		float getJERScaleDown(int);
 		float getSF(gChannel);
+    float getFSError(gChannel);
 		float getLeptonError(gChannel);
 		float getTriggerError(gChannel);
 		float getTopPtSF();
@@ -444,9 +466,19 @@ class StopAnalyzer : public PAFChainItemSelector
 		// EventWeight
 		//----------------------------------------------------------------------------
 		float EventWeight;
-		float PUSF;
+		float PUSF = 1;
 		bool  fChargeSwitch;
 
+		float		EventWeight_LepEffUp = 1;    
+		float		EventWeight_LepEffDown = 1;
+		float		EventWeight_FSUp = 1;
+		float		EventWeight_FSDown = 1;   
+		float		EventWeight_PUUp = 1;
+		float		EventWeight_PUDown = 1;   
+		float		EventWeight_TrigUp = 1; 
+		float		EventWeight_TrigDown = 1;   
+		float		EventWeight_BtagUp = 1;
+		float		EventWeight_BtagDown = 1;
 
 		//////////////////////////////////////////////////////////////////////////////
 		//               Data members

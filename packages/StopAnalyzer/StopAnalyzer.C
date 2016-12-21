@@ -359,10 +359,19 @@ void StopAnalyzer::InitialiseTree(){
     fTree->Branch("TIsDoubleMuon",&TIsDoubleMuon,"TIsDoubleMuon/I");
     fTree->Branch("TIsDoubleElec",&TIsDoubleElec,"TIsDoubleElec/I");
     fTree->Branch("TIsElMu",      &TIsElMu,      "TIsElMu/I");
-    fTree->Branch("TNJets",       &TNJets,       "TNJets/I");
-    fTree->Branch("TNJetsBtag",   &TNJetsBtag,   "TNJetsBtag/I");
+    fTree->Branch("TNJets",           &TNJets,         "TNJets/I");
+    fTree->Branch("TNJetsJESUp",           &TNJetsJESUp,         "TNJetsJESUp/I");
+    fTree->Branch("TNJetsJESDown",           &TNJetsJESDown,         "TNJetsJESDown/I");
+    fTree->Branch("TNJetsJER",           &TNJetsJER,         "TNJetsJER/I");
+    fTree->Branch("TNJetsBtag",       &TNJetsBtag,     "TNJetsBtag/I");
+    fTree->Branch("TNJetsBtagUp",     &TNJetsBtagUp,   "TNJetsBtagUp/I");
+    fTree->Branch("TNJetsBtagDown",   &TNJetsBtagDown, "TNJetsBtagDown/I");
+    fTree->Branch("TNJetsBtagMisTagUp",     &TNJetsBtagMisTagUp,   "TNJetsBtagMisTagUp/I");
+    fTree->Branch("TNJetsBtagMisTagDown",   &TNJetsBtagMisTagDown, "TNJetsBtagMisTagDown/I");
 
     fTree->Branch("TMET",         &TMET,         "TMET/F");
+    fTree->Branch("TMETJESUp",    &TMETJESUp,    "TMETJESUp/F");
+    fTree->Branch("TMETJESDown",  &TMETJESDown,  "TMETJESDown/F");
     fTree->Branch("TMT2ll",       &TMT2ll,       "TMT2ll/F");
     fTree->Branch("TMT2bb",       &TMT2bb,       "TMT2bb/F");
     fTree->Branch("TMT2lblb",     &TMT2lblb,     "TMT2lblb/F");
@@ -395,6 +404,18 @@ void StopAnalyzer::InitialiseTree(){
     fTree->Branch("TJet_Py",           TJet_Py,           "TJet_Py[TNJets]/F");
     fTree->Branch("TJet_Pz",           TJet_Pz,           "TJet_Pz[TNJets]/F");
     fTree->Branch("TJet_E",            TJet_E,            "TJet_E[TNJets]/F");
+    fTree->Branch("TJetJESUp_Pt",      TJetJESUp_Pt,      "TJetJESUp_Pt[TNJetsJESUp]/F");
+    fTree->Branch("TJetJESDown_Pt",    TJetJESDown_Pt,    "TJetJESDown_Pt[TNJetsJESDown]/F");
+    fTree->Branch("TJetJER_Pt",        TJetJER_Pt,        "TJetJER_Pt[TNJetsJER]/F");
+
+    fTree->Branch("TWeight_LepEffUp",      &TWeight_LepEffUp,      "TWeight_LepEffUp/F");
+    fTree->Branch("TWeight_LepEffDown",    &TWeight_LepEffDown,    "TWeight_LepEffDown/F");
+    fTree->Branch("TWeight_TrigUp",        &TWeight_TrigUp,        "TWeight_TrigUp/F");
+    fTree->Branch("TWeight_TrigDown",      &TWeight_TrigDown,      "TWeight_TrigDown/F");
+    fTree->Branch("TWeight_FSUp",          &TWeight_FSUp,          "TWeight_FSUp/F");
+    fTree->Branch("TWeight_FSDown",        &TWeight_FSDown,        "TWeight_FSDown/F");
+    fTree->Branch("TWeight_PUUp",        &TWeight_PUUp,        "TWeight_PUUp/F");
+    fTree->Branch("TWeight_PUDown",        &TWeight_PUDown,        "TWeight_PUDown/F");
 }
 
 void StopAnalyzer::InitialiseGenHistos(){
@@ -728,7 +749,69 @@ void StopAnalyzer::CoutEvent(long unsigned int en, TString t){
 void StopAnalyzer::SetTreeVariables(gChannel chan){ 
   TWeight     = EventWeight;
   TNJets      = getNJets();
-  TNJetsBtag  = getNBTags();
+  TNJetsBtag  = getNBTags(); 
+
+  fChargeSwitch = false;
+
+  // JES, JER
+
+  ResetOriginalObjects();
+  SmearJetPts(1);
+  gSysSource = JESUp;
+  SetEventObjects();
+	TNJetsJESUp = getNJets();
+  TMETJESUp = getMET();
+	for(int k = 0; k<40; k++){
+		if(k<TNJetsJESUp) TJetJESUp_Pt[k] = JetPt.at(k); 
+		else              TJetJESUp_Pt[k] = 0;
+	}
+
+  ResetOriginalObjects();
+  SmearJetPts(2);
+  gSysSource = JESDown;
+  SetEventObjects();
+  TMETJESDown = getMET();
+  TNJetsJESDown = getNJets();
+	for(int k = 0; k<40; k++){
+		if(k<TNJetsJESDown) TJetJESDown_Pt[k] = JetPt.at(k); 
+		else                TJetJESDown_Pt[k] = 0;
+	}
+
+  ResetOriginalObjects();
+  SmearJetPts(3);
+  gSysSource = JER;
+  SetEventObjects();
+  TNJetsJER = getNJets();
+	for(int k = 0; k<40; k++){
+		if(k<TNJetsJER) TJetJER_Pt[k] = JetPt.at(k); 
+		else            TJetJER_Pt[k] = 0;
+	}
+
+  // Btag
+
+  ResetOriginalObjects();
+  gSysSource = BtagUp;
+  SetEventObjects();
+  TNJetsBtagUp  = getNBTags();
+
+  ResetOriginalObjects();
+  gSysSource = BtagDown;
+  SetEventObjects();
+  TNJetsBtagDown  = getNBTags();
+
+  ResetOriginalObjects();
+  gSysSource = MisTagUp;
+  SetEventObjects();
+  TNJetsBtagMisTagUp  = getNBTags();
+
+  ResetOriginalObjects();
+  gSysSource = MisTagDown;
+  SetEventObjects();
+  TNJetsBtagMisTagDown  = getNBTags();
+
+  ResetOriginalObjects();
+  gSysSource = Norm;
+  SetEventObjects();
 
   TIsDoubleElec = 0; TIsDoubleMuon = 0; TIsElMu = 0;
   if(chan == Muon) TIsDoubleMuon = 1;
@@ -760,6 +843,15 @@ void StopAnalyzer::SetTreeVariables(gChannel chan){
   TLep2_Pz      = fHypLepton2.p.Pz();
   TLep2_E       = fHypLepton2.p.E();
   TLep2_Charge  = fHypLepton2.charge;
+
+	TWeight_LepEffUp   = EventWeight_LepEffUp;
+	TWeight_LepEffDown = EventWeight_LepEffDown;
+	TWeight_TrigUp     = EventWeight_TrigUp;
+	TWeight_TrigDown   = EventWeight_TrigDown;
+	TWeight_FSUp       = EventWeight_FSUp;
+	TWeight_FSDown     = EventWeight_FSDown;
+	TWeight_PUUp       = EventWeight_PUUp;
+	TWeight_PUDown     = EventWeight_PUDown;
 
   for(int k = 0; k<40; k++){
     if(k<TNJets){
@@ -1347,9 +1439,31 @@ float StopAnalyzer::getLeptonError(gChannel chan){
 float StopAnalyzer::getTriggerError(gChannel chan){
 	float trig(0.);
 	if (chan==Muon) trig = fLeptonSF->GetDoubleMuSF_err(fHypLepton1.p.Eta(),fHypLepton2.p.Eta());
-	if (chan==ElMu) trig = fLeptonSF->GetMuEGSF_err    (fHypLepton2.p.Eta(),fHypLepton1.p.Eta());
 	if (chan==Elec) trig = fLeptonSF->GetDoubleElSF_err(fHypLepton1.p.Eta(),fHypLepton2.p.Eta());
+	if (chan==ElMu){
+		float leadingPt  = fHypLepton1.p.Pt() > fHypLepton2.p.Pt()? fHypLepton1.p.Pt() : fHypLepton2.p.Pt();
+		float leadingEta = fHypLepton1.p.Pt() > fHypLepton2.p.Pt()? fHypLepton1.p.Eta() : fHypLepton2.p.Eta();
+		trig = fLeptonSF->GetMuEGSF_err    (leadingPt,leadingEta);
+	}
 	return trig;
+}
+
+float StopAnalyzer::getFSError(gChannel chan){
+	if(!gIsT2tt) return 0;
+  float eFS1 = 1; float eFS2 = 1;
+	if (chan == Muon){
+    eFS1  = fLeptonSF->GetFastSimMuonSF_err(fHypLepton1.p.Pt(), TMath::Abs(fHypLepton1.p.Eta()));
+    eFS2  = fLeptonSF->GetFastSimMuonSF_err(fHypLepton2.p.Pt(), TMath::Abs(fHypLepton2.p.Eta()));
+  } 
+  else if (chan == Elec){
+    eFS1  = fLeptonSF->GetFastSimElectronSF_err(fHypLepton1.p.Pt(), TMath::Abs(fHypLepton1.p.Eta()));
+    eFS2  = fLeptonSF->GetFastSimElectronSF_err(fHypLepton2.p.Pt(), TMath::Abs(fHypLepton2.p.Eta()));
+  }
+  else if (chan == ElMu){
+    eFS1  = fLeptonSF->GetFastSimMuonSF_err(fHypLepton1.p.Pt(),TMath::Abs(fHypLepton1.p.Eta()));
+    eFS2  = fLeptonSF->GetFastSimElectronSF_err(fHypLepton2.p.Pt(), TMath::Abs(fHypLepton2.p.Eta()));
+	}
+  return TMath::Sqrt(eFS1*eFS1 + eFS2*eFS2); 
 }
 
 float StopAnalyzer::getSF(gChannel chan) {
@@ -1606,7 +1720,7 @@ void StopAnalyzer::FillKinematicHistos(gChannel chan, iCut cut){
 	if (gSysSource != Norm)      return;  //only fill histograms for nominal distributions...
 	if (fChargeSwitch == true  ) return;
 
-	if (!gIsData) {
+	if (!gIsData && !gIsT2tt){
 		for(int i = 0; i<Get<Int_t>("nLHEweight"); i++){
 			fHLHEweights[chan][cut]->Fill(i, EventWeight*Get<Float_t>("LHEweight_wgt", i));
 		}
@@ -1793,19 +1907,43 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 	if (PassTriggerEMu()  && IsElMuEvent()){
 		// Define Hypothesis Leptons...
 		EventWeight = gWeight * getSF(ElMu);// * getTopPtSF();
+
+		EventWeight_LepEffUp   = gWeight * (getSF(ElMu) + getLeptonError(ElMu));
+		EventWeight_LepEffDown = gWeight * (getSF(ElMu) - getLeptonError(ElMu));
+		EventWeight_FSUp       = gWeight * (getSF(ElMu) + getFSError(ElMu));
+		EventWeight_FSDown     = gWeight * (getSF(ElMu) - getFSError(ElMu));
+		EventWeight_TrigUp     = gWeight * (getSF(ElMu) + getTriggerError(ElMu));
+		EventWeight_TrigDown   = gWeight * (getSF(ElMu) - getTriggerError(ElMu));
 		hWeight -> Fill(EventWeight,1.);
+
+		if (!gIsData){
+			PUSF = fPUWeightUp->GetWeight(Get<Float_t>("nTrueInt"));
+			EventWeight_PUUp       = gWeight * getSF(ElMu);
+			PUSF = fPUWeightDown->GetWeight(Get<Float_t>("nTrueInt"));
+			EventWeight_PUDown     = gWeight * getSF(ElMu);
+			PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); 
+		}
+
 #ifdef DEBUG
 		cout << " pass trigger + emu, ";
 #endif
 		// 0.115 = Fraction events with negative weight
-		if(gIsMCatNLO) EventWeight = EventWeight * genWeight;// /(TMath::Abs(T_Event_weight)); //*(1.-2.*0.115)); 
+		if(gIsMCatNLO){
+			EventWeight = EventWeight * genWeight;// /(TMath::Abs(T_Event_weight)); //*(1.-2.*0.115)); 
 
-		if(
-				(gCreateTree) && (sys==Norm)        && !(fChargeSwitch) &&
-				PassesMllVeto()    &&
-				PassesNJetsCut()){
+			EventWeight_LepEffUp   *= genWeight; 
+			EventWeight_LepEffDown *= genWeight; 
+			EventWeight_FSUp       *= genWeight; 
+			EventWeight_FSDown     *= genWeight; 
+			EventWeight_TrigUp     *= genWeight; 
+			EventWeight_TrigDown   *= genWeight; 
+			EventWeight_PUUp       *= genWeight; 
+			EventWeight_PUDown     *= genWeight; 
+		}
+
+		if((gCreateTree) && (sys==Norm) && !(fChargeSwitch) && PassesMllVeto()){
 			SetTreeVariables(ElMu);
-			fTree->Fill();
+			if( (TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2))  fTree->Fill();
 		}
 
 #ifdef DEBUG
@@ -1864,19 +2002,41 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 	if (PassTriggerMuMu() && IsMuMuEvent()){
 		EventWeight = gWeight * getSF(Muon); //  * getTopPtSF();
 		//EventWeight = 1.;
+		EventWeight_LepEffUp   = gWeight * (getSF(Muon) + getLeptonError(Muon));
+		EventWeight_LepEffDown = gWeight * (getSF(Muon) - getLeptonError(Muon));
+		EventWeight_FSUp       = gWeight * (getSF(Muon) + getFSError(Muon));
+		EventWeight_FSDown     = gWeight * (getSF(Muon) - getFSError(Muon));
+		EventWeight_TrigUp     = gWeight * (getSF(Muon) + getTriggerError(Muon));
+		EventWeight_TrigDown   = gWeight * (getSF(Muon) - getTriggerError(Muon));
+
+		if (!gIsData){
+			PUSF = fPUWeightUp->GetWeight(Get<Float_t>("nTrueInt"));
+			EventWeight_PUUp       = gWeight * getSF(Muon);
+			PUSF = fPUWeightDown->GetWeight(Get<Float_t>("nTrueInt"));
+			EventWeight_PUDown     = gWeight * getSF(Muon);
+			PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); 
+		}
+
 #ifdef DEBUG
 		cout << " pass trigger + mumu, ";
 #endif
 		// 0.115 = Fraction events with negative weight
-		if(gIsMCatNLO) EventWeight = EventWeight * genWeight;// /(TMath::Abs(T_Event_weight)); //*(1.-2.*0.115)); 
+		if(gIsMCatNLO){
+			EventWeight = EventWeight * genWeight;// /(TMath::Abs(T_Event_weight)); //*(1.-2.*0.115)); 
 
-		if(
-			(gCreateTree) &&	(sys==Norm) && !(fChargeSwitch) &&
-				PassesZVeto()      &&
-				PassesMllVeto()    &&
-				PassesNJetsCut()){
-			SetTreeVariables(Muon);
-			fTree->Fill();
+			EventWeight_LepEffUp   *= genWeight; 
+			EventWeight_LepEffDown *= genWeight; 
+			EventWeight_FSUp       *= genWeight; 
+			EventWeight_FSDown     *= genWeight; 
+			EventWeight_TrigUp     *= genWeight; 
+			EventWeight_TrigDown   *= genWeight; 
+			EventWeight_PUUp       *= genWeight; 
+			EventWeight_PUDown     *= genWeight; 
+		}
+
+		SetTreeVariables(Muon);
+		if( (gCreateTree) &&	(sys==Norm) && !(fChargeSwitch) && PassesZVeto()      && PassesMllVeto()){
+			if((TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2) ) 	fTree->Fill();
 		}
 
 		if (PassesMllVeto()){
@@ -1920,20 +2080,41 @@ void StopAnalyzer::FillYields(gSystFlag sys){
   ResetHypLeptons(); 
   if (PassTriggerEE() && IsElElEvent()){
 		EventWeight = gWeight * getSF(Elec);// * getTopPtSF();     
+		EventWeight_LepEffUp   = gWeight * (getSF(Elec) + getLeptonError(Elec));
+		EventWeight_LepEffDown = gWeight * (getSF(Elec) - getLeptonError(Elec));
+		EventWeight_FSUp       = gWeight * (getSF(Elec) + getFSError(Elec));
+		EventWeight_FSDown     = gWeight * (getSF(Elec) - getFSError(Elec));
+		EventWeight_TrigUp     = gWeight * (getSF(Elec) + getTriggerError(Elec));
+		EventWeight_TrigDown   = gWeight * (getSF(Elec) - getTriggerError(Elec));
+
+		if (!gIsData){
+			PUSF = fPUWeightUp->GetWeight(Get<Float_t>("nTrueInt"));
+			EventWeight_PUUp       = gWeight * getSF(Elec);
+			PUSF = fPUWeightDown->GetWeight(Get<Float_t>("nTrueInt"));
+			EventWeight_PUDown     = gWeight * getSF(Elec);
+			PUSF = fPUWeight->GetWeight(Get<Float_t>("nTrueInt")); 
+		}
+
 		//EventWeight = 1.;     
 #ifdef DEBUG
 		cout << " pass trigger + ee, ";
 #endif
 		// 0.115 = Fraction events with negative weight
-		if(gIsMCatNLO) EventWeight = EventWeight * genWeight;// /(TMath::Abs(T_Event_weight)); //*(1.-2.*0.115)); 
+		if(gIsMCatNLO){
+			EventWeight = EventWeight * genWeight;// /(TMath::Abs(T_Event_weight)); //*(1.-2.*0.115)); 
+			EventWeight_LepEffUp   *= genWeight; 
+			EventWeight_LepEffDown *= genWeight; 
+			EventWeight_FSUp       *= genWeight; 
+			EventWeight_FSDown     *= genWeight; 
+			EventWeight_PUUp       *= genWeight; 
+			EventWeight_PUDown     *= genWeight; 
+			EventWeight_TrigUp     *= genWeight; 
+			EventWeight_TrigDown   *= genWeight; 
+		}
 
-		if(
-			(gCreateTree) &&	(sys==Norm)        && !(fChargeSwitch) &&
-				PassesZVeto()      &&
-				PassesMllVeto()    &&
-				PassesNJetsCut()){
+		if( (gCreateTree) &&	(sys==Norm)        && !(fChargeSwitch) && PassesZVeto()      && PassesMllVeto()){
 			SetTreeVariables(Elec);
-			fTree->Fill();
+			if((TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2))  fTree->Fill();
 		}
 
 		if (PassesMllVeto()){
@@ -2178,15 +2359,16 @@ int StopAnalyzer::getSelectedLeptons(){
 }
 
 bool StopAnalyzer::METFilter(){
-  if(gSampleName.BeginsWith("T2tt")) return true;
+  if(gIsT2tt) return true;
+  return true;
   if (Get<Int_t>("Flag_HBHENoiseFilter") && 
       Get<Int_t>("Flag_HBHENoiseIsoFilter") && 
       Get<Int_t>("Flag_EcalDeadCellTriggerPrimitiveFilter") && 
       Get<Int_t>("Flag_goodVertices") && 
-      Get<Int_t>("Flag_eeBadScFilter")){ 
-      //Get<Int_t>("Flag_BadMuon")) 
-      //Get<Int_t>("Flag_badChargedHadron")) 
-      //Get<Int_t>("Flag_globalTightHalo2016Filter")) 
+      Get<Int_t>("Flag_eeBadScFilter")
+
+		//	&& Get<Int_t>("Flag_badMuonFilter") && Get<Int_t>("Flag_badChargedHadronFilter") &&  Get<Int_t>("Flag_globalTightHalo2016Filter")
+     ){
     CoutEvent(evt, "   Passes MET filters!!");
     return true;
   }
