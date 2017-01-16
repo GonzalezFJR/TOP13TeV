@@ -280,6 +280,8 @@ class StopAnalyzer : public PAFChainItemSelector
 		float TMETJESDown;
 		float TMET_Phi;
 		float THT;
+		float THTJESUp;
+		float THTJESDown;
 		float TMT2ll;
 		float TMT2bb;
 		float TMT2lblb;
@@ -465,7 +467,7 @@ class StopAnalyzer : public PAFChainItemSelector
 
 		// EventWeight
 		//----------------------------------------------------------------------------
-		float EventWeight;
+		float EventWeight = 1;
 		float PUSF = 1;
 		bool  fChargeSwitch;
 

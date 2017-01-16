@@ -379,6 +379,8 @@ void StopAnalyzer::InitialiseTree(){
     fTree->Branch("TMeff",        &TMeff,        "TMeff/F");
     fTree->Branch("TPtllb",       &TPtllb,       "TPtllb/F");
     fTree->Branch("THT",          &THT,          "THT/F");
+    fTree->Branch("THTJESUp",     &THTJESUp,     "THTJESUp/F");
+    fTree->Branch("THTJESDown",   &THTJESDown,   "THTJESDown/F");
 
     fTree->Branch("TMET_Phi",     &TMET_Phi,     "TMET_Phi/F");
     fTree->Branch("TdPhiPtllbMET",&TdPhiPtllbMET,"TdPhiPtllbMET/F");
@@ -751,68 +753,6 @@ void StopAnalyzer::SetTreeVariables(gChannel chan){
   TNJets      = getNJets();
   TNJetsBtag  = getNBTags(); 
 
-  fChargeSwitch = false;
-
-  // JES, JER
-
-  ResetOriginalObjects();
-  SmearJetPts(1);
-  gSysSource = JESUp;
-  SetEventObjects();
-	TNJetsJESUp = getNJets();
-  TMETJESUp = getMET();
-	for(int k = 0; k<40; k++){
-		if(k<TNJetsJESUp) TJetJESUp_Pt[k] = JetPt.at(k); 
-		else              TJetJESUp_Pt[k] = 0;
-	}
-
-  ResetOriginalObjects();
-  SmearJetPts(2);
-  gSysSource = JESDown;
-  SetEventObjects();
-  TMETJESDown = getMET();
-  TNJetsJESDown = getNJets();
-	for(int k = 0; k<40; k++){
-		if(k<TNJetsJESDown) TJetJESDown_Pt[k] = JetPt.at(k); 
-		else                TJetJESDown_Pt[k] = 0;
-	}
-
-  ResetOriginalObjects();
-  SmearJetPts(3);
-  gSysSource = JER;
-  SetEventObjects();
-  TNJetsJER = getNJets();
-	for(int k = 0; k<40; k++){
-		if(k<TNJetsJER) TJetJER_Pt[k] = JetPt.at(k); 
-		else            TJetJER_Pt[k] = 0;
-	}
-
-  // Btag
-
-  ResetOriginalObjects();
-  gSysSource = BtagUp;
-  SetEventObjects();
-  TNJetsBtagUp  = getNBTags();
-
-  ResetOriginalObjects();
-  gSysSource = BtagDown;
-  SetEventObjects();
-  TNJetsBtagDown  = getNBTags();
-
-  ResetOriginalObjects();
-  gSysSource = MisTagUp;
-  SetEventObjects();
-  TNJetsBtagMisTagUp  = getNBTags();
-
-  ResetOriginalObjects();
-  gSysSource = MisTagDown;
-  SetEventObjects();
-  TNJetsBtagMisTagDown  = getNBTags();
-
-  ResetOriginalObjects();
-  gSysSource = Norm;
-  SetEventObjects();
-
   TIsDoubleElec = 0; TIsDoubleMuon = 0; TIsElMu = 0;
   if(chan == Muon) TIsDoubleMuon = 1;
   if(chan == Elec) TIsDoubleElec = 1;
@@ -825,6 +765,8 @@ void StopAnalyzer::SetTreeVariables(gChannel chan){
   TPtllb        = getPtllb().Pt();
   TMeff         = getMeff();
   THT           = getHT();
+  THTJESDown    = getHT();
+  THTJESUp      = getHT();
   TdPhiPtllbMET = getDPhibMet();
   TMinDPhiMetJets = getMinDPhiMetJets();
   TdPhiJetMet   = getDPhiJetMet();
@@ -866,9 +808,79 @@ void StopAnalyzer::SetTreeVariables(gChannel chan){
       TJet_Py[k]           = 0;
       TJet_Pz[k]           = 0;
       TJet_E[k]            = 0;
-      TJet_isBJet[k]       = 0;
-    }
-  }
+			TJet_isBJet[k]       = 0;
+		}
+	}
+
+	// JES, JER
+	ResetOriginalObjects();
+	gSysSource = JESUp;
+	SmearJetPts(1);
+	SetEventObjects();
+	if( (TIsElMu && IsElMuEvent()) || (TIsDoubleElec &&  IsElElEvent()) || (TIsDoubleMuon && IsMuMuEvent()) ){
+		TNJetsJESUp = getNJets();
+		TMETJESUp = getMET();
+		for(int k = 0; k<40; k++){
+			if(k<TNJetsJESUp) TJetJESUp_Pt[k] = JetPt.at(k); 
+			else              TJetJESUp_Pt[k] = 0;
+		}
+  THTJESUp = getHT();
+	}
+
+	ResetOriginalObjects();
+	gSysSource = JESDown;
+	SmearJetPts(2);
+	SetEventObjects();
+	if( (TIsElMu && IsElMuEvent()) || (TIsDoubleElec &&  IsElElEvent()) || (TIsDoubleMuon && IsMuMuEvent()) ){
+		TMETJESDown = getMET();
+		TNJetsJESDown = getNJets();
+		for(int k = 0; k<40; k++){
+			if(k<TNJetsJESDown) TJetJESDown_Pt[k] = JetPt.at(k); 
+			else                TJetJESDown_Pt[k] = 0;
+		}
+  THTJESDown = getHT();
+	}
+
+	ResetOriginalObjects();
+	SmearJetPts(3);
+	gSysSource = JER;
+	SetEventObjects();
+	if( (TIsElMu && IsElMuEvent()) || (TIsDoubleElec &&  IsElElEvent()) || (TIsDoubleMuon && IsMuMuEvent()) ){
+		TNJetsJER = getNJets();
+		for(int k = 0; k<40; k++){
+			if(k<TNJetsJER) TJetJER_Pt[k] = JetPt.at(k); 
+			else            TJetJER_Pt[k] = 0;
+		}
+	}
+
+	// Btag
+	fChargeSwitch = false;
+
+	ResetOriginalObjects();
+	gSysSource = BtagUp;
+	SetEventObjects();
+	if( (TIsElMu && IsElMuEvent()) || (TIsDoubleElec &&  IsElElEvent()) || (TIsDoubleMuon && IsMuMuEvent()) ) TNJetsBtagUp  = getNBTags();
+
+	ResetOriginalObjects();
+	gSysSource = BtagDown;
+	SetEventObjects();
+  if( (TIsElMu && IsElMuEvent()) || (TIsDoubleElec &&  IsElElEvent()) || (TIsDoubleMuon && IsMuMuEvent()) ) TNJetsBtagDown  = getNBTags();
+
+  ResetOriginalObjects();
+  gSysSource = MisTagUp;
+  SetEventObjects();
+  if( (TIsElMu && IsElMuEvent()) || (TIsDoubleElec &&  IsElElEvent()) || (TIsDoubleMuon && IsMuMuEvent()) ) TNJetsBtagMisTagUp  = getNBTags();
+
+  ResetOriginalObjects();
+  gSysSource = MisTagDown;
+  SetEventObjects();
+  TNJetsBtagMisTagDown  = getNBTags();
+
+  ResetOriginalObjects();
+  gSysSource = Norm;
+  SetEventObjects();
+
+
 }
 
 
@@ -1929,7 +1941,7 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 #endif
 		// 0.115 = Fraction events with negative weight
 		if(gIsMCatNLO){
-			EventWeight = EventWeight * genWeight;// /(TMath::Abs(T_Event_weight)); //*(1.-2.*0.115)); 
+			EventWeight = EventWeight * genWeight;// /(TMath::Abs(T_Event_weight)); // *(1.-2.*0.115)); 
 
 			EventWeight_LepEffUp   *= genWeight; 
 			EventWeight_LepEffDown *= genWeight; 
@@ -1941,10 +1953,6 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 			EventWeight_PUDown     *= genWeight; 
 		}
 
-		if((gCreateTree) && (sys==Norm) && !(fChargeSwitch) && PassesMllVeto()){
-			SetTreeVariables(ElMu);
-			if( (TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2))  fTree->Fill();
-		}
 
 #ifdef DEBUG
 			cout << " pass mll, ";
@@ -1996,6 +2004,12 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 				if(sys==Norm) FillKinematicHistos(ElMu,iExact2btag);
 			}
 		}
+
+		if((gCreateTree) && (sys==Norm) && !(fChargeSwitch) && PassesMllVeto()){
+			SetTreeVariables(ElMu);
+			if( (TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2))  fTree->Fill();
+		}
+
 	}
 
 	ResetHypLeptons(); 
@@ -2034,10 +2048,6 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 			EventWeight_PUDown     *= genWeight; 
 		}
 
-		SetTreeVariables(Muon);
-		if( (gCreateTree) &&	(sys==Norm) && !(fChargeSwitch) && PassesZVeto()      && PassesMllVeto()){
-			if((TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2) ) 	fTree->Fill();
-		}
 
 		if (PassesMllVeto()){
 #ifdef DEBUG
@@ -2075,6 +2085,12 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 				}
       }
     }
+
+		if( (gCreateTree) &&	(sys==Norm) && !(fChargeSwitch) && PassesZVeto()      && PassesMllVeto()){
+		SetTreeVariables(Muon);
+			if((TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2) ) 	fTree->Fill();
+		}
+
   }
 
   ResetHypLeptons(); 
@@ -2112,10 +2128,6 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 			EventWeight_TrigDown   *= genWeight; 
 		}
 
-		if( (gCreateTree) &&	(sys==Norm)        && !(fChargeSwitch) && PassesZVeto()      && PassesMllVeto()){
-			SetTreeVariables(Elec);
-			if((TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2))  fTree->Fill();
-		}
 
 		if (PassesMllVeto()){
 			FillYieldsHistograms(Elec,iDilepton, sys);
@@ -2150,6 +2162,12 @@ void StopAnalyzer::FillYields(gSystFlag sys){
 				}	  
 			}
     }
+
+		if( (gCreateTree) &&	(sys==Norm)        && !(fChargeSwitch) && PassesZVeto()      && PassesMllVeto()){
+			SetTreeVariables(Elec);
+			if((TNJets >= 2) || (TNJetsJESUp >= 2) || (TNJetsJESDown >= 2) || (TNJetsJER >= 2))  fTree->Fill();
+		}
+
   }
   ResetHypLeptons();
 #ifdef DEBUG
@@ -2406,7 +2424,7 @@ float StopAnalyzer::getMuonIso(int iMuon){
 //------------------------------------------------------------------------------
 // Electron Selectors
 //------------------------------------------------------------------------------
-// https://twiki.cern.ch/twiki/bin/view/CMS/TopEGM#Spring15_selection_25ns
+// https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_2016_data_for
 bool StopAnalyzer::IsTightElectron(unsigned int iElec, float ptcut){
 	if ((TMath::Abs(LepGood_pdgId[iElec])) != 11) return false; 
 	if (LepGood_pt[iElec] < ptcut) return false;
@@ -2415,27 +2433,26 @@ bool StopAnalyzer::IsTightElectron(unsigned int iElec, float ptcut){
   //if (getElecIso(iElec) > 0.0766) return false;
 	if (TMath::Abs(LepGood_dxy[iElec]) >= 0.05) return false; 
 	if (TMath::Abs(LepGood_dz[ iElec]) >= 0.1 ) return false;
-	if (Get<Int_t>("LepGood_lostHits", iElec)         > 0      ) return false; 
 	if (TMath::Abs(LepGood_etaSc[iElec]) > 1.4442 && 
 			TMath::Abs(LepGood_etaSc[iElec]) < 1.566) return false;
 	if (Get<Float_t>("LepGood_sip3d", iElec) > 4.0) return false; 
-	//if(TMath::Abs(Get<Int_t>("LepGood_tightId", iElec)) != 3) return false; // bin 3: tight ID electrons
-  //'POG_SPRING15_25ns_v1_Tight' : [('dEtaIn', [0.00926, 0.00724]), ('dPhiIn', [0.0336, 0.0918]), ('sigmaIEtaIEta', [0.0101, 0.0279]), ('H/E', [0.0597, 0.0615]), ('1/E-1/p', [0.0120, 0.00999])],
   // Tight Electron Id:
   if(TMath::Abs(Get<Float_t>("LepGood_etaSc", iElec)) < 1.479){ // central
-    if(TMath::Abs(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec)) > 0.0101) return false;
-    if(TMath::Abs(Get<Float_t>("LepGood_dEtaScTrkIn", iElec)) > 0.00926 ) return false;
-    if(TMath::Abs(Get<Float_t>("LepGood_dPhiScTrkIn", iElec)) > 0.0336) return false;
-    if(Get<Float_t>("LepGood_hadronicOverEm", iElec) > 0.0597) return false;
-    if(TMath::Abs(Get<Float_t>("LepGood_eInvMinusPInv", iElec)) > 0.012) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec)) > 0.00998) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_dEtaScTrkIn", iElec)) > 0.00308  ) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_dPhiScTrkIn", iElec)) > 0.0816) return false;
+    if(Get<Float_t>("LepGood_hadronicOverEm", iElec) > 0.0414) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_eInvMinusPInv", iElec)) > 0.0129) return false;
 	}
   else{ // forward
-    if(TMath::Abs(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec)) > 0.0279) return false;
-    if(TMath::Abs(Get<Float_t>("LepGood_dEtaScTrkIn", iElec)) > 0.00724) return false;
-    if(TMath::Abs(Get<Float_t>("LepGood_dPhiScTrkIn", iElec)) > 0.0918) return false;
-    if(Get<Float_t>("LepGood_hadronicOverEm", iElec) > 0.0615) return false;
-    if(TMath::Abs(Get<Float_t>("LepGood_eInvMinusPInv", iElec)) >  	0.00999) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec)) > 0.0292) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_dEtaScTrkIn", iElec)) > 0.00605) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_dPhiScTrkIn", iElec)) > 0.0394) return false;
+    if(Get<Float_t>("LepGood_hadronicOverEm", iElec) > 0.0641) return false;
+    if(TMath::Abs(Get<Float_t>("LepGood_eInvMinusPInv", iElec)) >  	0.0129) return false;
   }
+	if (Get<Int_t>("LepGood_lostHits", iElec)         > 1      ) return false; 
+	if (Get<Int_t>("LepGood_convVeto", iElec)        == 0      ) return false; 
 
 	return true;
 }
@@ -2675,8 +2692,8 @@ void StopAnalyzer::SmearJetPts(int flag){
 					Get<Float_t>("Jet_mcPz",*it),  
 					Get<Float_t>("Jet_mcEnergy",*it));        
 			ojets += tmp; 
-			if(flag == 1) JetPt.at(*it) *= Get<Float_t>("Jet_corr_JECUp",*it);   // vary up   for flag 1 
-			if(flag == 2) JetPt.at(*it) *= Get<Float_t>("Jet_corr_JECDown",*it); // vary down for flag 2;
+			if(flag == 1) JetPt.at(*it) = Get<Float_t>("Jet_rawPt", *it)*Get<Float_t>("Jet_corr_JECUp",*it);   // vary up   for flag 1 
+			if(flag == 2) JetPt.at(*it) = Get<Float_t>("Jet_rawPt", *it)*Get<Float_t>("Jet_corr_JECDown",*it); // vary down for flag 2;
 			if(flag == 3){
 				float jerScaleUp   = getJERScaleUp(*it);	  
 				float jerScale     = getJERScale(*it);	  
