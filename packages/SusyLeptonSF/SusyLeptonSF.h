@@ -28,6 +28,7 @@ class SusyLeptonSF {
 
   double GetTightMuonIDSF (double pt, double eta) { return fTightMuonIDSF ->GetBinContent(fTightMuonIDSF->FindBin(TMath::Abs(eta), pt)); }
   double GetTightMuonIsoSF(double pt, double eta) { return fTightMuonIsoSF->GetBinContent(fTightMuonIsoSF->FindBin(TMath::Abs(eta), pt));}
+
   double GetTrackerMuonSF(double eta){
     float val = 0; float xlow = 0; float xhigh = 0;
     for(int i = 0; i < fTrackerMuonSF->GetN(); i++){
@@ -42,8 +43,20 @@ class SusyLeptonSF {
     float trackerSF = GetTrackerMuonSF(eta);
     eta = TMath::Abs(eta);
     return fTightMuonSF->GetBinContent(fTightMuonSF->FindBin(eta, pt))*trackerSF; 
-    return fTightMuonSF->GetBinContent(fTightMuonSF->FindBin(eta, pt)) + fTightMuonSF->GetBinError(fTightMuonSF->FindBin(eta,pt));  
   }
+  double GetTightMuonSF_err(double pt, double eta) {
+    if(pt > 120) pt = 119.9;
+    return fTightMuonSF->GetBinError(fTightMuonSF->FindBin(TMath::Abs(eta),pt));
+  }
+
+	float GetFastSimMuonSF(float pt, float eta){
+		if(pt > 200) pt = 199.9;
+		return fFastSimMuonSF->GetBinContent(fFastSimMuonSF->FindBin(pt, eta));	
+	}
+	float GetFastSimMuonSF_err(float pt, float eta){
+		if(pt > 200) pt = 199.9;
+		return fFastSimMuonSF->GetBinError(fFastSimMuonSF->FindBin(pt, eta));	
+	}
 
   
   //----------------------------------------------------------------------  
@@ -51,14 +64,17 @@ class SusyLeptonSF {
   //----------------------------------------------------------------------  
 
   float GetTightElectronIDSF  (float pt, float eta) const{ return fTightElectronIDSF->GetBinContent(fTightElectronIDSF->FindBin(TMath::Abs(eta), pt)); }
+
   float GetTrackerElectronSF(float eta){ return fTrackerElectronSF->GetBinContent(fTrackerElectronSF->FindBin(eta, 50.));	}
+  float GetTrackerElectronSF_err(float eta){ return fTrackerElectronSF->GetBinError(fTrackerElectronSF->FindBin(eta, 50.));	}
+
 	float GetFastSimElectronSF(float pt, float eta){
-		if(pt > 200) pt == 199.9;
+		if(pt > 200) pt = 199.9;
 		return fFastSimElectronSF->GetBinContent(fFastSimElectronSF->FindBin(pt, eta));
 	}
-	float GetFastSimMuonSF(float pt, float eta){
-		if(pt > 200) pt == 199.9;
-		return fFastSimMuonSF->GetBinContent(fFastSimMuonSF->FindBin(pt, eta));	
+	float GetFastSimElectronSF_err(float pt, float eta){
+		if(pt > 200) pt = 199.9;
+		return fFastSimElectronSF->GetBinError(fFastSimElectronSF->FindBin(pt, eta));
 	}
 
   float GetTightElectronSF  (float pt, float eta) { // binned in eta, pt
@@ -66,32 +82,43 @@ class SusyLeptonSF {
     float trackerSF = GetTrackerElectronSF(eta);
     return fTightElectronSF->GetBinContent(fTightElectronSF->FindBin(eta, pt))*trackerSF;    
   }
+  double GetTightElectronSF_err(double pt, double eta) {
+    if(pt > 200) pt = 199.9;
+    float trackerSF_err = GetTrackerElectronSF_err(eta);
+    float id_err = fTightElectronSF->GetBinError(fTightElectronSF->FindBin(eta, pt));
+    return TMath::Sqrt(trackerSF_err*trackerSF_err+id_err*id_err);
+  }
+
   /// Methods to get the ERROR 
-  double GetTightMuonSF_err(double pt, double eta) { return fTightMuonSF->GetBinError(fTightMuonSF->FindBin(pt,TMath::Abs(eta)));}
-  double GetTightElectronSF_err(double pt, double eta) { return fTightElectronSF->GetBinError(fTightElectronSF->FindBin(eta, pt));}
 
   
   //----------------------------------------------------------------------  
-  //--- Get Trigger SFs               (binned eta1, eta2)
-  //----------------------------------------------------------------------  
-  float GetDoubleMuSF(float pt, float eta) const {
-    if(pt > 200) pt = 199.9;
- return fDoubleMuSF->GetBinContent(fDoubleMuSF->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
-  float GetDoubleElSF(float pt, float eta) const { 
-    if(pt > 200) pt = 199.9;
-return fDoubleElSF->GetBinContent(fDoubleElSF->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
-  float GetMuEGSF    (float pt, float eta) const { 
-    if(pt > 200) pt = 199.9;
-return fMuEGSF    ->GetBinContent(fMuEGSF    ->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
-  // Trigger SF Errors (binned eta1, eta2)
-  float GetDoubleMuSF_err(float pt, float eta) const { return fDoubleMuSF->GetBinError(fDoubleMuSF->FindBin(TMath::Abs(pt),TMath::Abs(eta)));}
-  float GetDoubleElSF_err(float pt, float eta) const { return fDoubleElSF->GetBinError(fDoubleElSF->FindBin(TMath::Abs(pt),TMath::Abs(eta)));}
-  float GetMuEGSF_err(float pt, float eta)     const { return fMuEGSF    ->GetBinError(fMuEGSF    ->FindBin(TMath::Abs(pt),TMath::Abs(eta)));}
+	//--- Get Trigger SFs               (binned eta1, eta2)
+	//----------------------------------------------------------------------  
+	float GetDoubleMuSF(float pt, float eta) const {
+		if(pt > 200) pt = 199.9;
+		return fDoubleMuSF->GetBinContent(fDoubleMuSF->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
+	float GetDoubleElSF(float pt, float eta) const { 
+		if(pt > 200) pt = 199.9;
+		return fDoubleElSF->GetBinContent(fDoubleElSF->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
+	float GetMuEGSF    (float pt, float eta) const { 
+		if(pt > 200) pt = 199.9;
+		return fMuEGSF    ->GetBinContent(fMuEGSF    ->FindBin(TMath::Abs(pt), TMath::Abs(eta)) ); }
+	// Trigger SF Errors (binned eta1, eta2)
+	float GetDoubleMuSF_err(float pt, float eta) const { 
+		if(pt > 200) pt = 199.9;
+		return fDoubleMuSF->GetBinError(fDoubleMuSF->FindBin(TMath::Abs(pt),TMath::Abs(eta)));}
+	float GetDoubleElSF_err(float pt, float eta) const { 
+		if(pt > 200) pt = 199.9;
+		return fDoubleElSF->GetBinError(fDoubleElSF->FindBin(TMath::Abs(pt),TMath::Abs(eta)));}
+	float GetMuEGSF_err(float pt, float eta)     const {
+		if(pt > 200) pt = 199.9;
+		return fMuEGSF    ->GetBinError(fMuEGSF    ->FindBin(TMath::Abs(pt),TMath::Abs(eta)));}
 
-  
 
-  //######################################################################
-  //### Methods to load histograms with Scale Factors
+
+	//######################################################################
+	//### Methods to load histograms with Scale Factors
   //######################################################################
   // Muon SFs https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffsRun2#Results_for_CMSSW_7_6_X_dataset
   TH2D* LoadTightMuonIDSF (const char* file = "http://www.hep.uniovi.es/iglez/CMS/WZ/MuonIDSF.root", const char* histo = "DATA_over_MC_Tight");
