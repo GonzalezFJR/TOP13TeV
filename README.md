@@ -29,7 +29,7 @@ Start Pod:
   
 Load PAF:
 
-    source /nfs/fanae/PAF_releases/head/PAF_setup.sh
+    source /opt/PAF/PAF_setup.sh
   
   
 Top cross section at 13 TeV
