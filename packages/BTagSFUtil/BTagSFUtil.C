@@ -31,7 +31,8 @@ BTagSFUtil::BTagSFUtil(string MeasurementType, string BTagAlgorithm, TString Ope
   if (OperatingPoint=="Loose")  {
     TaggerOP += "L";
     if (TaggerName=="CSV") TaggerCut = 0.244;
-    if (TaggerName=="CSVv2") TaggerCut = 0.605;
+    //if (TaggerName=="CSVv2") TaggerCut = 0.605;
+    if (TaggerName=="CSVv2") TaggerCut = 0.5426; // for Moriond17
     reader_bc = new BTagCalibrationReader(&calib, BTagEntry::OP_LOOSE, MeasurementType, SystematicFlagBC);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_LOOSE, MeasurementType, SystematicFlagL);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_LOOSE, "comb", SystematicFlagL);
@@ -40,7 +41,8 @@ BTagSFUtil::BTagSFUtil(string MeasurementType, string BTagAlgorithm, TString Ope
     TaggerOP += "M";
     if (TaggerName=="CSV") TaggerCut = 0.679;
     //if (TaggerName=="CSVv2") TaggerCut = 0.890; // for 74X
-    if (TaggerName=="CSVv2") TaggerCut = 0.800; // for 76X
+    //if (TaggerName=="CSVv2") TaggerCut = 0.800; // for 76X
+    if (TaggerName=="CSVv2") TaggerCut = 0.8484; // for Moriond17
     reader_bc = new BTagCalibrationReader(&calib, BTagEntry::OP_MEDIUM, MeasurementType, SystematicFlagBC);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_MEDIUM, MeasurementType, SystematicFlagL);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_MEDIUM,  "comb", SystematicFlagL);
@@ -49,7 +51,8 @@ BTagSFUtil::BTagSFUtil(string MeasurementType, string BTagAlgorithm, TString Ope
     TaggerOP += "T";
     if (TaggerName=="CSV") TaggerCut = 0.898;
     if (TaggerName=="TCHP") TaggerCut = 3.41;
-    if (TaggerName=="CSVv2") TaggerCut = 0.970;
+    //if (TaggerName=="CSVv2") TaggerCut = 0.970;
+    if (TaggerName=="CSVv2") TaggerCut = 0.9535; // for Moriond17
     reader_bc = new BTagCalibrationReader(&calib, BTagEntry::OP_TIGHT, MeasurementType, SystematicFlagBC);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_TIGHT, MeasurementType, SystematicFlagL);
     //reader_l  = new BTagCalibrationReader(&calib, BTagEntry::OP_TIGHT, "comb", SystematicFlagL);
