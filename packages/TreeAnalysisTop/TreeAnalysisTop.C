@@ -1919,22 +1919,20 @@ bool TreeAnalysisTop::IsTightElectron(unsigned int iElec, float ptcut){
 	if (LepGood_pt[iElec] < ptcut) return false;
 	if (TMath::Abs(LepGood_eta[iElec]) > 2.4) return false;
 	if (TMath::Abs(LepGood_etaSc[iElec])  <= 1.479){ // Barrel
-		if (LepGood_relIso03[iElec]        > 0.0766 ) return false;
-		if (TMath::Abs(LepGood_dxy[iElec]) >= 0.0118) return false; 
-		if (TMath::Abs(LepGood_dz[ iElec]) >= 0.373 ) return false;
-		if (Get<Int_t>("LepGood_lostHits", iElec)         > 2      ) return false; 
- 	   	//if(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec) > 0.) return false;
+		if (LepGood_relIso03[iElec]        > 0.0588 ) return false;
+		//if (TMath::Abs(LepGood_dxy[iElec]) >= 0.0118) return false; 
+		//if (TMath::Abs(LepGood_dz[ iElec]) >= 0.373 ) return false;
+		//if(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec) > 0.) return false;
  	   	//if(Get<Float_t>("LepGood_dEtaScTrkIn", iElec) > 0. ) return false;
  	   	//if(Get<Float_t>("LepGood_dPhiScTrkIn", iElec) > 0.) return false;
  	   	//if(Get<Float_t>("LepGood_hadronicOverEm", iElec) > 0.) return false;
  	   	//if(Get<Float_t>("LepGood_eInvMinusPInv", iElec) > 0.) return false;
 	}
 	if (TMath::Abs(LepGood_etaSc[iElec])  > 1.479){ // Endcaps
-		if (LepGood_relIso03[iElec]        >  0.0678) return false;
-		if (TMath::Abs(LepGood_dxy[iElec]) >= 0.0739) return false; 
-		if (TMath::Abs(LepGood_dz[ iElec]) >= 0.602 ) return false;
-		if (Get<Int_t>("LepGood_lostHits", iElec)         > 1      ) return false; 
-   	 	//if(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec) > 0.) return false;
+		if (LepGood_relIso03[iElec]        >  0.0571) return false;
+		//if (TMath::Abs(LepGood_dxy[iElec]) >= 0.0739) return false; 
+		//if (TMath::Abs(LepGood_dz[ iElec]) >= 0.602 ) return false;
+		//if(Get<Float_t>("LepGood_sigmaIEtaIEta", iElec) > 0.) return false;
    	 	//if(Get<Float_t>("LepGood_dEtaScTrkIn", iElec) > 0. ) return false;
    	 	//if(Get<Float_t>("LepGood_dPhiScTrkIn", iElec) > 0.) return false;
    	 	//if(Get<Float_t>("LepGood_hadronicOverEm", iElec) > 0.) return false;
@@ -1942,8 +1940,9 @@ bool TreeAnalysisTop::IsTightElectron(unsigned int iElec, float ptcut){
 	}
 	if (TMath::Abs(LepGood_etaSc[iElec]) > 1.4442 && 
 			TMath::Abs(LepGood_etaSc[iElec]) < 1.566) return false;
-	if (Get<Int_t>("LepGood_convVeto", iElec) <  1) return false;
-	if(TMath::Abs(Get<Int_t>("LepGood_tightId", iElec)) < 2) return false;
+	if (Get<Int_t>("LepGood_lostHits", iElec) > 1) return false; 
+	if (Get<Int_t>("LepGood_convVeto", iElec) < 1) return false;
+	if(TMath::Abs(Get<Int_t>("LepGood_tightId", iElec)) < 3) return false;
 	return true;
 }
 
