@@ -1874,10 +1874,16 @@ int TreeAnalysisTop::getSelectedLeptons(){
 }
 
 bool TreeAnalysisTop::METFilter(){
-  if (Get<Float_t>("Flag_HBHENoiseIsoFilter") && 
-      Get<Float_t>("Flag_CSCTightHaloFilter") && 
-      Get<Float_t>("Flag_goodVertices") && 
-      Get<Float_t>("Flag_eeBadScFilter")) 
+  if (Get<Int_t>("Flag_HBHENoiseFilter") &&
+      Get<Int_t>("Flag_HBHENoiseIsoFilter") &&
+      Get<Int_t>("Flag_EcalDeadCellTriggerPrimitiveFilter") &&
+      Get<Int_t>("Flag_goodVertices") &&
+      Get<Int_t>("Flag_eeBadScFilter")
+
+      && Get<Int_t>("Flag_badMuonFilter")
+      && Get<Int_t>("Flag_badChargedHadronFilter") 
+      &&  Get<Int_t>("Flag_globalTightHalo2016Filter")
+  )
     return true;
   return false;
 }
