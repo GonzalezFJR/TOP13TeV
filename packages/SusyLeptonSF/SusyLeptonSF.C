@@ -8,6 +8,10 @@ SusyLeptonSF::SusyLeptonSF(bool loadhistos):
   fTrackerMuonSF(0),
   fTightMuonIsoSF(0),
   fTightMuonSF(0),
+  fMediumMuonSF_BCDEF(0),
+  fMediumMuonSF_GH(0),
+  fTightIsoMuonSF_BCDEF(0),
+  fTightIsoMuonSF_GH(0),
   fTightElectronIDSF(0),
   fTightElectronSF(0),
   fTrackerElectronSF(0),
@@ -23,6 +27,10 @@ SusyLeptonSF::SusyLeptonSF(bool loadhistos):
 		LoadTrackerMuonSF();
     LoadTightMuonIsoSF();
     LoadTightMuonSF();
+    LoadMediumMuonSF_BCDEF();
+    LoadMediumMuonSF_GH();
+    LoadTightIsoMuonSF_BCDEF();
+    LoadTightIsoMuonSF_GH();
     LoadTightElectronIDSF();
     LoadTightElectronSF();
     LoadFastSimMuonSF();
@@ -89,6 +97,26 @@ TH2D* SusyLeptonSF::LoadTightMuonSF(const char* file,
 				const char* histo) {
   fTightMuonSF = GetHistogramFromFileD(file, histo, "fTightMuonSF");
   return fTightMuonSF;
+}
+
+TH2D* SusyLeptonSF::LoadMediumMuonSF_BCDEF(const char* file, const char* histo) {
+  fMediumMuonSF_BCDEF = GetHistogramFromFileD(file, histo, "fMediumMuonSF_BCDEF");
+  return fMediumMuonSF_BCDEF;
+}
+
+TH2D* SusyLeptonSF::LoadMediumMuonSF_GH(const char* file, const char* histo) {
+  fMediumMuonSF_GH = GetHistogramFromFileD(file, histo, "fMediumMuonSF_GH");
+  return fMediumMuonSF_GH;
+}
+
+TH2D* SusyLeptonSF::LoadTightIsoMuonSF_BCDEF(const char* file, const char* histo) {
+  fTightIsoMuonSF_BCDEF = GetHistogramFromFileD(file, histo, "fTightIsoMuonSF_BCDEF");
+  return fTightIsoMuonSF_BCDEF;
+}
+
+TH2D* SusyLeptonSF::LoadTightIsoMuonSF_GH(const char* file, const char* histo) {
+  fTightIsoMuonSF_GH = GetHistogramFromFileD(file, histo, "fTightIsoMuonSF_GH");
+  return fTightIsoMuonSF_GH;
 }
 
 TH2D* SusyLeptonSF::LoadTightElectronIDSF(const char* file, 
