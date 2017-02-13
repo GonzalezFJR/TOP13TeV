@@ -723,10 +723,10 @@ void TreeAnalysisTop::InsideLoop() {
 			if((genElec+genMuon).M() < 20) return;
 		}
 		fHFidu->Fill(0.5);
-        Int_t nWTree = Get<Int_t>("nLHEweight");
+   /*     Int_t nWTree = Get<Int_t>("nLHEweight");
 		for(int i = 0; i<nWeights; i++){
 			fHWeightsFidu->Fill(i, EventWeight*Get<Float_t>("LHEweight_wgt", i));
-		}
+		}*/
 
 		fHDeltaRLepJet[Muon] -> Fill(minDRmu);
 		fHDeltaRLepJet[Elec] -> Fill(minDRel);
@@ -879,6 +879,89 @@ void TreeAnalysisTop::Summary(){}
 // TRIGGER INFORMATION
 //------------------------------------------------------------------------------
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopTrigger#Run2015C_D_25_ns_data_with_RunII
+
+bool TreeAnalysisTop::PassTriggerMuMu() {
+   Bool_t pass         = false;
+   Bool_t passDoubleMu = false;
+   Bool_t passSingleMu = false;
+	 //passDoubleMu = (Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"  ) ||
+			 //Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") );
+	 passDoubleMu = (
+			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") );
+	 if (gIsData){
+      if (gSampleName == "SingleMuon") passSingleMu = ( Get<Int_t>("HLT_BIT_HLT_IsoTkMu24_v") || 
+                                                        Get<Int_t>("HLT_BIT_HLT_IsoMu24_v"  ) );
+      if ( (gSampleName.Contains("DoubleMuon") && passDoubleMu                 ) ||
+           (gSampleName.Contains("SingleMuon") && passSingleMu && !passDoubleMu) )
+         pass = true;
+   }else{
+      pass = passDoubleMu;
+   }
+   return pass;
+}
+
+bool TreeAnalysisTop::PassTriggerEE(){
+   Bool_t pass         = false;
+   Bool_t passDoubleEl = false;
+   Bool_t passSingleEl = false;
+	 //     passDoubleEl = Get<Int_t>("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+	 passDoubleEl = (
+			 Get<Int_t>("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v") );
+   if (gIsData){
+      if (gSampleName == "SingleElectron") passSingleEl = Get<Int_t>("HLT_BIT_HLT_Ele27_WPTight_Gsf_v");
+      if ( (gSampleName.Contains("DoubleEG")  && passDoubleEl                 ) ||
+           (gSampleName == "SingleElectron" && passSingleEl && !passDoubleEl) )
+         pass = true;
+   }else{
+      pass = passDoubleEl;
+   }
+   return pass;
+}
+
+bool TreeAnalysisTop::PassTriggerEMu(){
+   Bool_t pass         = false;
+   Bool_t passElMu     = false;
+   Bool_t passSingleEl = false;
+   Bool_t passSingleMu = false;
+   //   passElMu     = (Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+   //         Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") );
+	 passElMu = (
+			 Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+			 Get<Int_t>("HLT_BIT_HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v") );
+   if (gIsData){
+      if (gSampleName == "SingleElectron" || gSampleName == "SingleMuon") passSingleEl =  Get<Int_t>("HLT_BIT_HLT_Ele27_WPTight_Gsf_v");
+      if (gSampleName == "SingleElectron" || gSampleName == "SingleMuon") passSingleMu = (Get<Int_t>("HLT_BIT_HLT_IsoTkMu24_v") ||
+                                                                                   Get<Int_t>("HLT_BIT_HLT_IsoMu24_v") );
+
+      if ( (gSampleName.Contains("MuonEG")         && passElMu                                  ) ||
+           (gSampleName.Contains("SingleMuon")     && passSingleMu && !passElMu                 ) ||
+           (gSampleName.Contains("SingleElectron") && passSingleEl && !passElMu && !passSingleMu) )
+         pass = true;
+   }else{
+      pass = passElMu;
+   }
+   return pass;
+}
+
+
+
+
+
+
+/*
 bool TreeAnalysisTop::PassTriggerMuMu() {
   Bool_t pass = false;
   if (!gIsData){
@@ -935,7 +1018,7 @@ bool TreeAnalysisTop::PassTriggerEMu(){
 						Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"));
 	}
 	return pass;
-}
+}*/
 
 //------------------------------------------------------------------------------
 // Get METHODS
@@ -1371,11 +1454,11 @@ void TreeAnalysisTop::FillDYHistograms(){
 			if (gSysSource != Norm)      return;  //only fill histograms for nominal distributions...
 			if (fChargeSwitch == true  ) return;
 
-			if (!gIsData) {
+/*			if (!gIsData) {
 				for(int i = 0; i<nWeights; i++){
 					fHLHEweights[chan][cut]->Fill(i, EventWeight*Get<Float_t>("LHEweight_wgt", i));
 				}
-			}
+			}*/
 
 			//++ met info
 			fHMET[chan][cut]           ->Fill(getMET(),             EventWeight);
@@ -1874,16 +1957,16 @@ int TreeAnalysisTop::getSelectedLeptons(){
 }
 
 bool TreeAnalysisTop::METFilter(){
-  if (Get<Int_t>("Flag_HBHENoiseFilter") &&
+ /* if (Get<Int_t>("Flag_HBHENoiseFilter") &&
       Get<Int_t>("Flag_HBHENoiseIsoFilter") &&
       Get<Int_t>("Flag_EcalDeadCellTriggerPrimitiveFilter") &&
       Get<Int_t>("Flag_goodVertices") &&
-      Get<Int_t>("Flag_eeBadScFilter")
-
-      && Get<Int_t>("Flag_badMuonFilter")
-      && Get<Int_t>("Flag_badChargedHadronFilter") 
-      &&  Get<Int_t>("Flag_globalTightHalo2016Filter")
-  )
+      Get<Int_t>("Flag_eeBadScFilter") &&
+      Get<Int_t>("Flag_badMuonFilter") &&
+      Get<Int_t>("Flag_badChargedHadronFilter") &&
+      Get<Int_t>("Flag_globalTightHalo2016Filter")
+     )
+*/
     return true;
   return false;
 }
@@ -1918,6 +2001,7 @@ bool TreeAnalysisTop::IsTightElectron(unsigned int iElec, float ptcut){
 	if ((TMath::Abs(LepGood_pdgId[iElec])) != 11) return false; 
 	if (LepGood_pt[iElec] < ptcut) return false;
 	if (TMath::Abs(LepGood_eta[iElec]) > 2.4) return false;
+  if (Get<Int_t>("LepGood_tightId", iElec) < 3) return false;
 	if (TMath::Abs(LepGood_etaSc[iElec])  <= 1.479){ // Barrel
 		if (LepGood_relIso03[iElec]        > 0.0588 ) return false;
 		//if (TMath::Abs(LepGood_dxy[iElec]) >= 0.0118) return false; 
@@ -1942,7 +2026,6 @@ bool TreeAnalysisTop::IsTightElectron(unsigned int iElec, float ptcut){
 			TMath::Abs(LepGood_etaSc[iElec]) < 1.566) return false;
 	if (Get<Int_t>("LepGood_lostHits", iElec) > 1) return false; 
 	if (Get<Int_t>("LepGood_convVeto", iElec) < 1) return false;
-	if(TMath::Abs(Get<Int_t>("LepGood_tightId", iElec)) < 3) return false;
 	return true;
 }
 
@@ -2055,7 +2138,7 @@ int TreeAnalysisTop::getSelectedJets(){
     }
     else {
       Int_t   jetmcflavouri = Get<Int_t>  ("Jet_mcFlavour", i);
-      Int_t   jethadronflavouri = Get<Int_t>  ("Jet_hadronFlavour", i);
+      //Int_t   jethadronflavouri = Get<Int_t>  ("Jet_hadronFlavour", i);
       // official b-tag recommendation: use JetHadronFlavour instead of JetPartonFlavor
       /*
 	if(TMath::Abs(Jet_mcFlavour[i]) == 5 || TMath::Abs(Jet_mcFlavour[i]) == 4){ 
@@ -2070,11 +2153,11 @@ int TreeAnalysisTop::getSelectedJets(){
 	if (gSysSource == MisTagUp)   btagSys =  1;
 	if (gSysSource == MisTagDown) btagSys = -1;
 	}*/
-      if      (gSysSource == BtagUp)      isbtag = fBTagSFbUp->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai); 
-      else if (gSysSource == BtagDown)    isbtag = fBTagSFbDo->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai);
-      else if (gSysSource == MisTagUp)    isbtag = fBTagSFlUp->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai);
-      else if (gSysSource == MisTagDown)  isbtag = fBTagSFlDo->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai);
-      else                                isbtag = fBTagSFnom->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai);
+      if      (gSysSource == BtagUp)      isbtag = fBTagSFbUp->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai); 
+      else if (gSysSource == BtagDown)    isbtag = fBTagSFbDo->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
+      else if (gSysSource == MisTagUp)    isbtag = fBTagSFlUp->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
+      else if (gSysSource == MisTagDown)  isbtag = fBTagSFlDo->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
+      else                                isbtag = fBTagSFnom->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
       // Use this line only to get raw numbers for syncronization
       //if(Get<Float_t>("Jet_btagCSV", i) > 0.89) isbtag=true;  // WP for 74
     }
