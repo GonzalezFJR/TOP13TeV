@@ -2138,7 +2138,7 @@ int TreeAnalysisTop::getSelectedJets(){
     }
     else {
       Int_t   jetmcflavouri = Get<Int_t>  ("Jet_mcFlavour", i);
-      //Int_t   jethadronflavouri = Get<Int_t>  ("Jet_hadronFlavour", i);
+      Int_t   jethadronflavouri = Get<Int_t>  ("Jet_hadronFlavour", i);
       // official b-tag recommendation: use JetHadronFlavour instead of JetPartonFlavor
       /*
 	if(TMath::Abs(Jet_mcFlavour[i]) == 5 || TMath::Abs(Jet_mcFlavour[i]) == 4){ 
@@ -2153,11 +2153,11 @@ int TreeAnalysisTop::getSelectedJets(){
 	if (gSysSource == MisTagUp)   btagSys =  1;
 	if (gSysSource == MisTagDown) btagSys = -1;
 	}*/
-      if      (gSysSource == BtagUp)      isbtag = fBTagSFbUp->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai); 
-      else if (gSysSource == BtagDown)    isbtag = fBTagSFbDo->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
-      else if (gSysSource == MisTagUp)    isbtag = fBTagSFlUp->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
-      else if (gSysSource == MisTagDown)  isbtag = fBTagSFlDo->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
-      else                                isbtag = fBTagSFnom->IsTagged(jetbtagi, jetmcflavouri, JetPt.at(i), jetetai);
+      if      (gSysSource == BtagUp)      isbtag = fBTagSFbUp->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai); 
+      else if (gSysSource == BtagDown)    isbtag = fBTagSFbDo->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai);
+      else if (gSysSource == MisTagUp)    isbtag = fBTagSFlUp->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai);
+      else if (gSysSource == MisTagDown)  isbtag = fBTagSFlDo->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai);
+      else                                isbtag = fBTagSFnom->IsTagged(jetbtagi, jethadronflavouri, JetPt.at(i), jetetai);
       // Use this line only to get raw numbers for syncronization
       //if(Get<Float_t>("Jet_btagCSV", i) > 0.89) isbtag=true;  // WP for 74
     }
