@@ -16,9 +16,9 @@
 //############################################################################
 //# Definition of constants
 //############################################################################
-
-const TString path = "/mnt_pool/fanae105/user/juanr/stop/TOP13TeV/temp/";
-//const TString path = "/mnt_pool/fanae105/user/juanr/stop/TOP13TeV/outputFiles/dec17/";
+//const TString path = "/mnt_pool/fanae105/user/juanr/stop/TOP13TeV/outputFiles/_feb11/";
+const TString path = "/mnt_pool/fanae105/user/juanr/stop/TOP13TeV/outputFiles/feb13/dilepton/";
+//const TString path = "/mnt_pool/fanae105/user/juanr/stop/TOP13TeV/outputFiles/feb13/";
 const TString prefix = "Tree_"; const TString sufix = ".root";
 const TString treeName = "sTopTree";
 
@@ -30,7 +30,6 @@ const TString Bkgs[nBkgs] = {
 "WW", "WZ", "ZZ",                                 // Dibosons
 "WJetsToLNu_aMCatNLO"                             // WJets
 };
-
 const Int_t nDataSamples = 5;
 const TString DataSamples[nDataSamples] = {"DoubleMuon", "DoubleEG", "MuonEF", "SigleElectron", "SingleMuon"};
 const Int_t nSignals = 10;
@@ -62,10 +61,9 @@ public :
 	 Float_t  TWeight_FSDown;
 	 Float_t  TWeight_PUUp;
 	 Float_t  TWeight_PUDown;
-	 Int_t           TIsDoubleMuon;
-	 Int_t           TIsDoubleElec;
-   Int_t           TIsElMu;
+   Int_t           TChannel;
    Int_t           TNJets;
+   Int_t           TNVert;
    Int_t           TNJetsJESUp;
    Int_t           TNJetsJESDown;
    Int_t           TNJetsJER;
@@ -75,15 +73,20 @@ public :
    Int_t           TNJetsBtagMisTagUp;
    Int_t           TNJetsBtagMisTagDown;
    Float_t         TMET;
+   Float_t         TGenMET;
    Float_t         TMETJESUp;
    Float_t         TMETJESDown;
    Float_t         TMT2ll;
-   Float_t         TMT2bb;
+   Float_t         TMT2llJESUp;
+   Float_t         TMT2llJESDown;
+   Float_t         TMT2jj;
    Float_t         TMT2lblb;
    Float_t         TMll;
    Float_t         TMeff;
    Float_t         TPtllb;
    Float_t         THT;
+   Float_t         THTJESUp;
+   Float_t         THTJESDown;
    Float_t         TMET_Phi;
    Float_t         TdPhiPtllbMET;
    Float_t         TMinDPhiMetJets;
@@ -111,6 +114,7 @@ public :
 
 	 // List of branches
 	 TBranch        *b_TWeight;   //!
+	 TBranch        *b_TChannel;   //!
 	 TBranch		*b_TWeight_LepEffUp;
 	 TBranch	*b_TWeight_LepEffDown;
 	 TBranch		*b_TWeight_TrigUp;
@@ -124,6 +128,7 @@ public :
    TBranch        *b_TIsDoubleElec;   //!
    TBranch        *b_TIsElMu;   //!
    TBranch        *b_TNJets;   //!
+   TBranch        *b_TNVert;   //!
 	 TBranch *b_TNJetsJESUp;
 	 TBranch *b_TNJetsJESDown;
 	 TBranch *b_TNJetsJER;
@@ -133,15 +138,20 @@ public :
 	 TBranch *b_TNJetsBtagMisTagUp;
 	 TBranch *b_TNJetsBtagMisTagDown;
    TBranch        *b_TMET;   //!
+   TBranch        *b_TGenMET;   //!
    TBranch        *b_TMETJESUp;   //!
-   TBranch        *b_TMETDownUp;   //!
+   TBranch        *b_TMETJESDown;   //!
    TBranch        *b_TMT2ll;   //!
-   TBranch        *b_TMT2bb;   //!
+   TBranch        *b_TMT2llJESUp;   //!
+   TBranch        *b_TMT2llJESDown;   //!
+   TBranch        *b_TMT2jj;   //!
    TBranch        *b_TMT2lblb;   //!
    TBranch        *b_TMll;   //!
    TBranch        *b_TMeff;   //!
    TBranch        *b_TPtllb;   //!
    TBranch        *b_THT;   //!
+   TBranch        *b_THTJESUp;   //!
+   TBranch        *b_THTJESDown;   //!
    TBranch        *b_TMET_Phi;   //!
    TBranch        *b_TdPhiPtllbMET;   //!
    TBranch        *b_TMinDPhiMetJets;   //!
@@ -215,6 +225,7 @@ void AnalMiniTree::Init(TTree *tree){
    fChain->SetMakeClass(1);
 
    fChain->SetBranchAddress("TWeight", &TWeight, &b_TWeight);
+   fChain->SetBranchAddress("TChannel", &TChannel, &b_TChannel);
 	 fChain->SetBranchAddress("TWeight_LepEffUp", &TWeight_LepEffUp, &b_TWeight_LepEffUp);
 	 fChain->SetBranchAddress("TWeight_LepEffDown", &TWeight_LepEffDown, &b_TWeight_LepEffDown);
 	 fChain->SetBranchAddress("TWeight_FSUp", &TWeight_FSUp, &b_TWeight_FSUp);
@@ -223,9 +234,7 @@ void AnalMiniTree::Init(TTree *tree){
 	 fChain->SetBranchAddress("TWeight_TrigDown", &TWeight_TrigDown, &b_TWeight_TrigDown);
 	 fChain->SetBranchAddress("TWeight_PUUp", &TWeight_PUUp, &b_TWeight_PUUp);
 	 fChain->SetBranchAddress("TWeight_PUDown", &TWeight_PUDown, &b_TWeight_PUDown);
-   fChain->SetBranchAddress("TIsDoubleMuon", &TIsDoubleMuon, &b_TIsDoubleMuon);
-   fChain->SetBranchAddress("TIsDoubleElec", &TIsDoubleElec, &b_TIsDoubleElec);
-   fChain->SetBranchAddress("TIsElMu", &TIsElMu, &b_TIsElMu);
+   fChain->SetBranchAddress("TNVert", &TNVert, &b_TNVert);
    fChain->SetBranchAddress("TNJets", &TNJets, &b_TNJets);
    fChain->SetBranchAddress("TNJetsJESUp", &TNJetsJESUp, &b_TNJetsJESUp);
    fChain->SetBranchAddress("TNJetsJESDown", &TNJetsJESDown, &b_TNJetsJESDown);
@@ -236,13 +245,20 @@ void AnalMiniTree::Init(TTree *tree){
    fChain->SetBranchAddress("TNJetsBtagMisTagUp", &TNJetsBtagMisTagUp, &b_TNJetsBtagMisTagUp);
    fChain->SetBranchAddress("TNJetsBtagMisTagDown", &TNJetsBtagMisTagDown, &b_TNJetsBtagMisTagDown);
    fChain->SetBranchAddress("TMET", &TMET, &b_TMET);
+   fChain->SetBranchAddress("TGenMET", &TGenMET, &b_TGenMET);
+   fChain->SetBranchAddress("TMETJESUp", &TMETJESUp, &b_TMETJESUp);
+   fChain->SetBranchAddress("TMETJESDown", &TMETJESDown, &b_TMETJESDown);
    fChain->SetBranchAddress("TMT2ll", &TMT2ll, &b_TMT2ll);
-   fChain->SetBranchAddress("TMT2bb", &TMT2bb, &b_TMT2bb);
+   fChain->SetBranchAddress("TMT2llJESUp", &TMT2llJESUp, &b_TMT2llJESUp);
+   fChain->SetBranchAddress("TMT2llJESDown", &TMT2llJESDown, &b_TMT2llJESDown);
+   fChain->SetBranchAddress("TMT2jj", &TMT2jj, &b_TMT2jj);
    fChain->SetBranchAddress("TMT2lblb", &TMT2lblb, &b_TMT2lblb);
    fChain->SetBranchAddress("TMll", &TMll, &b_TMll);
    fChain->SetBranchAddress("TMeff", &TMeff, &b_TMeff);
    fChain->SetBranchAddress("TPtllb", &TPtllb, &b_TPtllb);
    fChain->SetBranchAddress("THT", &THT, &b_THT);
+   fChain->SetBranchAddress("THTJESUp", &THTJESUp, &b_THTJESUp);
+   fChain->SetBranchAddress("THTJESDown", &THTJESDown, &b_THTJESDown);
    fChain->SetBranchAddress("TMET_Phi", &TMET_Phi, &b_TMET_Phi);
    fChain->SetBranchAddress("TdPhiPtllbMET", &TdPhiPtllbMET, &b_TdPhiPtllbMET);
    fChain->SetBranchAddress("TMinDPhiMetJets", &TMinDPhiMetJets, &b_TMinDPhiMetJets);
@@ -265,5 +281,7 @@ void AnalMiniTree::Init(TTree *tree){
    fChain->SetBranchAddress("TJet_Py", TJet_Py, &b_TJet_Py);
    fChain->SetBranchAddress("TJet_Pz", TJet_Pz, &b_TJet_Pz);
    fChain->SetBranchAddress("TJet_E", TJet_E, &b_TJet_E);
+   fChain->SetBranchAddress("TJetJESUp_Pt",  TJetJESUp_Pt, &b_TJetJESUp_Pt);
+   fChain->SetBranchAddress("TJetJESDown_Pt",  TJetJESDown_Pt, &b_TJetJESDown_Pt);
 }
 #endif
