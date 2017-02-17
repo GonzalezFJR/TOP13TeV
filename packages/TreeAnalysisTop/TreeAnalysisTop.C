@@ -290,10 +290,10 @@ void TreeAnalysisTop::Initialise() {
 	//	PU Reweight
 	//--------------------------------------
 	//PAF_INFO("TreeAnalysisTop", "+ Initialise Pile-Up reweighting tool...");
-	fPUWeight     = new PUWeight(gLumiForPU, Moriond17MC_PoissonOOTPU, "2016_ichep"); 
+	fPUWeight     = new PUWeight(gLumiForPU, Moriond17MC_PoissonOOTPU, "2016_Moriond17"); 
 	if (!gIsData) {
-	   fPUWeightUp   = new PUWeight(18494.9, Moriond17MC_PoissonOOTPU, "2016_ichep"); //  18494.9 
-	   fPUWeightDown = new PUWeight(20441.7, Moriond17MC_PoissonOOTPU, "2016_ichep"); //  20441.7 
+	   fPUWeightUp   = new PUWeight(18494.9, Moriond17MC_PoissonOOTPU, "2016_Moriond17"); //  18494.9 
+	   fPUWeightDown = new PUWeight(20441.7, Moriond17MC_PoissonOOTPU, "2016_Moriond17"); //  20441.7 
 	}
 
 	//if (gUseCSVM) fBTagSF   = new BTagSFUtil("CSVM","ABCD");//ReReco
