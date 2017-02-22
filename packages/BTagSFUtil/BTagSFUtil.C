@@ -141,15 +141,10 @@ float BTagSFUtil::GetJetSF(int JetFlavor, float JetPt, float JetEta) {
 }
 
 bool BTagSFUtil::IsTagged(float JetDiscriminant, int JetFlavor, float JetPt, float JetEta) {
-  
   bool isBTagged = JetDiscriminant>TaggerCut;
-
   if (JetFlavor==-999999) return isBTagged; // Data: no correction needed
-
   bool newBTag = isBTagged;
-
   float Btag_SF = GetJetSF(JetFlavor, JetPt, JetEta);
-  
   if (Btag_SF == 1) return newBTag; //no correction needed 
 
   //throw die
