@@ -34,7 +34,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
     PAF_INFO("RunTree_ReReco", "Sequential mode chosen");
     pafmode = new PAFSequentialEnvironment();
   }
-  else if (nSlots <=8) {
+  else if (nSlots <=64) {
     PAF_INFO("RunTree_ReReco", "PROOF Lite mode chosen");
     pafmode = new PAFPROOFLiteEnvironment(nSlots);
   }
@@ -52,26 +52,27 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
   DatasetManager* dm = DatasetManager::GetInstance();
   //dm->SetTab("DR80XasymptoticMiniAODv2");
-  dm->SetTab("DR80XSummer16asymptoticMiniAODv2");
+  dm->SetTab("DR80XSummer16asymptoticMiniAODv2_2");
   //dm->RedownloadFiles();
 
   // Deal with data samples
   if ((sampleName == "DoubleEG"   ||
        sampleName == "DoubleMuon" ||
        sampleName == "MuonEG"     ||
-       sampleName == "SingleEle"  ||
-       sampleName == "SingleMu")) {
+       sampleName.Contains("Single"))){
     cout << "   + Data..." << endl;
     
     TString datasuffix[] = {
-      "Run2016B_PromptReco_v2",
-      "Run2016C_PromptReco_v2",
-      "Run2016D_PromptReco_v2"
-      //"Run2015C_05Oct",
-      //"C_7016",
-      //"D_7360"
+      "16B_03Feb2017",
+      "16C_03Feb2017",
+      "16D_03Feb2017",
+      "16E_03Feb2017",
+      "16F_03Feb2017",
+      "16G_03Feb2017",
+      "16H_03Feb2017_v2",
+      "16H_03Feb2017_v3",
     };
-    const unsigned int nDataSamples = 3;
+    const unsigned int nDataSamples = 8;
     for(unsigned int i = 0; i < nDataSamples; i++) {
       TString asample = Form("Tree_%s_%s",sampleName.Data(), datasuffix[i].Data());
       cout << "   + Looking for " << asample << " trees..." << endl;
@@ -84,16 +85,9 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
     G_IsData = false; //true;  // only for pseudodata
     dm->LoadDataset(sampleName);
     if(sampleName != "TestHeppy")   myProject->AddDataFiles(dm->GetFiles());
-    if(sampleName == "WJetsToLNu_aMCatNLO" || 
-	    sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || 
-	    sampleName == "DYJetsToLL_M50_aMCatNLO" || 
-	    sampleName == "TTJets_amcatnlo" ||
-	    sampleName == "TTWToLNu"  || 
-	    sampleName == "TTWToQQ" || 
-	    sampleName == "TTZToQQ" || 
-	    sampleName == "WWZ" || 
-	    sampleName == "WZZ" || 
-			sampleName == "ZZZ" ||
+    if(
+	    sampleName.Contains("TTW")  || 
+	    sampleName.Contains("TTZ")  || 
 			sampleName.Contains("aMCatNLO") ||
 			sampleName.Contains("amcatnlo") ){
 			G_Event_Weight = dm->GetCrossSection() / dm->GetSumWeights();

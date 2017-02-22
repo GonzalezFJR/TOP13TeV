@@ -884,44 +884,41 @@ bool TreeAnalysisTop::PassTriggerMuMu() {
    Bool_t pass         = false;
    Bool_t passDoubleMu = false;
    Bool_t passSingleMu = false;
-	 //passDoubleMu = (Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"  ) ||
-			 //Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") );
-	 passDoubleMu = (
-			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") );
-	 if (gIsData){
-      if (gSampleName == "SingleMuon") passSingleMu = ( Get<Int_t>("HLT_BIT_HLT_IsoTkMu24_v") || 
-                                                        Get<Int_t>("HLT_BIT_HLT_IsoMu24_v"  ) );
+   passDoubleMu = (
+       Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") ||
+       Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v") ||
+       Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v") ||
+       Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") );
+   passSingleMu = ( Get<Int_t>("HLT_BIT_HLT_IsoTkMu24_v") ||
+       Get<Int_t>("HLT_BIT_HLT_IsoMu24_v"  ) );
+   if (gIsData){
       if ( (gSampleName.Contains("DoubleMuon") && passDoubleMu                 ) ||
            (gSampleName.Contains("SingleMuon") && passSingleMu && !passDoubleMu) )
          pass = true;
    }else{
-      pass = passDoubleMu;
+      pass = passDoubleMu || passSingleMu;
    }
    return pass;
 }
 
 bool TreeAnalysisTop::PassTriggerEE(){
-   Bool_t pass         = false;
-   Bool_t passDoubleEl = false;
-   Bool_t passSingleEl = false;
-	 //     passDoubleEl = Get<Int_t>("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-	 passDoubleEl = (
-			 Get<Int_t>("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v") );
-   if (gIsData){
-      if (gSampleName == "SingleElectron") passSingleEl = Get<Int_t>("HLT_BIT_HLT_Ele27_WPTight_Gsf_v");
-      if ( (gSampleName.Contains("DoubleEG")  && passDoubleEl                 ) ||
-           (gSampleName == "SingleElectron" && passSingleEl && !passDoubleEl) )
-         pass = true;
-   }else{
-      pass = passDoubleEl;
-   }
-   return pass;
+  Bool_t pass         = false;
+  Bool_t passDoubleEl = false;
+  Bool_t passSingleEl = false;
+  passDoubleEl = (
+      Get<Int_t>("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+      Get<Int_t>("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+      Get<Int_t>("HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v") ||
+      Get<Int_t>("HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v") );
+  passSingleEl = Get<Int_t>("HLT_BIT_HLT_Ele27_WPTight_Gsf_v");
+  if (gIsData){
+    if ( (gSampleName.Contains("DoubleEG")  && passDoubleEl                 ) ||
+        (gSampleName.Contains("SingleElec") && passSingleEl && !passDoubleEl) )
+      pass = true;
+  }else{
+    pass = passDoubleEl || passSingleEl;
+  }
+  return pass;
 }
 
 bool TreeAnalysisTop::PassTriggerEMu(){
@@ -929,29 +926,26 @@ bool TreeAnalysisTop::PassTriggerEMu(){
    Bool_t passElMu     = false;
    Bool_t passSingleEl = false;
    Bool_t passSingleMu = false;
-   //   passElMu     = (Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
-   //         Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") );
-	 passElMu = (
-			 Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
-			 Get<Int_t>("HLT_BIT_HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v") );
+   passElMu = (
+       Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v") || 
+       Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+       Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") ||
+       Get<Int_t>("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") || 
+       Get<Int_t>("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+       Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") ||
+       Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v") || 
+       Get<Int_t>("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v") ||
+       Get<Int_t>("HLT_BIT_HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v") );
+   passSingleEl =  Get<Int_t>("HLT_BIT_HLT_Ele27_WPTight_Gsf_v");
+   passSingleMu = (Get<Int_t>("HLT_BIT_HLT_IsoTkMu24_v") ||
+       Get<Int_t>("HLT_BIT_HLT_IsoMu24_v") );
    if (gIsData){
-      if (gSampleName == "SingleElectron" || gSampleName == "SingleMuon") passSingleEl =  Get<Int_t>("HLT_BIT_HLT_Ele27_WPTight_Gsf_v");
-      if (gSampleName == "SingleElectron" || gSampleName == "SingleMuon") passSingleMu = (Get<Int_t>("HLT_BIT_HLT_IsoTkMu24_v") ||
-                                                                                   Get<Int_t>("HLT_BIT_HLT_IsoMu24_v") );
-
-      if ( (gSampleName.Contains("MuonEG")         && passElMu                                  ) ||
-           (gSampleName.Contains("SingleMuon")     && passSingleMu && !passElMu                 ) ||
-           (gSampleName.Contains("SingleElectron") && passSingleEl && !passElMu && !passSingleMu) )
-         pass = true;
+     if ( (gSampleName.Contains("MuonEG")         && passElMu                                  ) ||
+         (gSampleName.Contains("SingleMuon")     && passSingleMu && !passElMu                 ) ||
+         (gSampleName.Contains("SingleElec") && passSingleEl && !passElMu && !passSingleMu) )
+       pass = true;
    }else{
-      pass = passElMu;
+     pass = passElMu || passSingleEl || passSingleMu;
    }
    return pass;
 }
@@ -1253,7 +1247,8 @@ float TreeAnalysisTop::getSF(gChannel chan) {
 		id2  = fLeptonSF->GetTightElectronSF(fHypLepton2.p.Pt(), fHypLepton2.p.Eta());
 		trig = fLeptonSF->GetMuEGSF         (fHypLepton2.p.Eta(),fHypLepton1.p.Eta());
 	}
-	return (PUSF*id1*id2*trig);
+//	return (PUSF*id1*id2*trig);
+	return (id1*id2*PUSF);
 }
 
 float TreeAnalysisTop::getTopPtSF(){

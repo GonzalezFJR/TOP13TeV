@@ -14,7 +14,7 @@ source /opt/PAF/PAF_setup.sh
 resetpaf
 
 #root -l -b -q 'RunTree_ReReco.C("TestHeppy", 1, 0, 0, true)'
-root -l -b -q 'RunTree_ReReco.C("TTbar_Powheg", 50, 0, true)'
+#root -l -b -q 'RunTree_ReReco.C("TTbar_Powheg", 50, 0, true)'
 root -l -b -q 'RunTree_ReReco.C("WJetsToLNu_aMCatNLO"    ,  15, 0, true)'
 root -l -b -q 'RunTree_ReReco.C("ZZ_ext"   , 15, 0, true)'
 root -l -b -q 'RunTree_ReReco.C("WW_ext"   , 15, 0, true)'
@@ -34,8 +34,8 @@ resetpaf -a
 root -l -b -q 'RunTree_ReReco.C("MuonEG"    , 40, 0, true)'
 root -l -b -q 'RunTree_ReReco.C("DoubleMuon", 40, 0, true)'
 root -l -b -q 'RunTree_ReReco.C("DoubleEG"  , 40, 0, true)'
-#root -l -b -q 'RunTree_ReReco.C("SingleElectron"  , 40, 0, true)'
-#root -l -b -q 'RunTree_ReReco.C("SingleMuon"  , 40, 0, true)'
+root -l -b -q 'RunTree_ReReco.C("SingleElectron"  , 40, 0, true)'
+root -l -b -q 'RunTree_ReReco.C("SingleMuon"  , 40, 0, true)'
 
 resetpaf -a
 root -l -b -q 'RunTree_ReReco.C("DYJetsToLL_M50_MLM_ext"  , 50, 0, true)'
