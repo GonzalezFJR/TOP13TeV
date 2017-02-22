@@ -51,7 +51,8 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   //----------------------------------------------------------------------------
   TString userhome = "/mnt_pool/fanae105/user/$USER/";
   DatasetManager* dm = DatasetManager::GetInstance();
-  dm->SetTab("DR80XasymptoticMiniAODv2");
+  //dm->SetTab("DR80XasymptoticMiniAODv2");
+  dm->SetTab("DR80XSummer16asymptoticMiniAODv2");
   //dm->RedownloadFiles();
 
   // Deal with data samples
@@ -147,7 +148,7 @@ void RunTree_ReReco(TString  sampleName     = "TTbar_Madgraph",
   PAF_INFO("RunTree_ReReco", Form("Output file = %s", outputFile.Data()));
   myProject->SetOutputFile(outputFile);
 
-  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || sampleName == "DYJetsToLL_M50_aMCatNLO" || sampleName == "TTJets_amcatnlo" || sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo")){ //||
+  if(sampleName == "WJetsToLNu_aMCatNLO" || sampleName == "DYJetsToLL_M10to50_aMCatNLO_ext" || sampleName == "DYJetsToLL_M50_aMCatNLO" || sampleName == "TTJets_amcatnlo" || sampleName.Contains("aMCatNLO") || sampleName.Contains("amcatnlo" || sampleName.Contains("TTZ") || sampleName.Contains("TTW"))){ //||
         //     sampleName == "TTWToLNu"  || sampleName == "TTWToQQ" || sampleName == "TTZToQQ" || sampleName == "WWZ" || sampleName == "WZZ" || sampleName == "ZZZ"){
     PAF_INFO("RunTree_ReReco", "This is a MC@NLO sample!");
     G_IsMCatNLO = true;

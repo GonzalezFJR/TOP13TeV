@@ -17,6 +17,9 @@
 #include "TCanvas.h"
 #include "TGraphAsymmErrors.h"
 
+const Float_t lumiBCDEF = 19.706;
+const Float_t lumiGH    = 16.1454;
+
 class LeptonSF {
  public:
   LeptonSF(bool loadhistos = true);
@@ -51,7 +54,7 @@ class LeptonSF {
   }
   
   
-  double GetTightMuonSF   (double pt, double eta) { 
+/*  double GetTightMuonSF   (double pt, double eta) { 
     if(pt > 120) pt = 119.9;
     float trackerSF = GetTrackerMuonSF(eta);
     eta = TMath::Abs(eta);
@@ -63,6 +66,33 @@ class LeptonSF {
      
     return fTightMuonSF->GetBinContent(fTightMuonSF->FindBin(eta, pt)) + fTightMuonSF->GetBinError(fTightMuonSF->FindBin(eta,pt));  
     //return fTightMuonSF->GetBinContent(fTightMuonSF->FindBin(eta, pt)) - totErr;  
+  }*/
+  double GetTightMuonSF   (double pt, double eta) { 
+    if(pt > 120) pt = 119.9;
+    float SF_BCDEF = 1; float SF_GH = 1;
+    float SF_iso_BCDEF = 1; float SF_iso_GH = 1;
+    //float trackerSF = GetTrackerMuonSF(eta);
+    eta = TMath::Abs(eta);
+    //return fTightMuonSF->GetBinContent(fTightMuonSF->FindBin(pt,eta))*trackerSF; 
+    SF_BCDEF = fTightMuonSF_BCDEF->GetBinContent(fTightMuonSF_BCDEF->FindBin(pt,eta));
+    SF_GH    = fTightMuonSF_GH   ->GetBinContent(fTightMuonSF_GH   ->FindBin(pt,eta));
+    SF_iso_BCDEF = fTightIsoMuonSF_BCDEF->GetBinContent(fTightIsoMuonSF_BCDEF->FindBin(pt,eta));
+    SF_iso_GH    = fTightIsoMuonSF_GH   ->GetBinContent(fTightIsoMuonSF_GH   ->FindBin(pt,eta));
+    SF_BCDEF *= SF_iso_BCDEF; SF_GH *= SF_iso_GH;
+    return (SF_BCDEF*lumiBCDEF + SF_GH*lumiGH)/(lumiBCDEF+lumiGH);
+  }
+  double GetTightMuonSF_err(double pt, double eta) {
+    if(pt > 120) pt = 119.9; eta = TMath::Abs(eta);
+    float SF_BCDEF = 1; float SF_GH = 1;
+    float SF_iso_BCDEF = 1; float SF_iso_GH = 1;
+    //return fTightMuonSF->GetBinError(fTightMuonSF->FindBin(pt, TMath::Abs(eta)));
+    SF_BCDEF = fTightMuonSF_BCDEF->GetBinError(fTightMuonSF_BCDEF->FindBin(pt,eta)); 
+    SF_GH    = fTightMuonSF_GH   ->GetBinError(fTightMuonSF_GH   ->FindBin(pt,eta));
+    SF_iso_BCDEF = fTightIsoMuonSF_BCDEF->GetBinError(fTightIsoMuonSF_BCDEF->FindBin(pt,eta));
+    SF_iso_GH    = fTightIsoMuonSF_GH   ->GetBinError(fTightIsoMuonSF_GH   ->FindBin(pt,eta));
+    SF_BCDEF = TMath::Sqrt(SF_BCDEF*SF_BCDEF + SF_iso_BCDEF*SF_iso_BCDEF);
+    SF_GH = TMath::Sqrt(SF_GH*SF_GH + SF_iso_GH*SF_iso_GH);
+    return (SF_BCDEF*lumiBCDEF + SF_GH*lumiGH)/(lumiBCDEF+lumiGH);
   }
 
   float GetTightElectronSF  (float pt, float eta) { // binned in eta, pt
@@ -70,7 +100,7 @@ class LeptonSF {
     if(pt > 200) pt = 199.9;
     float trackerSF = GetTrackerElectronSF(eta);
     //trackerSF = 1;
-    return fTightElectronSF->GetBinContent(fTightElectronSF->FindBin(eta, pt))*trackerSF;    
+    return fTightElectronSF->GetBinContent(fTightElectronSF->FindBin(eta,pt))*trackerSF;    
     //return fTightElectronSF->GetBinContent(fTightElectronSF->FindBin(eta, pt)) - fTightElectronSF->GetBinError(fTightElectronSF->FindBin(eta, pt));
   }
 
@@ -111,9 +141,9 @@ class LeptonSF {
 
   
   /// Methods to get the ERROR 
-  double GetTightMuonSF_err(double pt, double eta) {
+/*  double GetTightMuonSF_err(double pt, double eta) {
     return fTightMuonSF->GetBinError(fTightMuonSF->FindBin(pt,TMath::Abs(eta)));
-  }
+  }*/
   double GetTightElectronSF_err(double pt, double eta) {
     return fTightElectronSF->GetBinError(fTightElectronSF->FindBin(eta, pt));
   }
@@ -130,7 +160,16 @@ class LeptonSF {
   //TGraphAsymmErrors* LoadTrackerMuonSF (const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Muons/ratios.root",	   const char* histo = "ratio_eta");
   TGraphAsymmErrors* LoadTrackerMuonSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/muonTrackerEffRatios.root",	   const char* histo = "ratio_eta");
 					TH2D* LoadTightMuonSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/GlobalMuonSFs.root",		const char* histo = "GlobalSF");
-  
+ 
+
+  TH2D* LoadTightMuonSF_BCDEF(const char* file = "/nfs/fanae/user/juanr/SFs/topM17/MuonSFId_BCDEF.root",  const char* histo = "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/pt_abseta_ratio");
+  TH2D* LoadTightMuonSF_GH(const char* file = "/nfs/fanae/user/juanr/SFs/topM17/MuonSFId_GH.root",  const char* histo = "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/pt_abseta_ratio");
+  TH2D* LoadTightIsoMuonSF_BCDEF(const char* file = "/nfs/fanae/user/juanr/SFs/topM17/MuonSFTightIso_BCDEF.root",  const char* histo = "TightISO_TightID_pt_eta/pt_abseta_ratio");
+  TH2D* LoadTightIsoMuonSF_GH(const char* file = "/nfs/fanae/user/juanr/SFs/topM17/MuonSFTightIso_GH.root",  const char* histo = "TightISO_TightID_pt_eta/pt_abseta_ratio");
+
+
+
+ 
   // + Elec SFs
   // http://fcouderc.web.cern.ch/fcouderc/EGamma/scaleFactors/moriond2016_76X/eleCutBasedID/
   // https://twiki.cern.ch/twiki/bin/view/CMS/EgammaIDRecipesRun2#Electron_efficiencies_and_scale
@@ -139,12 +178,12 @@ class LeptonSF {
   TH2D* LoadTightElectronIDSF (const char* file = "http://www.hep.uniovi.es/iglez/CMS/WZ/ElectronMVAIDIsoSF.root",
 			       const char* histo = "electronsDATAMCratio_FO_ID_ISO");
  //TH2D* LoadTrackerElectronSF(const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons/trakingElectronSF.root",
- TH2D* LoadTrackerElectronSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/egammaTrackerEffi.txt_SF2D.root",
+ TH2D* LoadTrackerElectronSF(const char* file = "/nfs/fanae/user/juanr/SFs/topM17/RecoElec.root",
          const char* histo = "EGamma_SF2D");
   
   //TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/elec_tight_sf2D_13TeV_RunD.root",
   //TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/juanr/SFs/StopSFs/Electrons/GlobalElectronSFs_T.root",                          		     const char* histo = "GlobalSF_T");
-TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV/2016/egammaEffiMedium.txt_SF2D_runBCD_12p9fb.root", const char* histo = "EGamma_SF2D");
+TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/juanr/SFs/topM17/TightCBElec.root", const char* histo = "EGamma_SF2D");
 
   // + Trigger SFs
   TH2F* LoadDoubleElectronSF(const char* file = "/nfs/fanae/user/palencia/sfs13TeV/25ns/76X/triggerSummary_ee.root",
@@ -173,6 +212,10 @@ TH2D* LoadTightElectronSF (const char* file = "/nfs/fanae/user/palencia/sfs13TeV
   TH2D*  fTightElectronIDSF; //Electron ID Scale Factors
   TH2D*  fTightElectronSF; //Electron ID Scale Factors
   TH2D*  fTrackerElectronSF;
+  TH2D*  fTightMuonSF_BCDEF;  
+  TH2D*  fTightMuonSF_GH;   
+  TH2D*  fTightIsoMuonSF_BCDEF;  
+  TH2D*  fTightIsoMuonSF_GH;   
 
   // Trigger SFs
   TH2F *fDoubleMuSF;

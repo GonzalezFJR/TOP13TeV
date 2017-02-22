@@ -10,6 +10,10 @@ LeptonSF::LeptonSF(bool loadhistos):
   fTightMuonSF(0),
   fTightElectronIDSF(0),
   fTightElectronSF(0),
+  fTightMuonSF_BCDEF(0),
+  fTightMuonSF_GH(0),
+  fTightIsoMuonSF_BCDEF(0),
+  fTightIsoMuonSF_GH(0),
   fTrackerElectronSF(0),
   fDoubleMuSF(0),
   fDoubleElSF(0),  
@@ -24,6 +28,11 @@ LeptonSF::LeptonSF(bool loadhistos):
     LoadTightElectronIDSF();
     LoadTightElectronSF();
     LoadTrackerElectronSF();
+    LoadTightMuonSF_BCDEF();
+    LoadTightMuonSF_GH();
+    LoadTightIsoMuonSF_BCDEF();
+    LoadTightIsoMuonSF_GH();
+
 
     // Load Trigger SFs
     LoadDoubleElectronSF();
@@ -44,6 +53,26 @@ TH2D* LeptonSF::LoadTightMuonIDSF(const char* file,
 TH2D* LeptonSF::LoadTrackerElectronSF(const char* file, const char* histo) {
   fTrackerElectronSF = GetHistogramFromFileD(file, histo, "fTrackerElectronSF");
   return fTrackerElectronSF;
+}
+
+TH2D* LeptonSF::LoadTightMuonSF_BCDEF(const char* file, const char* histo) {
+  fTightMuonSF_BCDEF = GetHistogramFromFileD(file, histo, "fTightMuonSF_BCDEF");
+  return fTightMuonSF_BCDEF;
+}
+
+TH2D* LeptonSF::LoadTightMuonSF_GH(const char* file, const char* histo) {
+  fTightMuonSF_GH = GetHistogramFromFileD(file, histo, "fTightMuonSF_GH");
+  return fTightMuonSF_GH;
+}
+
+TH2D* LeptonSF::LoadTightIsoMuonSF_BCDEF(const char* file, const char* histo) {
+  fTightIsoMuonSF_BCDEF = GetHistogramFromFileD(file, histo, "fTightIsoMuonSF_BCDEF");
+  return fTightIsoMuonSF_BCDEF;
+}
+
+TH2D* LeptonSF::LoadTightIsoMuonSF_GH(const char* file, const char* histo) {
+  fTightIsoMuonSF_GH = GetHistogramFromFileD(file, histo, "fTightIsoMuonSF_GH");
+  return fTightIsoMuonSF_GH;
 }
 
 TH2D* LeptonSF::LoadTightMuonIsoSF(const char* file, 

@@ -75,7 +75,7 @@ float BTagSFUtil::TagEfficiencyB(float JetPt, float JetEta) {
       else if (fabs(JetEta) > 1.2 && fabs(JetEta) <= 1.8) return 0.403141;
       else if (fabs(JetEta) > 1.8 && fabs(JetEta) <= 2.4) return 0.346495;
     }
-    else if (JetPt > 120 && JetPt <= 140){
+    else if (JetPt > 120 && JetPt <= 3000){
       if      (fabs(JetEta) > 0   && fabs(JetEta) <= 0.6) return 0.471426;
       else if (fabs(JetEta) > 0.6 && fabs(JetEta) <= 1.2) return 0.467574;
       else if (fabs(JetEta) > 1.2 && fabs(JetEta) <= 1.8) return 0.402546;
@@ -166,7 +166,7 @@ float BTagSFUtil::TagEfficiencyC(float JetPt, float JetEta) {
       else if (fabs(JetEta) > 1.2 && fabs(JetEta) <= 1.8) return 0.0319888;
       else if (fabs(JetEta) > 1.8 && fabs(JetEta) <= 2.4) return 0.0176128;
     }
-    else if (JetPt > 120 && JetPt <= 140){
+    else if (JetPt > 120 && JetPt <= 3000){
       if      (fabs(JetEta) > 0   && fabs(JetEta) <= 0.6) return 0.0307386;
       else if (fabs(JetEta) > 0.6 && fabs(JetEta) <= 1.2) return 0.0321199;
       else if (fabs(JetEta) > 1.2 && fabs(JetEta) <= 1.8) return 0.0291277;
@@ -257,7 +257,7 @@ float BTagSFUtil::TagEfficiencyLight(float JetPt, float JetEta) {
       else if (fabs(JetEta) > 1.2 && fabs(JetEta) <= 1.8) return 0.00569144;
       else if (fabs(JetEta) > 1.8 && fabs(JetEta) <= 2.4) return 0.00384262;
     }
-    else if (JetPt > 120 && JetPt <= 140){
+    else if (JetPt > 120 && JetPt <= 3000){
       if      (fabs(JetEta) > 0   && fabs(JetEta) <= 0.6) return 0.00776751;
       else if (fabs(JetEta) > 0.6 && fabs(JetEta) <= 1.2) return 0.00515171;
       else if (fabs(JetEta) > 1.2 && fabs(JetEta) <= 1.8) return 0.00419529;
